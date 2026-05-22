@@ -53,12 +53,13 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/RoughDemo.loader.js";
+      var cacheBust = window.location.search || "?v=robot-soldier-20260522-1945";
+      var loaderUrl = buildUrl + "/RoughDemo.loader.js" + cacheBust;
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/RoughDemo.data",
-        frameworkUrl: buildUrl + "/RoughDemo.framework.js",
-        codeUrl: buildUrl + "/RoughDemo.wasm",
+        dataUrl: buildUrl + "/RoughDemo.data" + cacheBust,
+        frameworkUrl: buildUrl + "/RoughDemo.framework.js" + cacheBust,
+        codeUrl: buildUrl + "/RoughDemo.wasm" + cacheBust,
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "unity_rough_demo_project",
