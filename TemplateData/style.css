@@ -32,8 +32,23 @@ html, body {
   height: 100dvh;
 }
 
+#unity-container.unity-desktop {
+  width: 100vw;
+  height: 100vh;
+}
+
 .unity-mobile #unity-canvas {
   width: 100vw;
   height: 100dvh;
   display: block;
+}
+
+#unity-canvas {
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block;
+}
+
+#unity-footer {
+  display: none;
 }
