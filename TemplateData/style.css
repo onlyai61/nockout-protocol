@@ -52,3 +52,21 @@ html, body {
 #unity-footer {
   display: none;
 }
+
+@media screen and (orientation: portrait) {
+  #unity-container.unity-mobile,
+  #unity-container.unity-desktop {
+    position: fixed !important;
+    left: 100vw !important;
+    top: 0 !important;
+    width: 100vh !important;
+    height: 100vw !important;
+    transform: rotate(90deg) !important;
+    transform-origin: top left !important;
+  }
+
+  #unity-canvas {
+    width: 100vh !important;
+    height: 100vw !important;
+  }
+}
