@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NOCKOUT Protocol Wireframe v1</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --ink: #171a1f;
+        --muted: #6b7280;
+        --line: #c9ced6;
+        --panel: #ffffff;
+        --soft: #eef1f5;
+        --active: #2d6cdf;
+        --warn: #c98220;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .note {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .pill {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 999px;
+        padding: 7px 10px;
+      }
+
+      .map {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        min-height: 820px;
+        border: 2px solid var(--ink);
+        background: var(--panel);
+      }
+
+      .side {
+        border-right: 2px solid var(--ink);
+        background: #fbfbfc;
+        padding: 16px;
+      }
+
+      .logo {
+        height: 54px;
+        border: 2px solid var(--ink);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        margin-bottom: 18px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .nav-item {
+        min-height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+      }
+
+      .nav-item.active {
+        border: 2px solid var(--active);
+        background: #edf4ff;
+        font-weight: 800;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        border: 2px solid currentColor;
+        display: inline-grid;
+        place-items: center;
+        font-size: 11px;
+        flex: 0 0 auto;
+      }
+
+      .content {
+        display: grid;
+        grid-template-rows: 76px 1fr;
+      }
+
+      .topbar {
+        border-bottom: 2px solid var(--ink);
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .crumb {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .resources {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .screen-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 1.55fr 1fr;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 2px solid var(--ink);
+        background: var(--panel);
+      }
+
+      .panel-head {
+        min-height: 50px;
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .panel-title {
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .body {
+        padding: 12px;
+      }
+
+      .home-stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        background: var(--soft);
+        padding: 12px;
+        min-height: 86px;
+      }
+
+      .card.big {
+        min-height: 156px;
+      }
+
+      .primary-action {
+        min-height: 54px;
+        display: grid;
+        place-items: center;
+        border: 2px solid var(--active);
+        color: var(--active);
+        background: #eef5ff;
+        font-weight: 900;
+      }
+
+      .robot-area {
+        min-height: 520px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 12px;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      .tab {
+        min-height: 36px;
+        border: 1px solid var(--line);
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+      }
+
+      .tab.active {
+        border: 2px solid var(--active);
+        color: var(--active);
+        font-weight: 800;
+      }
+
+      .robot-preview {
+        border: 2px dashed var(--line);
+        background:
+          linear-gradient(90deg, transparent 48%, var(--line) 49%, var(--line) 51%, transparent 52%),
+          linear-gradient(transparent 48%, var(--line) 49%, var(--line) 51%, transparent 52%),
+          #f9fafb;
+        display: grid;
+        place-items: center;
+        position: relative;
+      }
+
+      .robot-box {
+        width: 180px;
+        height: 112px;
+        border: 3px solid var(--ink);
+        background: var(--panel);
+        position: relative;
+      }
+
+      .robot-box::before,
+      .robot-box::after {
+        content: "";
+        position: absolute;
+        width: 60px;
+        height: 28px;
+        border: 2px solid var(--ink);
+        top: 42px;
+        background: var(--soft);
+      }
+
+      .robot-box::before {
+        left: -72px;
+      }
+
+      .robot-box::after {
+        right: -72px;
+      }
+
+      .slots {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .slot {
+        min-height: 56px;
+        border: 1px solid var(--line);
+        background: var(--soft);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 6px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .slot.hot {
+        border: 2px solid var(--warn);
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .parts-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .part {
+        min-height: 62px;
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        border: 1px solid var(--line);
+        padding: 8px;
+        background: var(--panel);
+      }
+
+      .part.selected {
+        border: 2px solid var(--active);
+        background: #eef5ff;
+      }
+
+      .mini-icon {
+        width: 42px;
+        height: 42px;
+        border: 2px solid var(--ink);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+      }
+
+      .stat-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .stat {
+        display: grid;
+        gap: 5px;
+      }
+
+      .stat label {
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .bar {
+        height: 10px;
+        border: 1px solid var(--line);
+        background: var(--soft);
+      }
+
+      .bar i {
+        display: block;
+        height: 100%;
+        width: var(--v);
+        background: var(--active);
+      }
+
+      .flow {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+      }
+
+      .flow-step {
+        min-height: 82px;
+        border: 2px solid var(--ink);
+        background: var(--panel);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 8px;
+        font-weight: 800;
+        position: relative;
+      }
+
+      .flow-step:not(:last-child)::after {
+        content: ">";
+        position: absolute;
+        right: -14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+      }
+
+      .mobile {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      .phone {
+        min-height: 260px;
+        border: 2px solid var(--ink);
+        border-radius: 22px;
+        background: var(--panel);
+        padding: 12px;
+        display: grid;
+        grid-template-rows: 24px 1fr 38px;
+        gap: 8px;
+      }
+
+      .phone-head,
+      .phone-nav {
+        background: var(--soft);
+        border: 1px solid var(--line);
+      }
+
+      .phone-body {
+        border: 1px dashed var(--line);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: var(--muted);
+        padding: 8px;
+      }
+
+      @media (max-width: 960px) {
+        .map,
+        .screen-grid,
+        .flow,
+        .mobile {
+          grid-template-columns: 1fr;
+        }
+
+        .side {
+          border-right: 0;
+          border-bottom: 2px solid var(--ink);
+        }
+
+        .nav {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div>
+          <h1>NOCKOUT Protocol Wireframe v1</h1>
+          <p class="note">홈 / 장비 중심 1차 IA. 핵심은 “부품을 붙여 성장하는 배틀로봇”입니다.</p>
+        </div>
+        <div class="legend">
+          <span class="pill">굵은 선: 주요 영역</span>
+          <span class="pill">파란색: 현재 선택/핵심 행동</span>
+          <span class="pill">주황색: 업그레이드 후보</span>
+        </div>
+      </header>
+
+      <section class="map" aria-label="desktop wireframe">
+        <aside class="side">
+          <div class="logo">NOCKOUT</div>
+          <nav class="nav" aria-label="main navigation">
+            <div class="nav-item active"><span class="icon">H</span>홈</div>
+            <div class="nav-item"><span class="icon">E</span>장비</div>
+            <div class="nav-item"><span class="icon">B</span>제작</div>
+            <div class="nav-item"><span class="icon">F</span>전투</div>
+            <div class="nav-item"><span class="icon">S</span>상점</div>
+            <div class="nav-item"><span class="icon">L</span>리그</div>
+            <div class="nav-item"><span class="icon">R</span>리포트</div>
+            <div class="nav-item"><span class="icon">설</span>설정</div>
+          </nav>
+        </aside>
+
+        <main class="content">
+          <div class="topbar">
+            <div>
+              <strong>홈 / 장비 프리뷰</strong>
+              <div class="crumb">오늘 할 일: 로봇 상태 확인 → 부품 장착 → 테스트 전투</div>
+            </div>
+            <div class="resources">
+              <span class="pill">SCRAP 12,400</span>
+              <span class="pill">DATA 84%</span>
+              <span class="pill">RANK Rookie II</span>
+            </div>
+          </div>
+
+          <div class="screen-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">홈</div>
+                  <div class="sub">플레이어가 처음 보는 대시보드</div>
+                </div>
+              </div>
+              <div class="body home-stack">
+                <div class="card big">
+                  <h3>현재 로봇 상태</h3>
+                  <p class="note">손상률, 장착 부품, 다음 추천 업그레이드</p>
+                </div>
+                <div class="primary-action">빠른 테스트 전투 시작</div>
+                <div class="card">
+                  <h3>오늘의 목표</h3>
+                  <p class="note">장갑 1개 장착 / 전투 1회 / 리포트 확인</p>
+                </div>
+                <div class="card">
+                  <h3>최근 손상 리포트</h3>
+                  <p class="note">왼쪽 암 파손, 하부 구동계 과열</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">장비</div>
+                  <div class="sub">부품을 붙여 로봇의 살을 늘리는 핵심 화면</div>
+                </div>
+              </div>
+              <div class="body robot-area">
+                <div class="tabs">
+                  <div class="tab active">프레임</div>
+                  <div class="tab">무기</div>
+                  <div class="tab">구동계</div>
+                  <div class="tab">배터리</div>
+                </div>
+                <div class="robot-preview">
+                  <div class="robot-box" aria-label="robot placeholder"></div>
+                </div>
+                <div class="slots">
+                  <div class="slot hot">장갑<br>장착 가능</div>
+                  <div class="slot">무기<br>빈 슬롯</div>
+                  <div class="slot">구동계<br>MK-01</div>
+                  <div class="slot">배터리<br>기본형</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">부품 / 스탯</div>
+                  <div class="sub">선택한 부품의 효과와 비용</div>
+                </div>
+              </div>
+              <div class="body">
+                <div class="parts-list">
+                  <div class="part selected">
+                    <div class="mini-icon">A</div>
+                    <div>
+                      <strong>Side Armor</strong>
+                      <p class="note">방어 +24 / 무게 +13kg</p>
+                    </div>
+                    <strong>장착</strong>
+                  </div>
+                  <div class="part">
+                    <div class="mini-icon">W</div>
+                    <div>
+                      <strong>Impact Arm</strong>
+                      <p class="note">공격 +29 / 반동 증가</p>
+                    </div>
+                    <span class="sub">비교</span>
+                  </div>
+                  <div class="part">
+                    <div class="mini-icon">D</div>
+                    <div>
+                      <strong>Track Drive</strong>
+                      <p class="note">조작성 +28 / 접지력 증가</p>
+                    </div>
+                    <span class="sub">비교</span>
+                  </div>
+                </div>
+
+                <div style="height: 18px"></div>
+
+                <div class="stat-list">
+                  <div class="stat">
+                    <label><span>Durability</span><strong>62</strong></label>
+                    <div class="bar"><i style="--v: 62%"></i></div>
+                  </div>
+                  <div class="stat">
+                    <label><span>Impact</span><strong>24</strong></label>
+                    <div class="bar"><i style="--v: 24%"></i></div>
+                  </div>
+                  <div class="stat">
+                    <label><span>Control</span><strong>26</strong></label>
+                    <div class="bar"><i style="--v: 26%"></i></div>
+                  </div>
+                  <div class="stat">
+                    <label><span>Repair Cost</span><strong>Medium</strong></label>
+                    <div class="bar"><i style="--v: 48%"></i></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </section>
+
+      <section class="flow" aria-label="screen flow">
+        <div class="flow-step">홈<br><span class="sub">상태/목표</span></div>
+        <div class="flow-step">장비<br><span class="sub">부품 장착</span></div>
+        <div class="flow-step">제작<br><span class="sub">새 부품 생성</span></div>
+        <div class="flow-step">전투<br><span class="sub">테스트/랭크전</span></div>
+        <div class="flow-step">리포트<br><span class="sub">파손 분석</span></div>
+        <div class="flow-step">상점/리그<br><span class="sub">성장 확장</span></div>
+      </section>
+
+      <section class="mobile" aria-label="mobile wireframe">
+        <div class="phone">
+          <div class="phone-head"></div>
+          <div class="phone-body">홈<br>로봇 상태 + 빠른 전투</div>
+          <div class="phone-nav"></div>
+        </div>
+        <div class="phone">
+          <div class="phone-head"></div>
+          <div class="phone-body">장비<br>로봇 프리뷰 + 슬롯</div>
+          <div class="phone-nav"></div>
+        </div>
+        <div class="phone">
+          <div class="phone-head"></div>
+          <div class="phone-body">부품 선택<br>효과 비교 + 장착</div>
+          <div class="phone-nav"></div>
+        </div>
+        <div class="phone">
+          <div class="phone-head"></div>
+          <div class="phone-body">전투 결과<br>파손 리포트 + 개선 추천</div>
+          <div class="phone-nav"></div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
