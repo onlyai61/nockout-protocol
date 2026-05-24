@@ -1,0 +1,1020 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NOCKOUT Protocol Wireframe v4 - Spec Lab</title>
+    <style>
+      :root {
+        --bg: #f5f2ec;
+        --paper: #fffdf8;
+        --panel: #ffffff;
+        --ink: #20242c;
+        --muted: #69717d;
+        --line: #d6cec0;
+        --dark: #2c3138;
+        --blue: #2e6fd8;
+        --green: #23835e;
+        --amber: #ba701e;
+        --red: #bd3a3a;
+        --ice: #e7f5ff;
+        --cream: #fff2d8;
+        --mint: #e1f5ea;
+        --pink: #ffe6ee;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      h1, h2, h3, p { margin: 0; }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .caption {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+        overflow-wrap: anywhere;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--paper);
+        border-radius: 999px;
+        padding: 7px 10px;
+        font-size: 12px;
+        color: #46505f;
+        white-space: nowrap;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        min-height: 940px;
+        border: 2px solid var(--dark);
+        background: var(--paper);
+      }
+
+      .sidebar {
+        border-right: 2px solid var(--dark);
+        background: #fbf8f1;
+        padding: 16px;
+      }
+
+      .logo {
+        height: 54px;
+        border: 2px solid var(--dark);
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        background: var(--panel);
+        margin-bottom: 16px;
+      }
+
+      .nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .nav-item {
+        min-height: 44px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        font-weight: 800;
+      }
+
+      .nav-item.active {
+        border: 2px solid var(--blue);
+        background: var(--ice);
+        color: #17499f;
+      }
+
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        border: 2px solid currentColor;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        flex: 0 0 auto;
+      }
+
+      .note {
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 12px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .main {
+        display: grid;
+        grid-template-rows: 74px 1fr 174px;
+        min-width: 0;
+      }
+
+      .topbar {
+        border-bottom: 2px solid var(--dark);
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .crumb {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .wallet {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .screen {
+        display: grid;
+        grid-template-columns: 330px minmax(420px, 1fr) 390px;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 2px solid var(--dark);
+        background: var(--panel);
+      }
+
+      .panel-head {
+        min-height: 52px;
+        border-bottom: 1px solid var(--line);
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .panel-title {
+        font-weight: 900;
+        font-size: 15px;
+      }
+
+      .sub {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .body { padding: 12px; }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .tab {
+        min-height: 38px;
+        border: 1px solid var(--line);
+        background: #faf9f6;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .tab.active {
+        border: 2px solid var(--blue);
+        background: var(--ice);
+        color: #17499f;
+      }
+
+      .item-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .item {
+        border: 1px solid var(--line);
+        background: #fbfbfa;
+        padding: 10px;
+      }
+
+      .item.selected {
+        border: 2px solid var(--blue);
+        background: var(--ice);
+      }
+
+      .item-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .item-name {
+        font-weight: 900;
+        font-size: 14px;
+      }
+
+      .item-type {
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .item-copy {
+        margin-top: 7px;
+        color: #475160;
+        font-size: 12px;
+        line-height: 1.42;
+      }
+
+      .spec-grid {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .spec {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 6px;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+
+      .robot-area {
+        display: grid;
+        grid-template-rows: auto minmax(470px, 1fr) auto;
+        gap: 12px;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .status {
+        border: 1px solid var(--line);
+        background: #fbfbfa;
+        min-height: 60px;
+        padding: 8px;
+      }
+
+      .status strong {
+        display: block;
+        font-size: 15px;
+        margin-top: 2px;
+      }
+
+      .bench {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 12px;
+        min-height: 470px;
+      }
+
+      .robot-board,
+      .scope-board {
+        position: relative;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(#eee7dd 1px, transparent 1px),
+          linear-gradient(90deg, #eee7dd 1px, transparent 1px),
+          #fffdf8;
+        background-size: 28px 28px;
+        min-height: 470px;
+        overflow: hidden;
+      }
+
+      .robot-svg {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: min(78%, 330px);
+        transform: translate(-50%, -48%);
+      }
+
+      .slot {
+        position: absolute;
+        border: 2px solid var(--dark);
+        background: rgba(255,255,255,0.94);
+        padding: 7px;
+        min-width: 122px;
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .slot strong {
+        display: block;
+        font-size: 12px;
+      }
+
+      .slot.battery { left: 20px; top: 22px; background: var(--cream); }
+      .slot.camera { right: 20px; top: 104px; background: var(--mint); }
+      .slot.wire { left: 20px; bottom: 118px; background: var(--pink); }
+      .slot.convert { right: 20px; bottom: 34px; background: var(--ice); }
+
+      .meter {
+        border: 2px solid var(--dark);
+        background: var(--panel);
+        margin: 14px;
+        padding: 12px;
+      }
+
+      .meter-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+
+      .readout {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .read {
+        border: 1px solid var(--line);
+        background: #101720;
+        color: #d8f7d8;
+        padding: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .scope {
+        height: 130px;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(#214454 1px, transparent 1px),
+          linear-gradient(90deg, #214454 1px, transparent 1px),
+          #0c1820;
+        background-size: 18px 18px;
+        margin-top: 10px;
+        position: relative;
+      }
+
+      .scope svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .warning {
+        margin: 14px;
+        border: 1px solid var(--red);
+        background: #fff0f0;
+        color: #7c2525;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .button {
+        min-height: 42px;
+        border: 2px solid var(--dark);
+        background: var(--panel);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .button.primary {
+        border-color: var(--blue);
+        color: var(--blue);
+        background: var(--ice);
+      }
+
+      .right-stack {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        gap: 12px;
+      }
+
+      .compare {
+        display: grid;
+        gap: 8px;
+      }
+
+      .compare-row {
+        display: grid;
+        grid-template-columns: 92px 1fr 1fr;
+        gap: 6px;
+        align-items: stretch;
+        font-size: 11px;
+      }
+
+      .compare-row > div {
+        border: 1px solid var(--line);
+        background: #fbfbfa;
+        padding: 7px;
+        line-height: 1.35;
+      }
+
+      .compare-row .head {
+        font-weight: 900;
+        background: #f4efe7;
+      }
+
+      .env-list,
+      .lesson-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .env,
+      .lesson {
+        border: 1px solid var(--line);
+        background: #fbfbfa;
+        padding: 9px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .env strong,
+      .lesson strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+
+      .bottom {
+        border-top: 2px solid var(--dark);
+        padding: 14px;
+        background: #fbf8f1;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .stat-card {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 10px;
+        min-height: 118px;
+      }
+
+      .stat-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+      }
+
+      .bar {
+        height: 10px;
+        border: 1px solid var(--dark);
+        background: #ede7dc;
+        margin-bottom: 8px;
+      }
+
+      .fill { height: 100%; background: var(--blue); }
+      .fill.green { background: var(--green); }
+      .fill.amber { background: var(--amber); }
+      .fill.red { background: var(--red); }
+
+      .stat-card p {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .flow {
+        margin-top: 18px;
+        border: 2px solid var(--dark);
+        background: var(--panel);
+        padding: 16px;
+      }
+
+      .flow h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .flow-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .flow-step {
+        border: 1px solid var(--line);
+        background: #fbfbfa;
+        padding: 10px;
+        min-height: 112px;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .flow-step strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .mobile {
+        margin-top: 18px;
+        border: 2px solid var(--dark);
+        background: var(--panel);
+        padding: 16px;
+      }
+
+      .mobile h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .phone-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .phone {
+        border: 2px solid var(--dark);
+        background: #fffdf8;
+        min-height: 292px;
+        padding: 10px;
+      }
+
+      .phone-top {
+        min-height: 34px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 900;
+        font-size: 12px;
+      }
+
+      .mini {
+        margin-top: 9px;
+        min-height: 44px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 8px;
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      @media (max-width: 1200px) {
+        .app,
+        .screen,
+        .bench,
+        .stat-grid,
+        .flow-grid,
+        .phone-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: 0;
+          border-bottom: 2px solid var(--dark);
+        }
+
+        .main {
+          grid-template-rows: auto auto auto;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .page {
+          padding: 12px;
+          overflow-x: hidden;
+        }
+
+        header,
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        h1 {
+          font-size: 22px;
+        }
+
+        .chips,
+        .wallet {
+          display: grid;
+          grid-template-columns: 1fr;
+          width: 100%;
+          justify-content: stretch;
+        }
+
+        .chip {
+          white-space: normal;
+        }
+
+        .tabs,
+        .spec-grid,
+        .status-row,
+        .actions,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+
+        .slot {
+          position: static;
+          margin: 8px;
+        }
+
+        .robot-board {
+          display: grid;
+          padding-top: 260px;
+        }
+
+        .robot-svg {
+          top: 130px;
+          width: 260px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div>
+          <h1>NOCKOUT Protocol Wireframe v4</h1>
+          <p class="caption">스펙 실험실 버전. V, W, mAh, AWG, 카메라 화소, 미터기/오실로스코프, 추운 맵 배터리 방전까지 게임 규칙으로 반영.</p>
+        </div>
+        <div class="chips">
+          <span class="chip">톤: 귀여운 실험실</span>
+          <span class="chip">핵심: 측정하고 비교하기</span>
+          <span class="chip">환경: 추위/고온/어둠 상성</span>
+        </div>
+      </header>
+
+      <main class="app">
+        <aside class="sidebar">
+          <div class="logo">NOCKOUT</div>
+          <nav class="nav" aria-label="Main navigation">
+            <div class="nav-item"><span class="nav-icon">H</span>홈</div>
+            <div class="nav-item"><span class="nav-icon">G</span>성장실</div>
+            <div class="nav-item active"><span class="nav-icon">M</span>측정실</div>
+            <div class="nav-item"><span class="nav-icon">P</span>전원 설계</div>
+            <div class="nav-item"><span class="nav-icon">W</span>배선</div>
+            <div class="nav-item"><span class="nav-icon">C</span>카메라/센서</div>
+            <div class="nav-item"><span class="nav-icon">E</span>환경 훈련</div>
+            <div class="nav-item"><span class="nav-icon">L</span>리그</div>
+          </nav>
+          <div class="note">
+            핵심 감성은 “뭔지 몰라도 일단 달아보고 수치가 변하는 걸 보며 배우는 것”. 장비 강화가 곧 기초 전자/로봇 학습이 된다.
+          </div>
+        </aside>
+
+        <section class="main">
+          <div class="topbar">
+            <div>
+              <div class="crumb">측정실 / 콩봇 Mk.1 / 설원 리그 준비</div>
+              <strong>기본 사양 비교</strong>
+            </div>
+            <div class="wallet">
+              <span class="chip">COIN 12,450</span>
+              <span class="chip">배터리 건강 82%</span>
+              <span class="chip">다음 맵: 설원 -12C</span>
+            </div>
+          </div>
+
+          <div class="screen">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">부품/측정 아이템</div>
+                  <div class="sub">실제 부품 스펙을 게임 언어로 비교</div>
+                </div>
+              </div>
+              <div class="body">
+                <div class="tabs">
+                  <div class="tab active">전원</div>
+                  <div class="tab">측정</div>
+                  <div class="tab">센서</div>
+                </div>
+                <div class="item-list">
+                  <article class="item selected">
+                    <div class="item-top">
+                      <div class="item-name">LiPo 2S 850mAh</div>
+                      <div class="item-type">Battery Lv.1</div>
+                    </div>
+                    <p class="item-copy">가볍고 귀여운 초급 배터리. 추운 맵에서는 출력이 빨리 떨어진다.</p>
+                    <div class="spec-grid">
+                      <div class="spec">7.4V</div>
+                      <div class="spec">850mAh</div>
+                      <div class="spec">설원 효율 -22%</div>
+                    </div>
+                  </article>
+
+                  <article class="item">
+                    <div class="item-top">
+                      <div class="item-name">Step-Up Module</div>
+                      <div class="item-type">Power Lv.2</div>
+                    </div>
+                    <p class="item-copy">전압을 올려 고출력 장비를 잠깐 밀어준다. 발열과 배터리 소모가 증가한다.</p>
+                    <div class="spec-grid">
+                      <div class="spec">5V > 9V</div>
+                      <div class="spec">출력 보조</div>
+                      <div class="spec">발열 +</div>
+                    </div>
+                  </article>
+
+                  <article class="item">
+                    <div class="item-top">
+                      <div class="item-name">Step-Down Module</div>
+                      <div class="item-type">Power Lv.2</div>
+                    </div>
+                    <p class="item-copy">보드와 센서를 안전한 전압으로 보호한다. 안정성이 중요한 장기전에 좋다.</p>
+                    <div class="spec-grid">
+                      <div class="spec">12V > 5V</div>
+                      <div class="spec">센서 보호</div>
+                      <div class="spec">안정성 +</div>
+                    </div>
+                  </article>
+
+                  <article class="item">
+                    <div class="item-top">
+                      <div class="item-name">AWG 22 Wire</div>
+                      <div class="item-type">Cable Lv.1</div>
+                    </div>
+                    <p class="item-copy">얇고 가벼운 전선. 고전류 모터에는 불안정할 수 있어 배선 선택이 중요하다.</p>
+                    <div class="spec-grid">
+                      <div class="spec">가벼움</div>
+                      <div class="spec">전류 낮음</div>
+                      <div class="spec">발열 주의</div>
+                    </div>
+                  </article>
+
+                  <article class="item">
+                    <div class="item-top">
+                      <div class="item-name">Linear Actuator</div>
+                      <div class="item-type">Drive Lv.3</div>
+                    </div>
+                    <p class="item-copy">회전이 아니라 밀고 당기는 직선 힘. 방패, 펀치, 다리 보조에 사용한다.</p>
+                    <div class="spec-grid">
+                      <div class="spec">직선 힘</div>
+                      <div class="spec">무게 +</div>
+                      <div class="spec">속도 낮음</div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel robot-area">
+              <div class="panel-head">
+                <div>
+                  <div class="panel-title">측정 벤치</div>
+                  <div class="sub">장착 전후 수치를 보고 배틀 리스크 판단</div>
+                </div>
+                <span class="chip">설원 페널티 적용 중</span>
+              </div>
+              <div class="body">
+                <div class="status-row">
+                  <div class="status"><span class="sub">전압</span><strong>7.4V</strong></div>
+                  <div class="status"><span class="sub">전력</span><strong>42W</strong></div>
+                  <div class="status"><span class="sub">용량</span><strong>850mAh</strong></div>
+                  <div class="status"><span class="sub">배선</span><strong>AWG22</strong></div>
+                  <div class="status"><span class="sub">카메라</span><strong>2MP</strong></div>
+                </div>
+              </div>
+              <div class="body">
+                <div class="bench">
+                  <div class="robot-board">
+                    <svg class="robot-svg" viewBox="0 0 420 500" role="img" aria-label="robot measurement wireframe">
+                      <rect x="160" y="36" width="100" height="78" rx="22" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <circle cx="192" cy="72" r="8" fill="#2e6fd8"/>
+                      <circle cx="228" cy="72" r="8" fill="#2e6fd8"/>
+                      <path d="M190 94c14 9 28 9 42 0" fill="none" stroke="#2c3138" stroke-width="4" stroke-linecap="round"/>
+                      <rect x="144" y="138" width="132" height="142" rx="24" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <rect x="176" y="168" width="68" height="50" fill="#e7f5ff" stroke="#2e6fd8" stroke-width="4"/>
+                      <line x1="144" y1="166" x2="82" y2="242" stroke="#2c3138" stroke-width="13" stroke-linecap="round"/>
+                      <line x1="276" y1="166" x2="338" y2="242" stroke="#2c3138" stroke-width="13" stroke-linecap="round"/>
+                      <rect x="58" y="232" width="58" height="82" rx="18" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <rect x="304" y="232" width="58" height="82" rx="18" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <line x1="184" y1="280" x2="152" y2="386" stroke="#2c3138" stroke-width="15" stroke-linecap="round"/>
+                      <line x1="236" y1="280" x2="268" y2="386" stroke="#2c3138" stroke-width="15" stroke-linecap="round"/>
+                      <rect x="126" y="374" width="64" height="84" rx="17" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <rect x="230" y="374" width="64" height="84" rx="17" fill="#fff" stroke="#2c3138" stroke-width="5"/>
+                      <path d="M138 458h70M212 458h70" stroke="#2c3138" stroke-width="10" stroke-linecap="round"/>
+                    </svg>
+                    <div class="slot battery"><strong>BATTERY</strong>LiPo 2S 850mAh<br>추위 효율 -22%</div>
+                    <div class="slot camera"><strong>CAMERA</strong>2MP / 어두운 맵 약함</div>
+                    <div class="slot wire"><strong>WIRE</strong>AWG22 / 고전류 주의</div>
+                    <div class="slot convert"><strong>CONVERTER</strong>Step-Down 12V > 5V</div>
+                  </div>
+
+                  <div class="scope-board">
+                    <div class="meter">
+                      <div class="meter-title"><span>멀티미터</span><span>장착 후 측정</span></div>
+                      <div class="readout">
+                        <div class="read">V 07.40</div>
+                        <div class="read">A 05.70</div>
+                        <div class="read">W 42.18</div>
+                        <div class="read">mAh 850</div>
+                      </div>
+                      <div class="scope" aria-label="oscilloscope graph">
+                        <svg viewBox="0 0 260 130" preserveAspectRatio="none">
+                          <polyline points="0,70 18,64 36,78 54,44 72,62 90,58 108,92 126,50 144,70 162,66 180,84 198,46 216,60 234,72 260,64" fill="none" stroke="#79ff9d" stroke-width="4"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="warning">
+                      설원 맵에서는 배터리 내부저항 증가로 순간 출력이 낮아짐. 보온 케이스 또는 고용량 배터리 장착 시 페널티 감소.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="body">
+                <div class="actions">
+                  <div class="button primary">스펙 비교</div>
+                  <div class="button">측정 아이템 사용</div>
+                  <div class="button">설원 테스트</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="right-stack">
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="panel-title">기본 사양 비교표</div>
+                    <div class="sub">플레이어가 실제 스펙 읽는 법을 익힘</div>
+                  </div>
+                </div>
+                <div class="body">
+                  <div class="compare">
+                    <div class="compare-row">
+                      <div class="head">항목</div><div class="head">현재</div><div class="head">교체 후보</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>배터리</div><div>2S 850mAh</div><div>3S 2200mAh</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>전압</div><div>7.4V</div><div>11.1V</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>전력</div><div>42W</div><div>78W</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>전선</div><div>AWG22</div><div>AWG18</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>카메라</div><div>2MP</div><div>8MP + 저조도</div>
+                    </div>
+                    <div class="compare-row">
+                      <div>설원 효율</div><div>-22%</div><div>-9%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="panel-title">환경 페널티</div>
+                    <div class="sub">맵이 부품 선택을 바꾼다</div>
+                  </div>
+                </div>
+                <div class="body">
+                  <div class="env-list">
+                    <div class="env"><strong>설원 경기장</strong>배터리 방전 가속, 서보 반응 둔화. 보온 케이스/고용량 배터리 유리.</div>
+                    <div class="env"><strong>사막 경기장</strong>고온으로 전압강하와 과열 위험. 쿨링팬/방열판/온습도 센서 유리.</div>
+                    <div class="env"><strong>어두운 경기장</strong>저화소 카메라 추적 실패율 증가. 조도 센서/저조도 카메라 유리.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <div>
+                    <div class="panel-title">아이템 설명</div>
+                    <div class="sub">게임 아이템이 곧 교육 카드</div>
+                  </div>
+                </div>
+                <div class="body">
+                  <div class="lesson-list">
+                    <div class="lesson"><strong>멀티미터</strong>전압 V, 전류 A, 저항을 확인. 부품이 왜 약해졌는지 숫자로 보여준다.</div>
+                    <div class="lesson"><strong>오실로스코프</strong>전압이 흔들리는 파형을 확인. 불안정한 전원 공급을 시각화한다.</div>
+                    <div class="lesson"><strong>DC-DC 컨버터</strong>전압을 바꿔 보드와 모터를 안정적으로 연결한다.</div>
+                    <div class="lesson"><strong>AWG 전선</strong>숫자가 작을수록 굵은 전선. 고전류 부품은 굵은 전선이 안전하다.</div>
+                    <div class="lesson"><strong>카메라 화소</strong>화소가 높으면 디테일은 좋지만 처리량과 전력 소모가 늘어난다.</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="bottom">
+            <div class="stat-grid">
+              <div class="stat-card"><strong>전압 안정성</strong><div class="bar"><div class="fill amber" style="width:58%"></div></div><p>Step-Down 장착 시 센서 오류 감소.</p></div>
+              <div class="stat-card"><strong>추위 내성</strong><div class="bar"><div class="fill red" style="width:34%"></div></div><p>설원 맵에서 배터리 효율이 낮다.</p></div>
+              <div class="stat-card"><strong>배선 여유</strong><div class="bar"><div class="fill amber" style="width:46%"></div></div><p>AWG22는 가볍지만 고전류에 약하다.</p></div>
+              <div class="stat-card"><strong>영상 인식</strong><div class="bar"><div class="fill" style="width:40%"></div></div><p>2MP 카메라는 저조도 맵에서 불리.</p></div>
+              <div class="stat-card"><strong>순간 출력</strong><div class="bar"><div class="fill green" style="width:62%"></div></div><p>Step-Up 모듈로 잠깐 출력 보조.</p></div>
+              <div class="stat-card"><strong>학습 도감</strong><div class="bar"><div class="fill" style="width:26%"></div></div><p>스펙을 읽을수록 도감이 열린다.</p></div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <section class="flow">
+        <h2>측정형 성장 루프</h2>
+        <div class="flow-grid">
+          <div class="flow-step"><strong>1. 부품 장착</strong>배터리, 컨버터, 전선, 카메라, 액추에이터를 로봇에 단다.</div>
+          <div class="flow-step"><strong>2. 미터기 측정</strong>V, A, W, mAh를 확인하고 현재 사양을 이해한다.</div>
+          <div class="flow-step"><strong>3. 스펙 비교</strong>AWG, 화소, 전압, 용량을 비교해 교체 후보를 고른다.</div>
+          <div class="flow-step"><strong>4. 환경 테스트</strong>설원/사막/어둠에서 페널티와 보너스를 확인한다.</div>
+          <div class="flow-step"><strong>5. 리그 적용</strong>맵에 맞는 장비 세팅으로 배틀에 들어간다.</div>
+        </div>
+      </section>
+
+      <section class="mobile">
+        <h2>모바일 축약 화면</h2>
+        <div class="phone-grid">
+          <div class="phone">
+            <div class="phone-top"><span>측정실</span><span>7.4V</span></div>
+            <div class="mini">멀티미터: V/A/W/mAh 표시</div>
+            <div class="mini">오실로스코프: 전압 흔들림 파형</div>
+            <div class="mini">설원 페널티: 배터리 효율 -22%</div>
+            <div class="mini">버튼: 스펙 비교 / 테스트</div>
+          </div>
+          <div class="phone">
+            <div class="phone-top"><span>전원</span><span>LiPo</span></div>
+            <div class="mini">2S 850mAh: 가벼움</div>
+            <div class="mini">3S 2200mAh: 출력 좋음</div>
+            <div class="mini">Step-Up: 전압 올림</div>
+            <div class="mini">Step-Down: 센서 보호</div>
+          </div>
+          <div class="phone">
+            <div class="phone-top"><span>배선</span><span>AWG</span></div>
+            <div class="mini">AWG22: 가볍지만 고전류 약함</div>
+            <div class="mini">AWG18: 무겁지만 안정적</div>
+            <div class="mini">발열 경고 / 전압강하 표시</div>
+            <div class="mini">DC-DC 컨버터 추천</div>
+          </div>
+          <div class="phone">
+            <div class="phone-top"><span>카메라</span><span>MP</span></div>
+            <div class="mini">2MP: 저전력</div>
+            <div class="mini">8MP: 추적 정확도 증가</div>
+            <div class="mini">저조도 카메라: 어두운 맵 유리</div>
+            <div class="mini">처리량/전력 소모 비교</div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
