@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>NOCKOUT Protocol - Logged Out</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #05070b;
+        --line: rgba(232, 240, 255, 0.16);
+        --text: #f4f8ff;
+        --muted: #9aaabd;
+        --cyan: #50ddff;
+        --gold: #ffc85a;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        min-height: 100dvh;
+        overflow: hidden;
+      }
+
+      .auth-screen {
+        display: grid;
+        grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr);
+        align-items: stretch;
+        gap: 28px;
+        min-height: 100dvh;
+        padding: 34px;
+        background:
+          linear-gradient(90deg, rgba(3, 5, 9, 0.92) 0%, rgba(5, 7, 11, 0.74) 42%, rgba(5, 7, 11, 0.25) 100%),
+          linear-gradient(180deg, rgba(5, 7, 11, 0.18), rgba(5, 7, 11, 0.88)),
+          url("./assets/arena-bg.png") center / cover no-repeat,
+          var(--bg);
+      }
+
+      .auth-panel {
+        display: grid;
+        align-content: center;
+        gap: 18px;
+        min-height: calc(100dvh - 68px);
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(12, 20, 33, 0.96), rgba(8, 12, 20, 0.9));
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
+        backdrop-filter: blur(18px);
+      }
+
+      .auth-kicker,
+      .auth-wordmark,
+      .auth-tagline {
+        font-family: Menlo, Consolas, monospace;
+      }
+
+      .auth-kicker {
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .auth-wordmark {
+        margin-top: 8px;
+        color: var(--text);
+        font-size: clamp(38px, 6vw, 72px);
+        font-weight: 950;
+        line-height: 0.9;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        text-shadow: 0 0 26px rgba(80, 221, 255, 0.22);
+      }
+
+      .auth-tagline {
+        margin-top: 8px;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      h1,
+      p { margin: 0; }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .button {
+        display: inline-grid;
+        place-items: center;
+        min-height: 46px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        background: #ffffff;
+        color: #1f2937;
+        font-size: 13px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .auth-art {
+        position: relative;
+        min-height: calc(100dvh - 68px);
+        overflow: hidden;
+      }
+
+      .auth-art img {
+        position: absolute;
+        right: max(4vw, 20px);
+        bottom: -4vh;
+        width: min(44vw, 620px);
+        max-height: 88dvh;
+        object-fit: contain;
+        filter: drop-shadow(0 36px 50px rgba(0, 0, 0, 0.64));
+      }
+
+      .auth-art::before,
+      .auth-art::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .auth-art::before {
+        left: 4%;
+        right: 6%;
+        bottom: 8%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(80, 221, 255, 0.7), transparent);
+        box-shadow: 0 0 28px rgba(80, 221, 255, 0.5);
+      }
+
+      .auth-art::after {
+        inset: 10% 0 12% 18%;
+        border: 1px solid rgba(80, 221, 255, 0.18);
+        border-radius: 8px;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.4;
+      }
+
+      @media (max-width: 900px) {
+        body { overflow: auto; }
+
+        .auth-screen {
+          grid-template-columns: 1fr;
+          padding: 18px;
+        }
+
+        .auth-panel {
+          min-height: calc(100dvh - 36px);
+        }
+
+        .auth-art {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="auth-screen">
+      <section class="auth-panel">
+        <div>
+          <div class="auth-kicker">SESSION CLOSED</div>
+          <div class="auth-wordmark">NOCKOUT<br>PROTOCOL</div>
+          <div class="auth-tagline">BUILD. BREAK. KNOCKOUT.</div>
+        </div>
+        <div>
+          <h1>로그아웃 완료</h1>
+          <p>세션이 종료됐다. 다시 접속하려면 로그인 화면으로 돌아가면 된다.</p>
+        </div>
+        <a class="button" href="./">로그인 화면으로</a>
+      </section>
+      <section class="auth-art" aria-hidden="true">
+        <img src="./assets/combat-robot.png" alt="">
+      </section>
+    </main>
+  </body>
+</html>
