@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>NOCKOUT Protocol</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
     <style>
       :root {
         color-scheme: dark;
@@ -231,6 +239,38 @@
         display: grid;
         place-items: center;
         perspective: 1000px;
+      }
+
+      .model-space canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .model-loading,
+      .asset-credit {
+        position: absolute;
+        z-index: 2;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        background: rgba(5, 8, 13, 0.62);
+        color: rgba(244, 248, 255, 0.72);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .model-loading {
+        top: 14px;
+        left: 14px;
+        padding: 7px 10px;
+      }
+
+      .asset-credit {
+        right: 12px;
+        bottom: 12px;
+        padding: 6px 9px;
       }
 
       .robot-model {
@@ -539,7 +579,8 @@
         transform: rotateX(-7deg) rotateY(-22deg) scale(0.86) translateX(-70px);
       }
 
-      .enemy {
+      .enemy,
+      .sandbag {
         position: absolute;
         right: 13%;
         bottom: 18%;
@@ -560,6 +601,54 @@
         height: 8px;
         border-radius: 999px;
         background: var(--red);
+      }
+
+      .sandbag {
+        right: 15%;
+        bottom: 16%;
+        width: 92px;
+        height: 210px;
+        border-color: rgba(255, 200, 90, 0.34);
+        border-radius: 999px 999px 18px 18px;
+        background:
+          linear-gradient(90deg, transparent 46%, rgba(0, 0, 0, 0.28) 47%, rgba(0, 0, 0, 0.28) 53%, transparent 54%),
+          linear-gradient(160deg, #9e4935, #3f1511 78%);
+        box-shadow:
+          inset -18px -18px 28px rgba(0, 0, 0, 0.36),
+          0 0 32px rgba(255, 200, 90, 0.18);
+        transform-origin: 50% 0;
+      }
+
+      .sandbag::before {
+        content: "";
+        position: absolute;
+        left: 42px;
+        top: -92px;
+        width: 8px;
+        height: 94px;
+        border-radius: 999px;
+        background: linear-gradient(#d8e8ef, #67717a);
+      }
+
+      .sandbag::after {
+        content: "";
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        top: 54px;
+        height: 38px;
+        border-top: 2px solid rgba(255, 255, 255, 0.14);
+        border-bottom: 2px solid rgba(0, 0, 0, 0.22);
+      }
+
+      .sandbag.hit {
+        animation: sandbagHit 0.74s ease-in-out infinite;
+      }
+
+      @keyframes sandbagHit {
+        0%, 100% { transform: rotateZ(0); }
+        46% { transform: rotateZ(9deg) translateX(14px); }
+        68% { transform: rotateZ(-5deg) translateX(-8px); }
       }
 
       .arena-hud {
@@ -1050,8 +1139,8 @@
           <section class="view" data-page="training">
             <div class="list">
               <article class="card">
-                <div class="card-head"><h3>연습 전투</h3><button class="primary" id="practiceButton">연습장 입장</button></div>
-                <p class="caption">실제 세션을 만들지 않고 클라이언트 훈련 상태만 전환한다.</p>
+                <div class="card-head"><h3>샌드백 훈련</h3><button class="primary" id="practiceButton">훈련장 입장</button></div>
+                <p class="caption">상대 AI 없이 매달린 샌드백을 타격하며 펀치 모션과 타격감을 확인한다.</p>
               </article>
               <article class="card">
                 <button class="secondary" data-anim="walk">이동 루틴</button>
@@ -1064,7 +1153,8 @@
           <section class="view arena-view" data-page="arena">
             <div class="arena-stage">
               <div class="model-space" id="arenaModel"></div>
-              <div class="enemy" aria-label="상대 기본 더미"></div>
+              <div class="enemy" id="enemyTarget" aria-label="상대 기본 더미"></div>
+              <div class="sandbag" id="sandbagTarget" aria-label="훈련 샌드백" hidden></div>
               <div class="arena-hud">
                 <span class="chip" id="battleState">전투 대기</span>
                 <div>
@@ -1089,7 +1179,7 @@
         <aside class="panel side">
           <div class="side-actions">
             <button class="primary" id="startBattleButton">전투 시작하기</button>
-            <button class="secondary" id="startPracticeButton">연습 전투하기</button>
+            <button class="secondary" id="startPracticeButton">샌드백 훈련하기</button>
           </div>
           <article class="card">
             <div class="card-head"><h3>현재 편성</h3><button class="ghost" id="saveLoadoutButton">저장</button></div>
@@ -1151,11 +1241,16 @@
       </section>
     </div>
 
-    <script>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+      import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
+      const ROBOT_MODEL_URL = "./assets/heavy_robot.glb";
 
       const state = {
         user: null,
@@ -1165,6 +1260,7 @@
         loadout: null,
         rankings: [],
         battle: null,
+        trainingMode: false,
         anim: "idle",
         authMode: new URL(window.location.href).searchParams.has("logged_out") ? "logged_out" : "login"
       };
@@ -1195,6 +1291,7 @@
         state.loadout = null;
         state.rankings = [];
         state.battle = null;
+        state.trainingMode = false;
         state.authMode = authMode;
       }
 
@@ -1210,18 +1307,123 @@
         upgrade: ["업그레이드", "선택된 실제 로봇 행의 스텟을 업데이트한다"],
         garage: ["정비실", "유저가 보유한 서포트봇 데이터를 보여준다"],
         league: ["리그", "저장된 랭킹 엔트리를 표시한다"],
-        training: ["훈련", "로봇 동작 루틴을 확인한다"],
+        training: ["훈련", "샌드백 타격으로 펀치 루틴을 확인한다"],
         arena: ["전투장", "전투 시작 후 들어오는 아레나 화면"]
       };
 
-      const modelHtml = () => `
-        <div class="robot-model ${state.anim}">
-          <div class="part head"></div><div class="part neck"></div><div class="part torso"></div><div class="part core"></div><div class="part pelvis"></div>
-          <div class="arm left"><div class="limb upper-arm"></div><div class="limb forearm"></div><div class="limb fist"></div></div>
-          <div class="arm right"><div class="limb upper-arm"></div><div class="limb forearm"></div><div class="limb fist"></div></div>
-          <div class="leg left"><div class="limb thigh"></div><div class="limb shin"></div><div class="limb foot"></div></div>
-          <div class="leg right"><div class="limb thigh"></div><div class="limb shin"></div><div class="limb foot"></div></div>
-        </div>`;
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/");
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.setDRACOLoader(dracoLoader);
+      const robotAsset = gltfLoader.loadAsync(ROBOT_MODEL_URL);
+
+      class RobotStage {
+        constructor(container, options = {}) {
+          this.container = container;
+          this.options = options;
+          this.anim = "idle";
+          this.clock = new THREE.Clock();
+          this.scene = new THREE.Scene();
+          this.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+          this.camera.position.set(options.arena ? 0.18 : 0, 0.62, 5.7);
+          this.camera.lookAt(0, 0.05, 0);
+          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Heavy robot / Scarecrow_original / CC-BY-4.0</div>';
+          try {
+            this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          } catch (error) {
+            this.container.querySelector(".model-loading").textContent = "WEBGL UNAVAILABLE";
+            return;
+          }
+          this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+          this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          this.renderer.toneMappingExposure = 1.12;
+          this.container.prepend(this.renderer.domElement);
+          this.scene.add(new THREE.HemisphereLight(0x9fdfff, 0x080b10, 2.2));
+          const key = new THREE.DirectionalLight(0xffffff, 3.4);
+          key.position.set(-2.4, 4.2, 5.2);
+          this.scene.add(key);
+          const rim = new THREE.DirectionalLight(0x50ddff, 2.1);
+          rim.position.set(3.4, 2.6, -2.8);
+          this.scene.add(rim);
+          this.group = new THREE.Group();
+          this.group.position.x = options.arena ? -0.72 : 0;
+          this.scene.add(this.group);
+          this.resize();
+          window.addEventListener("resize", () => this.resize());
+          robotAsset.then((gltf) => this.mount(gltf.scene)).catch(() => {
+            const loading = this.container.querySelector(".model-loading");
+            if (loading) loading.textContent = "MODEL LOAD FAILED";
+          });
+          this.tick();
+        }
+
+        mount(source) {
+          const model = source.clone(true);
+          const bounds = new THREE.Box3().setFromObject(model);
+          const center = bounds.getCenter(new THREE.Vector3());
+          const size = bounds.getSize(new THREE.Vector3());
+          const scale = 2.3 / Math.max(size.x, size.y, size.z);
+          model.position.sub(center);
+          model.scale.setScalar(scale);
+          model.rotation.y = this.options.arena ? -0.38 : -0.18;
+          model.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.frustumCulled = false;
+              if (child.material) {
+                child.material.metalness = Math.max(child.material.metalness ?? 0, 0.36);
+                child.material.roughness = Math.min(child.material.roughness ?? 0.7, 0.72);
+              }
+            }
+          });
+          this.model = model;
+          this.group.add(model);
+          this.container.querySelector(".model-loading")?.remove();
+        }
+
+        setAnim(anim) {
+          this.anim = anim;
+        }
+
+        resize() {
+          const rect = this.container.getBoundingClientRect();
+          const width = Math.max(1, rect.width);
+          const height = Math.max(1, rect.height);
+          this.camera.aspect = width / height;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(width, height, false);
+        }
+
+        tick() {
+          requestAnimationFrame(() => this.tick());
+          const t = this.clock.getElapsedTime();
+          if (this.model) {
+            const baseY = this.options.arena ? -0.38 : -0.18;
+            this.group.position.y = Math.sin(t * 2.4) * 0.035;
+            this.group.rotation.z = 0;
+            this.group.rotation.y = Math.sin(t * 0.7) * 0.04;
+            this.model.rotation.y = baseY;
+            if (this.anim === "walk") {
+              this.group.position.x = (this.options.arena ? -0.72 : 0) + Math.sin(t * 5.4) * 0.08;
+              this.group.rotation.z = Math.sin(t * 5.4) * 0.025;
+            } else if (this.anim === "punch") {
+              const hit = Math.max(0, Math.sin(t * 8.4));
+              this.group.rotation.y = -0.28 - hit * 0.32;
+              this.group.position.x = (this.options.arena ? -0.72 : 0) + hit * 0.24;
+            } else if (this.anim === "guard") {
+              this.group.rotation.y = -0.12;
+              this.group.position.y -= 0.08;
+            }
+          }
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
+
+      const robotStages = [
+        new RobotStage(document.getElementById("homeModel")),
+        new RobotStage(document.getElementById("arenaModel"), { arena: true })
+      ];
 
       function setView(view) {
         document.querySelectorAll("[data-page]").forEach((el) => el.classList.toggle("active", el.dataset.page === view));
@@ -1232,8 +1434,11 @@
 
       function setAnim(anim) {
         state.anim = anim;
-        document.getElementById("homeModel").innerHTML = modelHtml();
-        document.getElementById("arenaModel").innerHTML = modelHtml();
+        robotStages.forEach((stage) => {
+          stage.resize?.();
+          stage.setAnim(anim);
+        });
+        document.getElementById("sandbagTarget")?.classList.toggle("hit", state.trainingMode && anim === "punch");
       }
 
       function line(label, value) {
@@ -1284,8 +1489,14 @@
         document.getElementById("supportSummary").innerHTML = state.supports.length ? state.supports.slice(0, 3).map((bot) => line(bot.name, bot.frame_type)).join("") : empty("보유 서포트봇 없음");
         document.getElementById("loadoutSummary").innerHTML = robot ? line("전투봇", robot.name) + line("편성", state.loadout?.name || "미저장") : empty("편성할 전투봇 없음");
         document.getElementById("rankingList").innerHTML = renderRankings();
-        document.getElementById("battleInfo").innerHTML = state.battle ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name) : empty("전투 세션 없음");
-        document.getElementById("battleState").textContent = state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
+        document.getElementById("battleInfo").innerHTML = state.trainingMode
+          ? line("모드", "샌드백 훈련") + line("목표", "펀치 타격감 확인") + line("세션", "로컬")
+          : state.battle
+            ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name)
+            : empty("전투 세션 없음");
+        document.getElementById("battleState").textContent = state.trainingMode ? "SANDBAG TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
+        document.getElementById("enemyTarget").hidden = state.trainingMode;
+        document.getElementById("sandbagTarget").hidden = !state.trainingMode;
         setAnim(state.anim);
       }
 
@@ -1443,6 +1654,7 @@
       async function startBattle() {
         if (!state.user) return signIn();
         if (!state.robot) return showModal("전투봇 필요", "먼저 기본 로봇을 생성해야 전투장에 들어갈 수 있음");
+        state.trainingMode = false;
         await saveLoadout();
         const { data, error } = await client.from("battle_sessions").insert({
           user_id: state.user.id,
@@ -1454,6 +1666,14 @@
         state.battle = data;
         setView("arena");
         setAnim("walk");
+        render();
+      }
+
+      function startSandbagTraining() {
+        state.battle = null;
+        state.trainingMode = true;
+        setView("arena");
+        setAnim("punch");
         render();
       }
 
@@ -1480,9 +1700,9 @@
       document.getElementById("createRobotButton").addEventListener("click", createStarterRobot);
       document.getElementById("saveLoadoutButton").addEventListener("click", saveLoadout);
       document.getElementById("startBattleButton").addEventListener("click", startBattle);
-      document.getElementById("startPracticeButton").addEventListener("click", () => { setView("arena"); setAnim("walk"); });
-      document.getElementById("practiceButton").addEventListener("click", () => { setView("arena"); setAnim("walk"); });
-      document.getElementById("endBattleButton").addEventListener("click", () => { state.battle = null; setView("home"); render(); });
+      document.getElementById("startPracticeButton").addEventListener("click", startSandbagTraining);
+      document.getElementById("practiceButton").addEventListener("click", startSandbagTraining);
+      document.getElementById("endBattleButton").addEventListener("click", () => { state.battle = null; state.trainingMode = false; setView("home"); render(); });
       document.getElementById("modalClose").addEventListener("click", () => document.getElementById("modal").classList.remove("open"));
       document.getElementById("modal").addEventListener("click", (event) => {
         if (event.target.id === "modal") document.getElementById("modal").classList.remove("open");
