@@ -238,6 +238,7 @@
         inset: 0;
         display: grid;
         place-items: center;
+        overflow: hidden;
         perspective: 1000px;
       }
 
@@ -246,6 +247,7 @@
         inset: 0;
         width: 100%;
         height: 100%;
+        pointer-events: none;
       }
 
       .model-loading,
@@ -569,10 +571,16 @@
 
       .arena-stage {
         min-height: 0;
+        isolation: isolate;
         background:
           linear-gradient(180deg, rgba(4, 7, 12, 0.4), rgba(4, 7, 12, 0.86)),
           radial-gradient(ellipse at 50% 74%, rgba(255, 200, 90, 0.22), transparent 46%),
           rgba(0, 0, 0, 0.22);
+      }
+
+      .arena-stage .model-space {
+        inset: 4% 0 12%;
+        z-index: 0;
       }
 
       .arena-stage .robot-model {
@@ -582,6 +590,7 @@
       .enemy,
       .sandbag {
         position: absolute;
+        z-index: 2;
         right: 13%;
         bottom: 18%;
         width: 96px;
@@ -653,6 +662,7 @@
 
       .arena-hud {
         position: absolute;
+        z-index: 3;
         left: 14px;
         right: 14px;
         bottom: 14px;
@@ -818,7 +828,7 @@
       }
 
       .auth-art .model-space {
-        inset: 2vh -2vw 0;
+        inset: 8vh 2vw 5vh;
         filter:
           drop-shadow(0 34px 46px rgba(0, 0, 0, 0.72))
           drop-shadow(0 0 30px rgba(80, 221, 255, 0.28));
@@ -1035,6 +1045,7 @@
       @media (max-height: 720px) {
         .app { min-height: 560px; padding: 10px; }
         .robot-model { transform: rotateX(-7deg) rotateY(-16deg) scale(0.82); }
+        .arena-stage .model-space { inset: 6% 0 16%; }
         .upgrade-card { min-height: 132px; }
       }
 
@@ -1262,7 +1273,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
-      const ROBOT_ASSET_VERSION = "azure-automaton-rig-v2";
+      const ROBOT_ASSET_VERSION = "azure-automaton-rig-v3-fit";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
 
       const state = {
@@ -1338,8 +1349,8 @@
           this.clock = new THREE.Clock();
           this.scene = new THREE.Scene();
           this.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-          this.camera.position.set(options.arena ? 0.18 : 0, options.hero ? 0.54 : 0.62, options.hero ? 5.05 : 5.7);
-          this.camera.lookAt(0, 0.05, 0);
+          this.camera.position.set(options.arena ? 0.42 : 0, options.hero ? 0.46 : 0.62, options.arena ? 7.2 : options.hero ? 6.45 : 5.7);
+          this.camera.lookAt(options.arena ? -0.38 : 0, options.hero ? 0.16 : options.arena ? 0.02 : 0.05, 0);
           this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton / Meshy AI generated concept</div>';
           try {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -1360,8 +1371,8 @@
           rim.position.set(3.4, 2.6, -2.8);
           this.scene.add(rim);
           this.group = new THREE.Group();
-          this.group.position.x = options.arena ? -0.48 : 0;
-          this.group.position.y = options.hero ? -0.1 : 0;
+          this.group.position.x = options.arena ? -1.06 : 0;
+          this.group.position.y = options.arena ? -0.42 : options.hero ? -0.34 : 0;
           this.scene.add(this.group);
           this.lastSize = { width: 0, height: 0 };
           this.resizeObserver = new ResizeObserver(() => this.resize());
@@ -1381,7 +1392,7 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = (this.options.hero ? 2.45 : 2.3) / Math.max(size.x, size.y, size.z);
+          const scale = (this.options.arena ? 1.46 : this.options.hero ? 1.68 : 2.3) / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           model.position.copy(center).multiplyScalar(-scale);
           model.rotation.y = this.options.arena ? -0.38 : -0.18;
@@ -1461,20 +1472,24 @@
           if (this.model) {
             this.mixer?.update(delta);
             const baseY = this.options.arena ? -0.38 : -0.18;
-            this.group.position.y = Math.sin(t * 2.4) * 0.035;
+            const baseX = this.options.arena ? -1.06 : 0;
+            const idleY = this.options.arena ? -0.42 : 0;
+            this.group.position.y = idleY + Math.sin(t * 2.4) * 0.028;
             this.group.rotation.z = 0;
             this.group.rotation.y = Math.sin(t * 0.7) * 0.04;
             this.model.rotation.y = baseY;
             if (this.anim === "walk") {
-              this.group.position.x = (this.options.arena ? -0.48 : 0) + Math.sin(t * 5.4) * 0.08;
+              this.group.position.x = baseX + Math.sin(t * 5.4) * (this.options.arena ? 0.05 : 0.08);
               this.group.rotation.z = Math.sin(t * 5.4) * 0.025;
             } else if (this.anim === "punch") {
               const hit = Math.max(0, Math.sin(t * 8.4));
               this.group.rotation.y = -0.28 - hit * 0.32;
-              this.group.position.x = (this.options.arena ? -0.48 : 0) + hit * 0.24;
+              this.group.position.x = baseX + hit * (this.options.arena ? 0.12 : 0.24);
             } else if (this.anim === "guard") {
               this.group.rotation.y = -0.12;
               this.group.position.y -= 0.08;
+            } else {
+              this.group.position.x = baseX;
             }
           }
           this.renderer.render(this.scene, this.camera);
