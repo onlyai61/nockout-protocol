@@ -1388,7 +1388,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
-      const ROBOT_ASSET_VERSION = "azure-automaton-rig-v3-fit";
+      const ROBOT_ASSET_VERSION = "azure-automaton-biped-2";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
 
       const state = {
@@ -1466,7 +1466,7 @@
           this.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
           this.camera.position.set(options.arena ? 0.42 : 0, options.hero ? 0.46 : 0.62, options.arena ? 7.2 : options.hero ? 6.45 : 5.7);
           this.camera.lookAt(options.arena ? -0.38 : 0, options.hero ? 0.16 : options.arena ? 0.02 : 0.05, 0);
-          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton / Meshy AI generated concept</div>';
+          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton Biped / Meshy AI generated concept</div>';
           try {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
           } catch (error) {
@@ -1519,9 +1519,11 @@
               const materials = hasMaterialArray ? child.material : [child.material];
               const tunedMaterials = materials.map((material) => {
                 const next = material || new THREE.MeshStandardMaterial();
-                next.color?.setHex(0xb8c8d8);
-                next.emissive?.setHex(0x071522);
-                next.emissiveIntensity = 0.16;
+                if (!next.map && next.color) next.color.setHex(0xb8c8d8);
+                if (next.emissive && !next.emissiveMap) {
+                  next.emissive.setHex(0x071522);
+                  next.emissiveIntensity = 0.16;
+                }
                 next.metalness = Math.max(next.metalness ?? 0, 0.42);
                 next.roughness = Math.min(next.roughness ?? 0.7, 0.58);
                 next.side = THREE.DoubleSide;
@@ -1550,7 +1552,7 @@
 
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
-          const nextName = anim === "punch" ? "running" : "walking";
+          const nextName = anim === "punch" ? "boxing_guard_prep_straight_punch" : "walking";
           const nextAction = this.actions[nextName];
           Object.values(this.actions).forEach((action) => {
             if (action !== nextAction) action.fadeOut(0.18);
