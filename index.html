@@ -1,147 +1,771 @@
-<!DOCTYPE html>
-<html lang="en-us">
+<!doctype html>
+<html lang="ko">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NOCKOUT PROTOCOL Mobile</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>NOCKOUT Protocol - Loadout Wireframe</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #05070b;
+        --glass: rgba(8, 13, 22, 0.72);
+        --glass-strong: rgba(10, 18, 31, 0.9);
+        --line: rgba(234, 242, 255, 0.18);
+        --text: #f5f8ff;
+        --muted: #9aa9bc;
+        --cyan: #53e4ff;
+        --gold: #ffcc58;
+        --green: #72f29a;
+        --coral: #ff6a5f;
+        --violet: #a78bfa;
+        --shadow: rgba(0, 0, 0, 0.42);
+      }
+
+      :root.light {
+        color-scheme: light;
+        --bg: #dfeaf6;
+        --glass: rgba(244, 248, 255, 0.72);
+        --glass-strong: rgba(255, 255, 255, 0.92);
+        --line: rgba(22, 36, 58, 0.18);
+        --text: #07111f;
+        --muted: #526176;
+        --shadow: rgba(18, 34, 58, 0.22);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      button {
+        border: 0;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .app {
+        position: relative;
+        width: 100vw;
+        height: 100dvh;
+        min-width: 760px;
+        min-height: 360px;
+        padding: 14px 16px;
+        isolation: isolate;
+      }
+
+      .app::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background:
+          linear-gradient(90deg, rgba(2, 6, 12, 0.56), rgba(2, 6, 12, 0.16) 42%, rgba(2, 6, 12, 0.84)),
+          linear-gradient(0deg, rgba(2, 6, 12, 0.84), transparent 44%, rgba(2, 6, 12, 0.5)),
+          url("./assets/arena-bg.png") center / cover no-repeat;
+      }
+
+      .app::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        opacity: 0.24;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(circle at 50% 48%, #000, transparent 72%);
+      }
+
+      .shell {
+        display: grid;
+        grid-template-rows: 42px 1fr 56px;
+        gap: 10px;
+        width: 100%;
+        height: 100%;
+      }
+
+      .topbar,
+      .dock,
+      .panel,
+      .card,
+      .modal {
+        border: 1px solid var(--line);
+        background: var(--glass);
+        box-shadow: 0 16px 42px var(--shadow);
+        backdrop-filter: blur(18px);
+        border-radius: 8px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .mark {
+        width: 26px;
+        height: 26px;
+        flex: 0 0 auto;
+        border: 1px solid rgba(255, 204, 88, 0.7);
+        background: linear-gradient(135deg, rgba(255, 204, 88, 0.9), rgba(83, 228, 255, 0.8));
+        clip-path: polygon(50% 0, 92% 25%, 92% 76%, 50% 100%, 8% 76%, 8% 25%);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 16px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .caption {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.2;
+      }
+
+      .coins {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .coin {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 0 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 84px minmax(330px, 1fr) 310px;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .nav {
+        display: grid;
+        gap: 7px;
+        align-content: start;
+      }
+
+      .nav button,
+      .action {
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--glass-strong);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .nav button.active {
+        background: var(--cyan);
+        color: #041018;
+      }
+
+      .stage {
+        position: relative;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      .stage-head {
+        position: absolute;
+        top: 12px;
+        left: 14px;
+        right: 14px;
+        z-index: 2;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .stage-title strong {
+        display: block;
+        font-size: 20px;
+        line-height: 1.1;
+      }
+
+      .rank-pill {
+        min-width: 104px;
+        padding: 8px 10px;
+        border: 1px solid rgba(255, 204, 88, 0.55);
+        border-radius: 8px;
+        background: rgba(255, 204, 88, 0.14);
+        text-align: right;
+      }
+
+      .rank-pill strong {
+        display: block;
+        color: var(--gold);
+        font-size: 18px;
+      }
+
+      .robot-wrap {
+        position: absolute;
+        inset: 42px 108px 10px 104px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .robot-wrap::before {
+        content: "";
+        position: absolute;
+        bottom: 22px;
+        width: 280px;
+        height: 42px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(83, 228, 255, 0.32), transparent 68%);
+        filter: blur(2px);
+      }
+
+      .robot {
+        position: relative;
+        z-index: 1;
+        max-width: 58%;
+        max-height: 92%;
+        object-fit: contain;
+        filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.58));
+      }
+
+      .rotate-hint {
+        position: absolute;
+        left: 50%;
+        bottom: 12px;
+        transform: translateX(-50%);
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+      }
+
+      .slot {
+        position: absolute;
+        z-index: 3;
+        width: 122px;
+        min-height: 48px;
+        padding: 8px 9px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(6, 10, 17, 0.68);
+        color: var(--text);
+        text-align: left;
+      }
+
+      .slot strong {
+        display: block;
+        font-size: 12px;
+      }
+
+      .slot span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .slot.power {
+        top: 78px;
+        left: 16px;
+        border-color: rgba(83, 228, 255, 0.52);
+      }
+
+      .slot.wire {
+        bottom: 62px;
+        left: 18px;
+        border-color: rgba(255, 204, 88, 0.52);
+      }
+
+      .slot.sensor {
+        top: 78px;
+        right: 16px;
+        border-color: rgba(114, 242, 154, 0.52);
+      }
+
+      .slot.lab {
+        bottom: 62px;
+        right: 18px;
+        border-color: rgba(255, 106, 95, 0.52);
+      }
+
+      .loadout {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 8px;
+        padding: 12px;
+        min-height: 0;
+      }
+
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .panel-head strong {
+        display: block;
+        font-size: 16px;
+      }
+
+      .support-list {
+        display: grid;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .support {
+        display: grid;
+        grid-template-columns: 42px 1fr 70px;
+        gap: 8px;
+        align-items: center;
+        min-height: 62px;
+        padding: 8px;
+      }
+
+      .bot-icon {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #051018;
+        font-weight: 900;
+      }
+
+      .support h3 {
+        font-size: 13px;
+      }
+
+      .support p {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.25;
+      }
+
+      .support button,
+      .mini {
+        min-height: 32px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .dock {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 130px;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+      }
+
+      .metric {
+        min-width: 0;
+        padding: 0 8px;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 3px;
+        color: var(--text);
+        font-size: 15px;
+      }
+
+      .action {
+        background: var(--coral);
+        color: white;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: none;
+        place-items: center;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.64);
+      }
+
+      .modal-backdrop.open {
+        display: grid;
+      }
+
+      .modal {
+        width: min(540px, 92vw);
+        max-height: 82dvh;
+        padding: 18px;
+        overflow: auto;
+        background: var(--glass-strong);
+      }
+
+      .modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .modal h2 {
+        font-size: 20px;
+      }
+
+      .close {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--text);
+        font-weight: 900;
+      }
+
+      .modal-grid {
+        display: grid;
+        gap: 8px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-height: 46px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .row small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+      }
+
+      .row b {
+        color: var(--gold);
+      }
+
+      @media (max-height: 370px) {
+        .app {
+          padding: 10px;
+        }
+
+        .shell {
+          grid-template-rows: 38px 1fr 50px;
+          gap: 8px;
+        }
+
+        .support {
+          min-height: 54px;
+        }
+
+        .robot {
+          max-height: 84%;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+    <main class="app">
+      <section class="shell">
+        <header class="topbar">
+          <div class="brand">
+            <div class="mark" aria-hidden="true"></div>
+            <div>
+              <h1>NOCKOUT LOADOUT WIREFRAME</h1>
+              <p class="caption">전투봇 1대 + 서포트봇 3대 / 모바일 가로 UI</p>
+            </div>
+          </div>
+          <div class="coins">
+            <span class="coin">RC 2,430</span>
+            <span class="coin">VC 820</span>
+            <span class="coin">WC 640</span>
+            <button class="mini" data-theme>Light</button>
+          </div>
+        </header>
+
+        <section class="main">
+          <nav class="nav" aria-label="Main navigation">
+            <button class="active" data-modal="홈">홈</button>
+            <button data-modal="업그레이드">업그레이드</button>
+            <button data-modal="정비실">정비실</button>
+            <button data-modal="리그">리그</button>
+            <button data-modal="훈련">훈련</button>
+          </nav>
+
+          <section class="panel stage" aria-label="Combat bot preview">
+            <div class="stage-head">
+              <div class="stage-title">
+                <strong>MECH BOXER</strong>
+                <p class="caption">나중에 Unity 3D 모델 360도 회전 영역</p>
+              </div>
+              <button class="rank-pill" data-modal="랭킹">
+                <span class="caption">예상 랭킹</span>
+                <strong>TOP 12%</strong>
+              </button>
+            </div>
+
+            <button class="slot power" data-modal="전원설계">
+              <strong>전원설계</strong>
+              <span>효율 82% / 과열 주의</span>
+            </button>
+            <button class="slot wire" data-modal="배선">
+              <strong>배선</strong>
+              <span>신호 안정 76%</span>
+            </button>
+            <button class="slot sensor" data-modal="카메라·센서">
+              <strong>카메라·센서</strong>
+              <span>표적 인식 91%</span>
+            </button>
+            <button class="slot lab" data-modal="측정실">
+              <strong>측정실</strong>
+              <span>진단 리포트 열기</span>
+            </button>
+
+            <div class="robot-wrap">
+              <img class="robot" src="./assets/combat-robot.png" alt="전투봇">
+            </div>
+            <div class="rotate-hint">DRAG TO ROTATE 360</div>
+          </section>
+
+          <aside class="panel loadout" aria-label="Support bot loadout">
+            <div class="panel-head">
+              <div>
+                <strong>서포트봇 3대</strong>
+                <p class="caption">전투 후 정비 / 랭킹 점수 보정</p>
+              </div>
+              <button class="mini" data-modal="편성 규칙">규칙</button>
+            </div>
+
+            <div class="support-list">
+              <article class="card support">
+                <div class="bot-icon" style="background: var(--cyan)">W</div>
+                <div>
+                  <h3>PIT-01 / 바퀴형</h3>
+                  <p>기본 정비. 수리비 -8%, 배터리 회복 +5%</p>
+                </div>
+                <button data-modal="PIT-01">커스텀</button>
+              </article>
+
+              <article class="card support">
+                <div class="bot-icon" style="background: var(--green)">Q</div>
+                <div>
+                  <h3>QUAD-K9 / 4족</h3>
+                  <p>파손 회수. 부품 회수율 +18%, 안정성 보너스</p>
+                </div>
+                <button data-modal="QUAD-K9">커스텀</button>
+              </article>
+
+              <article class="card support">
+                <div class="bot-icon" style="background: var(--gold)">B</div>
+                <div>
+                  <h3>BIPED-7 / 2족</h3>
+                  <p>정밀 튜닝. 업그레이드 비용 -10%</p>
+                </div>
+                <button data-modal="BIPED-7">커스텀</button>
+              </article>
+            </div>
+
+            <button class="action" data-modal="랭킹">편성 랭킹 만들기</button>
+          </aside>
+        </section>
+
+        <footer class="dock">
+          <div class="metric">
+            <span>편성 점수</span>
+            <strong>8,420</strong>
+          </div>
+          <div class="metric">
+            <span>정비 안정성</span>
+            <strong style="color: var(--green)">A-</strong>
+          </div>
+          <div class="metric">
+            <span>빌드 성향</span>
+            <strong>회복형 복서</strong>
+          </div>
+          <button class="action" data-modal="출전 확인">UI 흐름 확인</button>
+        </footer>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" data-backdrop>
+      <section class="modal" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <div>
+            <h2 data-modal-title>상세</h2>
+            <p class="caption" data-modal-caption>눌렀을 때 상세 정보를 modal로 보여주는 구조</p>
+          </div>
+          <button class="close" data-close>×</button>
         </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">unity_rough_demo_project</div>
-      </div>
+        <div class="modal-grid" data-modal-body></div>
+      </section>
     </div>
+
     <script>
-      var canvas = document.querySelector("#unity-canvas");
-      function requestNockoutLandscape() {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(function(){});
-        }
-        var root = document.documentElement;
-        if (root.requestFullscreen) {
-          root.requestFullscreen().catch(function(){});
-        } else if (root.webkitRequestFullscreen) {
-          root.webkitRequestFullscreen();
-        }
-      }
-      window.addEventListener('pointerdown', requestNockoutLandscape, { once: true, passive: true });
-      window.addEventListener('touchstart', requestNockoutLandscape, { once: true, passive: true });
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/RoughDemo.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/RoughDemo.data",
-        frameworkUrl: buildUrl + "/RoughDemo.framework.js",
-        codeUrl: buildUrl + "/RoughDemo.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "unity_rough_demo_project",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
+      const data = {
+        "홈": [
+          ["목적", "전투봇과 서포트봇 3대 편성을 한 화면에서 확인"],
+          ["정보량", "가로폰 첫 화면에는 핵심 점수와 선택 상태만 노출"],
+          ["상세", "부품, 정비봇, 랭킹은 모두 modal로 분리"]
+        ],
+        "업그레이드": [
+          ["측정실", "멀티미터 / 부하 테스트 / 전투 리포트"],
+          ["전원설계", "배터리, 컨버터, 과열 안정성 강화"],
+          ["배선", "전선 등급, 커넥터, 신호 안정성 강화"],
+          ["카메라·센서", "표적 인식, 시야각, 충격 감지 강화"]
+        ],
+        "정비실": [
+          ["서포트봇 슬롯", "최대 3대 장착"],
+          ["커스텀", "4족 / 바퀴 / 2족 타입별 섀시, 작업 암, AI 루틴 강화"],
+          ["역할", "전투 중 직접 싸우지 않고 전투 후 회복과 랭킹에 영향"]
+        ],
+        "리그": [
+          ["랭킹 방식", "전투봇 성능 + 서포트봇 조합 + 정비 안정성으로 편성 점수 계산"],
+          ["공유", "@vector_claw 랭킹 보드처럼 친구 편성과 비교 가능"],
+          ["MVP", "전투 시작 없이 편성 랭킹 UI부터 확인"]
+        ],
+        "훈련": [
+          ["목적", "나중에 조작, 콤보, 회피 타이밍 연습으로 연결"],
+          ["현재", "이번 와이어프레임에서는 버튼만 노출"]
+        ],
+        "전원설계": [
+          ["현재 상태", "효율 82%, 순간 출력 +12, 과열 위험 중간"],
+          ["추천", "VC 80으로 컨버터 안정화 먼저 강화"],
+          ["서포트 영향", "PIT-01 장착 시 전투 후 배터리 회복 +5%"]
+        ],
+        "배선": [
+          ["현재 상태", "신호 안정 76%, 피격 후 접촉 불량 위험"],
+          ["추천", "WC 95로 방진 커넥터 교체"],
+          ["서포트 영향", "QUAD-K9 장착 시 파손 부품 회수율 증가"]
+        ],
+        "카메라·센서": [
+          ["현재 상태", "표적 인식 91%, 암전 아레나 보정 낮음"],
+          ["추천", "RC 120으로 저조도 카메라 강화"],
+          ["랭킹 영향", "센서형 빌드는 회피 점수에 보너스"]
+        ],
+        "측정실": [
+          ["진단", "전투 후 손상률, 전압 흔들림, 센서 로그 확인"],
+          ["결과", "측정 결과가 업그레이드 추천과 랭킹 점수에 반영"],
+          ["UI", "전체 표는 modal 내부에서만 보여줌"]
+        ],
+        "PIT-01": [
+          ["타입", "바퀴형 기본 정비봇"],
+          ["강화", "작업 암 Lv.3, 배터리 도킹 Lv.2"],
+          ["효과", "수리비 -8%, 배터리 회복 +5%"]
+        ],
+        "QUAD-K9": [
+          ["타입", "4족 보행 회수봇"],
+          ["강화", "견인 다리 Lv.4, 파손 스캐너 Lv.2"],
+          ["효과", "부품 회수율 +18%, 전투 후 안정성 보너스"]
+        ],
+        "BIPED-7": [
+          ["타입", "2족 보행 정밀 튜닝봇"],
+          ["강화", "정밀 손 Lv.3, 튜닝 AI Lv.2"],
+          ["효과", "업그레이드 비용 -10%"]
+        ],
+        "편성 규칙": [
+          ["전투봇", "한 경기에는 전투봇 1대"],
+          ["서포트봇", "정비봇/서포트봇 최대 3대"],
+          ["핵심", "서포트봇은 작은 전투봇이 아니라 전투 사이클을 바꾸는 보조 유닛"]
+        ],
+        "랭킹": [
+          ["1위", "Iron Choir / 9,820 / 드론 분석형"],
+          ["2위", "Vector Lab / 8,420 / 바퀴 + 4족 + 2족 정비"],
+          ["3위", "Null Arena / 7,960 / 중장갑 수리형"],
+          ["다음 액션", "편성 저장 후 친구 랭킹과 비교"]
+        ],
+        "출전 확인": [
+          ["현재 범위", "게임 시작 없음. UI 흐름만 검증"],
+          ["다음 제작", "이 화면을 Unity Canvas 또는 WebGL UI로 재현"],
+          ["주의", "전투 로직은 아직 연결하지 않음"]
+        ]
       };
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
+      const backdrop = document.querySelector("[data-backdrop]");
+      const title = document.querySelector("[data-modal-title]");
+      const caption = document.querySelector("[data-modal-caption]");
+      const body = document.querySelector("[data-modal-body]");
 
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "100vw";
-        canvas.style.height = "100vh";
+      function openModal(key) {
+        title.textContent = key;
+        caption.textContent = "세부 정보는 화면을 덮는 modal로 확인";
+        body.innerHTML = "";
+        (data[key] || data["홈"]).forEach(([label, value]) => {
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = `<span>${label}<small>${value}</small></span><b>보기</b>`;
+          body.appendChild(row);
+        });
+        backdrop.classList.add("open");
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+      document.querySelectorAll("[data-modal]").forEach((button) => {
+        button.addEventListener("click", () => openModal(button.dataset.modal));
+      });
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+      document.querySelector("[data-close]").addEventListener("click", () => {
+        backdrop.classList.remove("open");
+      });
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+      backdrop.addEventListener("click", (event) => {
+        if (event.target === backdrop) {
+          backdrop.classList.remove("open");
+        }
+      });
 
-      document.body.appendChild(script);
-
+      document.querySelector("[data-theme]").addEventListener("click", (event) => {
+        document.documentElement.classList.toggle("light");
+        event.currentTarget.textContent = document.documentElement.classList.contains("light") ? "Dark" : "Light";
+      });
     </script>
   </body>
 </html>
