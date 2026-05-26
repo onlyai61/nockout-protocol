@@ -857,6 +857,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const DEFAULT_GOOGLE_CLIENT_ID = "956756213946-vsvlk574kejn5oi3klgk7r2jfq8uk45i.apps.googleusercontent.com";
       const GOOGLE_CLIENT_ID_KEY = "nockout_google_oauth_client_id";
+      const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       const state = {
@@ -874,6 +875,20 @@
         googleClientId: localStorage.getItem(GOOGLE_CLIENT_ID_KEY) || DEFAULT_GOOGLE_CLIENT_ID,
         redirectTo: window.location.origin + window.location.pathname
       };
+
+      function authReturnState() {
+        const url = new URL(window.location.href);
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        return {
+          isCallback: url.searchParams.has("code") || hash.has("access_token") || hash.has("refresh_token"),
+          hasError: url.searchParams.has("error") || hash.has("error"),
+          errorText: url.searchParams.get("error_description") || hash.get("error_description") || url.searchParams.get("error") || hash.get("error")
+        };
+      }
+
+      function cleanAuthUrl() {
+        window.history.replaceState({}, document.title, authConfig.redirectTo);
+      }
 
       const meta = {
         home: ["홈", "로그인한 유저의 실제 로봇/편성 데이터를 불러온다"],
@@ -1015,9 +1030,40 @@
       }
 
       async function loadData() {
+        const authReturn = authReturnState();
+        if (authReturn.hasError) {
+          await client.auth.signOut();
+          state.user = null;
+          state.profile = null;
+          state.robot = null;
+          state.supports = [];
+          state.loadout = null;
+          state.rankings = [];
+          state.battle = null;
+          cleanAuthUrl();
+          render();
+          document.getElementById("loginNote").textContent = `로그인 실패: ${authReturn.errorText || "다시 로그인 필요"}`;
+          return;
+        }
+
+        if (REQUIRE_LOGIN_ON_FRESH_ENTRY && !authReturn.isCallback) {
+          const { data: sessionData } = await client.auth.getSession();
+          if (sessionData.session) await client.auth.signOut();
+          state.user = null;
+          state.profile = null;
+          state.robot = null;
+          state.supports = [];
+          state.loadout = null;
+          state.rankings = [];
+          state.battle = null;
+          render();
+          return;
+        }
+
         const { data: sessionData } = await client.auth.getSession();
         state.user = sessionData.session?.user || null;
         if (!state.user) { render(); return; }
+        if (authReturn.isCallback) cleanAuthUrl();
 
         const userId = state.user.id;
         await client.from("profiles").upsert({
