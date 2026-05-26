@@ -19,15 +19,9 @@ cp .env.example .env.local
 `.env.local`에는 Supabase Project Settings에서 확인한 값을 넣습니다.
 실제 키/비밀번호는 commit하지 않습니다.
 
-Google 로그인 Client ID는 현재 앱 기본값으로 적용되어 있습니다.
-
-```text
-956756213946-vsvlk574kejn5oi3klgk7r2jfq8uk45i.apps.googleusercontent.com
-```
-
 소셜 로그인은 Google, Kakao, Apple 버튼을 앱에 노출합니다.
 각 Provider의 Client ID와 Client Secret은 Supabase Dashboard의 Authentication > Providers에 저장해야 동작합니다.
-Authorized redirect URL은 앱 로그인 화면에 표시되는 값을 각 개발자 콘솔과 Supabase Redirect URLs에 같이 등록합니다.
+Authorized redirect URL은 Supabase Auth callback URL을 각 개발자 콘솔과 Supabase Redirect URLs에 같이 등록합니다.
 
 - Google: OAuth Client ID / Client Secret
 - Kakao: REST API Key / Client Secret
