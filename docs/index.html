@@ -1256,6 +1256,7 @@
       import * as THREE from "three";
       import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
       import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
+      import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
 
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
@@ -1363,45 +1364,77 @@
           this.scene.add(this.group);
           this.resize();
           window.addEventListener("resize", () => this.resize());
-          robotAsset.then((gltf) => this.mount(gltf.scene)).catch(() => {
+          robotAsset.then((gltf) => this.mount(gltf)).catch(() => {
             const loading = this.container.querySelector(".model-loading");
             if (loading) loading.textContent = "MODEL LOAD FAILED";
           });
           this.tick();
         }
 
-        mount(source) {
-          const model = source.clone(true);
+        mount(gltf) {
+          const model = cloneSkeleton(gltf.scene);
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
           const scale = (this.options.hero ? 2.45 : 2.3) / Math.max(size.x, size.y, size.z);
-          model.position.sub(center);
           model.scale.setScalar(scale);
+          model.position.copy(center).multiplyScalar(-scale);
           model.rotation.y = this.options.arena ? -0.38 : -0.18;
           model.traverse((child) => {
             if (child.isMesh) {
               child.castShadow = true;
               child.frustumCulled = false;
-              if (!child.material) {
-                child.material = new THREE.MeshStandardMaterial({
-                  color: 0x6f7f8f,
-                  metalness: 0.48,
-                  roughness: 0.46
-                });
-              } else {
-                child.material.metalness = Math.max(child.material.metalness ?? 0, 0.36);
-                child.material.roughness = Math.min(child.material.roughness ?? 0.7, 0.72);
-              }
+              const hasMaterialArray = Array.isArray(child.material);
+              const materials = hasMaterialArray ? child.material : [child.material];
+              const tunedMaterials = materials.map((material) => {
+                const next = material || new THREE.MeshStandardMaterial();
+                next.color?.setHex(0xb8c8d8);
+                next.emissive?.setHex(0x071522);
+                next.emissiveIntensity = 0.16;
+                next.metalness = Math.max(next.metalness ?? 0, 0.42);
+                next.roughness = Math.min(next.roughness ?? 0.7, 0.58);
+                next.side = THREE.DoubleSide;
+                next.transparent = false;
+                next.opacity = 1;
+                return next;
+              });
+              child.material = hasMaterialArray ? tunedMaterials : tunedMaterials[0];
             }
           });
           this.model = model;
           this.group.add(model);
+          this.mixer = new THREE.AnimationMixer(model);
+          this.actions = {};
+          gltf.animations.forEach((clip) => {
+            this.actions[clip.name.toLowerCase()] = this.mixer.clipAction(clip);
+          });
+          this.applyRigAnimation(this.anim);
           this.container.querySelector(".model-loading")?.remove();
         }
 
         setAnim(anim) {
           this.anim = anim;
+          this.applyRigAnimation(anim);
+        }
+
+        applyRigAnimation(anim) {
+          if (!this.mixer || !this.actions) return;
+          const nextName = anim === "punch" ? "running" : "walking";
+          const nextAction = this.actions[nextName];
+          Object.values(this.actions).forEach((action) => {
+            if (action !== nextAction) action.fadeOut(0.18);
+          });
+          if (!nextAction) {
+            this.activeAction = null;
+            return;
+          }
+          nextAction.enabled = true;
+          nextAction.paused = false;
+          nextAction.timeScale = anim === "punch" ? 1.45 : anim === "idle" ? 0.22 : anim === "guard" ? 0.55 : 1;
+          if (this.activeAction !== nextAction) {
+            nextAction.reset().fadeIn(0.18).play();
+            this.activeAction = nextAction;
+          }
         }
 
         resize() {
@@ -1415,8 +1448,10 @@
 
         tick() {
           requestAnimationFrame(() => this.tick());
-          const t = this.clock.getElapsedTime();
+          const delta = this.clock.getDelta();
+          const t = this.clock.elapsedTime;
           if (this.model) {
+            this.mixer?.update(delta);
             const baseY = this.options.arena ? -0.38 : -0.18;
             this.group.position.y = Math.sin(t * 2.4) * 0.035;
             this.group.rotation.z = 0;
