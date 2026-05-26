@@ -590,83 +590,142 @@
         z-index: 40;
         display: none;
         min-height: 100dvh;
-        padding: 34px;
+        padding: clamp(18px, 3vw, 42px);
         overflow: auto;
         background:
-          linear-gradient(90deg, rgba(3, 5, 9, 0.92) 0%, rgba(5, 7, 11, 0.74) 42%, rgba(5, 7, 11, 0.25) 100%),
-          linear-gradient(180deg, rgba(5, 7, 11, 0.18), rgba(5, 7, 11, 0.88)),
-          url("./assets/arena-bg.png") center / cover no-repeat,
+          linear-gradient(90deg, rgba(3, 5, 9, 0.94) 0%, rgba(3, 5, 9, 0.72) 38%, rgba(3, 5, 9, 0.14) 72%),
+          linear-gradient(180deg, rgba(4, 7, 12, 0.08), rgba(4, 7, 12, 0.88)),
+          url("./assets/keyart-arena.jpg") center / cover no-repeat,
           var(--bg);
+      }
+
+      .auth-screen::before,
+      .auth-screen::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .auth-screen::before {
+        opacity: 0.26;
+        background-image:
+          linear-gradient(rgba(80, 221, 255, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(80, 221, 255, 0.12) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: linear-gradient(90deg, black, transparent 68%);
+      }
+
+      .auth-screen::after {
+        background:
+          linear-gradient(180deg, transparent 0 48%, rgba(255, 95, 87, 0.16) 49%, transparent 50% 100%),
+          radial-gradient(circle at 32% 74%, rgba(255, 200, 90, 0.22), transparent 32%);
+        mix-blend-mode: screen;
+        opacity: 0.42;
       }
 
       .auth-screen.open {
         display: grid;
-        grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr);
-        align-items: stretch;
-        gap: 28px;
+        grid-template-columns: minmax(360px, 560px) minmax(280px, 1fr) minmax(280px, 390px);
+        align-items: end;
+        gap: clamp(16px, 3vw, 38px);
       }
 
       .auth-panel {
+        position: relative;
+        z-index: 1;
         display: grid;
-        align-content: center;
-        gap: 18px;
-        min-height: calc(100dvh - 68px);
-        padding: 28px;
-        border: 1px solid var(--line);
+        align-content: end;
+        gap: clamp(14px, 2.2vh, 22px);
+        min-height: calc(100dvh - clamp(36px, 6vw, 84px));
+        padding: clamp(10px, 2vw, 18px) 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        backdrop-filter: none;
+      }
+
+      .auth-panel::before {
+        content: "LIVE BUILD 0.1.0 / PUBLIC ARENA";
+        width: fit-content;
+        padding: 7px 10px;
+        border: 1px solid rgba(80, 221, 255, 0.54);
         border-radius: 8px;
-        background: linear-gradient(180deg, rgba(12, 20, 33, 0.96), rgba(8, 12, 20, 0.9));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
-        backdrop-filter: blur(18px);
+        background: rgba(3, 8, 14, 0.62);
+        color: var(--cyan);
+        font: 850 11px/1 Menlo, Consolas, monospace;
+        box-shadow: 0 0 28px rgba(80, 221, 255, 0.18);
       }
 
       .auth-logo {
         display: grid;
-        gap: 8px;
+        gap: 10px;
       }
 
       .auth-kicker {
-        color: var(--cyan);
+        width: fit-content;
+        padding: 8px 10px;
+        border-left: 3px solid var(--red);
+        background: linear-gradient(90deg, rgba(255, 95, 87, 0.26), transparent);
+        color: #ffdfc2;
         font-family: Menlo, Consolas, monospace;
-        font-size: 12px;
-        font-weight: 800;
+        font-size: clamp(11px, 1.1vw, 13px);
+        font-weight: 900;
       }
 
       .auth-wordmark {
         color: var(--text);
-        font-family: Menlo, Consolas, monospace;
-        font-size: clamp(38px, 6vw, 72px);
+        font-family: Impact, Haettenschweiler, "Arial Black", Menlo, Consolas, monospace;
+        font-size: clamp(58px, 9vw, 128px);
         font-weight: 950;
-        line-height: 0.9;
+        line-height: 0.78;
         letter-spacing: 0;
         text-transform: uppercase;
-        text-shadow: 0 0 26px rgba(80, 221, 255, 0.22);
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.24);
+        text-shadow:
+          0 3px 0 rgba(0, 0, 0, 0.9),
+          0 0 34px rgba(80, 221, 255, 0.42),
+          0 0 62px rgba(255, 95, 87, 0.22);
       }
 
       .auth-tagline {
         color: var(--gold);
         font-family: Menlo, Consolas, monospace;
-        font-size: 13px;
-        font-weight: 850;
+        font-size: clamp(13px, 1.6vw, 19px);
+        font-weight: 950;
       }
 
       .auth-title h2 {
-        font-size: 24px;
+        font-size: clamp(24px, 3vw, 36px);
+        text-shadow: 0 0 28px rgba(0, 0, 0, 0.72);
+      }
+
+      .auth-title {
+        display: grid;
+        gap: 8px;
+        max-width: 470px;
       }
 
       .auth-art {
         position: relative;
-        min-height: calc(100dvh - 68px);
+        z-index: 1;
+        min-height: calc(100dvh - clamp(36px, 6vw, 84px));
         overflow: hidden;
       }
 
       .auth-art img {
         position: absolute;
-        right: max(4vw, 20px);
-        bottom: -4vh;
-        width: min(44vw, 620px);
-        max-height: 88dvh;
+        left: 50%;
+        bottom: -2vh;
+        width: min(39vw, 600px);
+        max-height: 82dvh;
         object-fit: contain;
-        filter: drop-shadow(0 36px 50px rgba(0, 0, 0, 0.64));
+        transform: translateX(-50%);
+        opacity: 0.96;
+        filter:
+          drop-shadow(0 34px 46px rgba(0, 0, 0, 0.72))
+          drop-shadow(0 0 30px rgba(80, 221, 255, 0.28));
       }
 
       .auth-art::before,
@@ -677,16 +736,16 @@
       }
 
       .auth-art::before {
-        left: 4%;
-        right: 6%;
-        bottom: 8%;
+        left: 0;
+        right: 0;
+        bottom: 12%;
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(80, 221, 255, 0.7), transparent);
         box-shadow: 0 0 28px rgba(80, 221, 255, 0.5);
       }
 
       .auth-art::after {
-        inset: 10% 0 12% 18%;
+        inset: 16% 4% 16% 4%;
         border: 1px solid rgba(80, 221, 255, 0.18);
         border-radius: 8px;
         background-image:
@@ -694,6 +753,64 @@
           linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
         background-size: 48px 48px;
         opacity: 0.4;
+      }
+
+      .auth-console {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: 14px;
+        width: 100%;
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid rgba(232, 240, 255, 0.18);
+        border-top: 3px solid var(--gold);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(8, 13, 22, 0.92), rgba(4, 7, 12, 0.78)),
+          linear-gradient(135deg, rgba(80, 221, 255, 0.1), transparent);
+        box-shadow:
+          0 24px 70px rgba(0, 0, 0, 0.56),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+      }
+
+      .auth-console::before {
+        content: "ACCOUNT LINK";
+        color: var(--cyan);
+        font: 900 11px/1 Menlo, Consolas, monospace;
+      }
+
+      .auth-status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .auth-status {
+        min-height: 58px;
+        padding: 10px;
+        border: 1px solid rgba(232, 240, 255, 0.13);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .auth-status span,
+      .auth-status b {
+        display: block;
+        font-family: Menlo, Consolas, monospace;
+      }
+
+      .auth-status span {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 850;
+      }
+
+      .auth-status b {
+        margin-top: 7px;
+        color: var(--text);
+        font-size: 13px;
       }
 
       .field {
@@ -731,10 +848,30 @@
       }
 
       .social-auth button {
-        min-height: 44px;
+        position: relative;
+        min-height: 48px;
+        width: 100%;
         border-radius: 8px;
         font-size: 13px;
         font-weight: 900;
+        text-align: left;
+        padding: 0 16px;
+        transition: transform 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .social-auth button::after {
+        content: "↗";
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 950;
+      }
+
+      .social-auth button:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.08);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
       }
 
       .social-auth .google {
@@ -805,14 +942,28 @@
         .auth-screen.open {
           grid-template-columns: 1fr;
           padding: 18px;
+          align-items: end;
         }
 
         .auth-panel {
-          min-height: auto;
+          min-height: 42dvh;
         }
 
         .auth-art {
           display: none;
+        }
+
+        .auth-console {
+          align-self: end;
+          overflow: hidden;
+        }
+
+        .auth-wordmark {
+          font-size: clamp(52px, 18vw, 88px);
+        }
+
+        .auth-status-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
@@ -959,15 +1110,24 @@
     <section class="auth-screen login-mode open" id="authScreen">
       <div class="auth-panel">
         <div class="auth-logo">
-          <div class="auth-kicker">CORE LINK CHECK</div>
+          <div class="auth-kicker">CORE LINK READY</div>
           <div class="auth-wordmark">NOCKOUT<br>PROTOCOL</div>
           <div class="auth-tagline">BUILD. BREAK. KNOCKOUT.</div>
         </div>
         <div class="auth-title">
-          <h2 class="login-only">로그인</h2>
-          <h2 class="logout-only">로그아웃 완료</h2>
-          <p class="caption login-only">소셜 계정으로 접속하면 실제 유저 로봇, 편성, 랭킹 데이터를 불러온다.</p>
-          <p class="caption logout-only">세션이 종료됐다. 다시 접속하려면 아래 버튼으로 로그인하면 된다.</p>
+          <h2 class="login-only">아레나 접속</h2>
+          <h2 class="logout-only">세션 종료</h2>
+          <p class="caption login-only">계정을 연결하고 전투봇, 편성, 랭킹 데이터를 불러온다.</p>
+          <p class="caption logout-only">세션이 종료됐다. 다시 접속하면 새 링크 상태로 시작한다.</p>
+        </div>
+      </div>
+      <div class="auth-art" aria-hidden="true">
+        <img src="./assets/heavy-robot.png" alt="">
+      </div>
+      <div class="auth-console">
+        <div class="auth-status-grid" aria-hidden="true">
+          <div class="auth-status"><span>ARENA</span><b>ONLINE</b></div>
+          <div class="auth-status"><span>KO WINDOW</span><b>LOCKED</b></div>
         </div>
         <div class="social-auth login-only" aria-label="소셜 로그인">
           <button class="google" data-auth-provider="google">Google로 시작</button>
@@ -977,10 +1137,7 @@
         <div class="social-auth logout-only" aria-label="다시 로그인">
           <button class="google" id="returnLoginButton">다시 로그인</button>
         </div>
-        <p class="caption" id="loginNote">Google, 카카오톡, Apple Provider를 Supabase에서 활성화하면 해당 버튼으로 로그인할 수 있다.</p>
-      </div>
-      <div class="auth-art" aria-hidden="true">
-        <img src="./assets/combat-robot.png" alt="">
+        <p class="caption" id="loginNote">Supabase Provider가 활성화된 계정으로 접속 가능.</p>
       </div>
     </section>
 
