@@ -8,11 +8,12 @@
       :root {
         color-scheme: dark;
         --bg: #05070b;
-        --line: rgba(232, 240, 255, 0.16);
+        --line: rgba(232, 240, 255, 0.18);
         --text: #f4f8ff;
         --muted: #9aaabd;
         --cyan: #50ddff;
         --gold: #ffc85a;
+        --red: #ff5f57;
       }
 
       * { box-sizing: border-box; }
@@ -31,68 +32,149 @@
         overflow: hidden;
       }
 
-      .auth-screen {
-        display: grid;
-        grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr);
-        align-items: stretch;
-        gap: 28px;
-        min-height: 100dvh;
-        padding: 34px;
-        background:
-          linear-gradient(90deg, rgba(3, 5, 9, 0.92) 0%, rgba(5, 7, 11, 0.74) 42%, rgba(5, 7, 11, 0.25) 100%),
-          linear-gradient(180deg, rgba(5, 7, 11, 0.18), rgba(5, 7, 11, 0.88)),
-          url("./assets/arena-bg.png") center / cover no-repeat,
-          var(--bg);
-      }
-
-      .auth-panel {
-        display: grid;
-        align-content: center;
-        gap: 18px;
-        min-height: calc(100dvh - 68px);
-        padding: 28px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: linear-gradient(180deg, rgba(12, 20, 33, 0.96), rgba(8, 12, 20, 0.9));
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
-        backdrop-filter: blur(18px);
-      }
-
-      .auth-kicker,
-      .auth-wordmark,
-      .auth-tagline {
-        font-family: Menlo, Consolas, monospace;
-      }
-
-      .auth-kicker {
-        color: var(--cyan);
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      .auth-wordmark {
-        margin-top: 8px;
-        color: var(--text);
-        font-size: clamp(38px, 6vw, 72px);
-        font-weight: 950;
-        line-height: 0.9;
-        letter-spacing: 0;
-        text-transform: uppercase;
-        text-shadow: 0 0 26px rgba(80, 221, 255, 0.22);
-      }
-
-      .auth-tagline {
-        margin-top: 8px;
-        color: var(--gold);
-        font-size: 13px;
-        font-weight: 850;
-      }
-
       h1,
       p { margin: 0; }
 
+      .logout-screen {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(360px, 600px) 1fr minmax(280px, 390px);
+        align-items: end;
+        gap: clamp(16px, 3vw, 38px);
+        min-height: 100dvh;
+        padding: clamp(18px, 3vw, 42px);
+        background:
+          linear-gradient(90deg, rgba(3, 5, 9, 0.94) 0%, rgba(3, 5, 9, 0.72) 38%, rgba(3, 5, 9, 0.14) 72%),
+          linear-gradient(180deg, rgba(4, 7, 12, 0.08), rgba(4, 7, 12, 0.88)),
+          url("./assets/keyart-arena.jpg") center / cover no-repeat,
+          var(--bg);
+      }
+
+      .logout-screen::before,
+      .logout-screen::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .logout-screen::before {
+        opacity: 0.25;
+        background-image:
+          linear-gradient(rgba(80, 221, 255, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(80, 221, 255, 0.12) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: linear-gradient(90deg, black, transparent 68%);
+      }
+
+      .logout-screen::after {
+        background:
+          linear-gradient(180deg, transparent 0 48%, rgba(255, 95, 87, 0.16) 49%, transparent 50% 100%),
+          radial-gradient(circle at 32% 74%, rgba(255, 200, 90, 0.22), transparent 32%);
+        mix-blend-mode: screen;
+        opacity: 0.42;
+      }
+
+      .brand {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        align-content: end;
+        gap: clamp(14px, 2.2vh, 22px);
+        min-height: calc(100dvh - clamp(36px, 6vw, 84px));
+        padding: clamp(10px, 2vw, 18px) 0;
+      }
+
+      .brand::before {
+        content: "SESSION CLOSED / PUBLIC ARENA";
+        width: fit-content;
+        padding: 7px 10px;
+        border: 1px solid rgba(80, 221, 255, 0.54);
+        border-radius: 8px;
+        background: rgba(3, 8, 14, 0.62);
+        color: var(--cyan);
+        font: 850 11px/1 Menlo, Consolas, monospace;
+        box-shadow: 0 0 28px rgba(80, 221, 255, 0.18);
+      }
+
+      .kicker {
+        width: fit-content;
+        padding: 8px 10px;
+        border-left: 3px solid var(--red);
+        background: linear-gradient(90deg, rgba(255, 95, 87, 0.26), transparent);
+        color: #ffdfc2;
+        font: 900 clamp(11px, 1.1vw, 13px)/1 Menlo, Consolas, monospace;
+      }
+
+      .wordmark {
+        color: var(--text);
+        font-family: Impact, Haettenschweiler, "Arial Black", Menlo, Consolas, monospace;
+        font-size: clamp(58px, 9vw, 128px);
+        font-weight: 950;
+        line-height: 0.78;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.24);
+        text-shadow:
+          0 3px 0 rgba(0, 0, 0, 0.9),
+          0 0 34px rgba(80, 221, 255, 0.42),
+          0 0 62px rgba(255, 95, 87, 0.22);
+      }
+
+      .tagline {
+        color: var(--gold);
+        font: 950 clamp(13px, 1.6vw, 19px)/1 Menlo, Consolas, monospace;
+      }
+
+      .hero {
+        position: relative;
+        z-index: 1;
+        min-height: calc(100dvh - clamp(36px, 6vw, 84px));
+        overflow: hidden;
+      }
+
+      .hero img {
+        position: absolute;
+        left: 50%;
+        bottom: -2vh;
+        width: min(39vw, 600px);
+        max-height: 82dvh;
+        object-fit: contain;
+        transform: translateX(-50%);
+        opacity: 0.96;
+        filter:
+          drop-shadow(0 34px 46px rgba(0, 0, 0, 0.72))
+          drop-shadow(0 0 30px rgba(80, 221, 255, 0.28));
+      }
+
+      .console {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        gap: 14px;
+        width: 100%;
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-top: 3px solid var(--gold);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(8, 13, 22, 0.92), rgba(4, 7, 12, 0.78)),
+          linear-gradient(135deg, rgba(80, 221, 255, 0.1), transparent);
+        box-shadow:
+          0 24px 70px rgba(0, 0, 0, 0.56),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(14px);
+      }
+
+      .console::before {
+        content: "ACCOUNT LINK";
+        color: var(--cyan);
+        font: 900 11px/1 Menlo, Consolas, monospace;
+      }
+
       h1 {
-        font-size: 24px;
+        font-size: clamp(24px, 3vw, 36px);
       }
 
       p {
@@ -101,10 +183,45 @@
         line-height: 1.45;
       }
 
+      .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .status {
+        min-height: 58px;
+        padding: 10px;
+        border: 1px solid rgba(232, 240, 255, 0.13);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .status span,
+      .status b {
+        display: block;
+        font-family: Menlo, Consolas, monospace;
+      }
+
+      .status span {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 850;
+      }
+
+      .status b {
+        margin-top: 7px;
+        color: var(--text);
+        font-size: 13px;
+      }
+
       .button {
-        display: inline-grid;
-        place-items: center;
-        min-height: 46px;
+        position: relative;
+        display: grid;
+        align-items: center;
+        width: 100%;
+        min-height: 50px;
+        padding: 0 16px;
         border: 1px solid rgba(255, 255, 255, 0.22);
         border-radius: 8px;
         background: #ffffff;
@@ -114,83 +231,68 @@
         text-decoration: none;
       }
 
-      .auth-art {
-        position: relative;
-        min-height: calc(100dvh - 68px);
-        overflow: hidden;
-      }
-
-      .auth-art img {
+      .button::after {
+        content: "↗";
         position: absolute;
-        right: max(4vw, 20px);
-        bottom: -4vh;
-        width: min(44vw, 620px);
-        max-height: 88dvh;
-        object-fit: contain;
-        filter: drop-shadow(0 36px 50px rgba(0, 0, 0, 0.64));
-      }
-
-      .auth-art::before,
-      .auth-art::after {
-        content: "";
-        position: absolute;
-        pointer-events: none;
-      }
-
-      .auth-art::before {
-        left: 4%;
-        right: 6%;
-        bottom: 8%;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(80, 221, 255, 0.7), transparent);
-        box-shadow: 0 0 28px rgba(80, 221, 255, 0.5);
-      }
-
-      .auth-art::after {
-        inset: 10% 0 12% 18%;
-        border: 1px solid rgba(80, 221, 255, 0.18);
-        border-radius: 8px;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-        background-size: 48px 48px;
-        opacity: 0.4;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 950;
       }
 
       @media (max-width: 900px) {
         body { overflow: auto; }
 
-        .auth-screen {
+        .logout-screen {
           grid-template-columns: 1fr;
+          align-items: end;
           padding: 18px;
         }
 
-        .auth-panel {
-          min-height: calc(100dvh - 36px);
+        .brand {
+          min-height: 42dvh;
         }
 
-        .auth-art {
+        .hero {
           display: none;
+        }
+
+        .wordmark {
+          font-size: clamp(52px, 18vw, 88px);
+        }
+
+        .console {
+          overflow: hidden;
+        }
+
+        .status-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <main class="auth-screen">
-      <section class="auth-panel">
+    <main class="logout-screen">
+      <section class="brand">
         <div>
-          <div class="auth-kicker">SESSION CLOSED</div>
-          <div class="auth-wordmark">NOCKOUT<br>PROTOCOL</div>
-          <div class="auth-tagline">BUILD. BREAK. KNOCKOUT.</div>
+          <div class="kicker">CORE LINK DISCONNECTED</div>
+          <div class="wordmark">NOCKOUT<br>PROTOCOL</div>
+          <div class="tagline">BUILD. BREAK. KNOCKOUT.</div>
+        </div>
+      </section>
+      <section class="hero" aria-hidden="true">
+        <img src="./assets/heavy-robot.png" alt="">
+      </section>
+      <section class="console">
+        <div class="status-grid" aria-hidden="true">
+          <div class="status"><span>SESSION</span><b>CLOSED</b></div>
+          <div class="status"><span>CORE LINK</span><b>OFFLINE</b></div>
         </div>
         <div>
           <h1>로그아웃 완료</h1>
-          <p>세션이 종료됐다. 다시 접속하려면 로그인 화면으로 돌아가면 된다.</p>
+          <p>계정 연결이 해제됐다. 다시 접속하면 새 세션으로 아레나 데이터를 불러온다.</p>
         </div>
         <a class="button" href="./">로그인 화면으로</a>
-      </section>
-      <section class="auth-art" aria-hidden="true">
-        <img src="./assets/combat-robot.png" alt="">
       </section>
     </main>
   </body>
