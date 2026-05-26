@@ -855,6 +855,7 @@
     <script>
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
+      const DEFAULT_GOOGLE_CLIENT_ID = "956756213946-vsvlk574kejn5oi3klgk7r2jfq8uk45i.apps.googleusercontent.com";
       const GOOGLE_CLIENT_ID_KEY = "nockout_google_oauth_client_id";
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -870,7 +871,7 @@
       };
 
       const authConfig = {
-        googleClientId: localStorage.getItem(GOOGLE_CLIENT_ID_KEY) || "",
+        googleClientId: localStorage.getItem(GOOGLE_CLIENT_ID_KEY) || DEFAULT_GOOGLE_CLIENT_ID,
         redirectTo: window.location.origin + window.location.pathname
       };
 
@@ -987,11 +988,7 @@
       }
 
       async function signIn() {
-        if (!authConfig.googleClientId.trim()) {
-          document.getElementById("loginNote").textContent = "Google OAuth Client ID를 입력하고 저장한 뒤 다시 시도해줘.";
-          document.getElementById("googleClientIdInput").focus();
-          return;
-        }
+        if (!localStorage.getItem(GOOGLE_CLIENT_ID_KEY)) localStorage.setItem(GOOGLE_CLIENT_ID_KEY, authConfig.googleClientId);
         await client.auth.signInWithOAuth({
           provider: "google",
           options: { redirectTo: authConfig.redirectTo }
@@ -1002,7 +999,7 @@
         document.getElementById("googleClientIdInput").value = authConfig.googleClientId;
         document.getElementById("redirectUrlInput").value = authConfig.redirectTo;
         document.getElementById("loginNote").textContent = authConfig.googleClientId
-          ? "Client ID 저장됨. Supabase Provider에 같은 값과 Client Secret이 들어가 있어야 로그인된다."
+          ? "Google Client ID 적용됨. 바로 Google로 로그인하면 된다."
           : "Google OAuth Client ID를 입력하면 이 브라우저에 저장된다.";
       }
 
