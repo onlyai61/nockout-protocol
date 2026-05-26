@@ -637,6 +637,35 @@
         gap: 8px;
       }
 
+      .social-auth {
+        display: grid;
+        gap: 8px;
+      }
+
+      .social-auth button {
+        min-height: 44px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .social-auth .google {
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        background: #ffffff;
+        color: #1f2937;
+      }
+
+      .social-auth .kakao {
+        background: #fee500;
+        color: #181600;
+      }
+
+      .social-auth .apple {
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: #050505;
+        color: #ffffff;
+      }
+
       .modal-backdrop {
         position: fixed;
         inset: 0;
@@ -695,7 +724,7 @@
           <span class="pill" id="creditRC">RC -</span>
           <span class="pill" id="creditVC">VC -</span>
           <span class="pill" id="creditWC">WC -</span>
-          <button class="ghost" id="loginButton">Google 로그인</button>
+          <button class="ghost" id="loginButton">로그인</button>
           <button class="ghost" id="logoutButton" hidden>로그아웃</button>
         </div>
       </header>
@@ -822,13 +851,18 @@
     <section class="login open" id="loginGate">
       <div class="login-card">
         <div>
-          <h2>Google 로그인 필요</h2>
-          <p class="caption">목업 데이터 없이 실제 유저 로봇/편성/랭킹을 불러오려면 Google 계정으로 로그인해야 한다.</p>
+          <h2>로그인 필요</h2>
+          <p class="caption">목업 데이터 없이 실제 유저 로봇/편성/랭킹을 불러오려면 소셜 계정으로 로그인해야 한다.</p>
+        </div>
+        <div class="social-auth" aria-label="소셜 로그인">
+          <button class="google" data-auth-provider="google">Google로 시작</button>
+          <button class="kakao" data-auth-provider="kakao">카카오톡으로 시작</button>
+          <button class="apple" data-auth-provider="apple">Apple로 시작</button>
         </div>
         <div class="field">
           <label for="googleClientIdInput">Google OAuth Client ID</label>
           <input id="googleClientIdInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="1234567890-xxxxx.apps.googleusercontent.com">
-          <p class="caption">Client Secret은 공개 앱에 저장하지 않고 Supabase 대시보드 Provider 설정에만 입력한다.</p>
+          <p class="caption">각 Provider의 Client Secret은 공개 앱에 저장하지 않고 Supabase 대시보드 Provider 설정에만 입력한다.</p>
         </div>
         <div class="field">
           <label for="redirectUrlInput">Authorized redirect URL</label>
@@ -836,9 +870,9 @@
         </div>
         <div class="auth-actions">
           <button class="secondary" id="saveGoogleClientButton">Client ID 저장</button>
-          <button class="primary" id="gateLoginButton">Google로 시작</button>
+          <button class="primary" id="gateLoginButton">Google 기본 로그인</button>
         </div>
-        <p class="caption" id="loginNote">Google OAuth Client ID를 입력하면 이 브라우저에 저장된다.</p>
+        <p class="caption" id="loginNote">Google, 카카오톡, Apple Provider를 Supabase에서 활성화하면 해당 버튼으로 로그인할 수 있다.</p>
       </div>
     </section>
 
@@ -1002,19 +1036,20 @@
         `).join("");
       }
 
-      async function signIn() {
+      async function signIn(provider = "google") {
         if (!localStorage.getItem(GOOGLE_CLIENT_ID_KEY)) localStorage.setItem(GOOGLE_CLIENT_ID_KEY, authConfig.googleClientId);
-        await client.auth.signInWithOAuth({
-          provider: "google",
+        const { error } = await client.auth.signInWithOAuth({
+          provider,
           options: { redirectTo: authConfig.redirectTo }
         });
+        if (error) document.getElementById("loginNote").textContent = `${provider} 로그인 실패: ${error.message}`;
       }
 
       function renderAuthConfig() {
         document.getElementById("googleClientIdInput").value = authConfig.googleClientId;
         document.getElementById("redirectUrlInput").value = authConfig.redirectTo;
         document.getElementById("loginNote").textContent = authConfig.googleClientId
-          ? "Google Client ID 적용됨. 바로 Google로 로그인하면 된다."
+          ? "소셜 로그인 버튼 준비됨. 카카오톡/Apple은 Supabase Provider 설정을 켜야 동작한다."
           : "Google OAuth Client ID를 입력하면 이 브라우저에 저장된다.";
       }
 
@@ -1165,8 +1200,11 @@
         const upgradeButton = event.target.closest("[data-upgrade]");
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
       });
-      document.getElementById("loginButton").addEventListener("click", signIn);
-      document.getElementById("gateLoginButton").addEventListener("click", signIn);
+      document.getElementById("loginButton").addEventListener("click", () => signIn("google"));
+      document.getElementById("gateLoginButton").addEventListener("click", () => signIn("google"));
+      document.querySelectorAll("[data-auth-provider]").forEach((button) => {
+        button.addEventListener("click", () => signIn(button.dataset.authProvider));
+      });
       document.getElementById("saveGoogleClientButton").addEventListener("click", saveGoogleClientId);
       document.getElementById("googleClientIdInput").addEventListener("keydown", (event) => {
         if (event.key === "Enter") saveGoogleClientId();
