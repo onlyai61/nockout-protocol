@@ -19,6 +19,9 @@ cp .env.example .env.local
 `.env.local`에는 Supabase Project Settings에서 확인한 값을 넣습니다.
 실제 키/비밀번호는 commit하지 않습니다.
 
+Google 로그인은 Google Cloud OAuth Client ID를 앱 로그인 화면에 입력하고, 같은 Client ID와 Client Secret을 Supabase Dashboard의 Authentication Provider > Google에도 저장해야 동작합니다.
+Authorized redirect URL은 앱 로그인 화면에 표시되는 값을 Google Cloud Console과 Supabase Redirect URLs에 같이 등록합니다.
+
 ## Supabase 연결
 
 Supabase 계정 로그인 후 프로젝트를 연결합니다.

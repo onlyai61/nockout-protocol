@@ -595,11 +595,46 @@
       .login-card {
         display: grid;
         gap: 14px;
-        width: min(460px, 92vw);
+        width: min(540px, 92vw);
         padding: 22px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--panel-strong);
+      }
+
+      .field {
+        display: grid;
+        gap: 7px;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      input {
+        min-height: 42px;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        padding: 0 12px;
+        font: inherit;
+        font-size: 12px;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: rgba(80, 221, 255, 0.86);
+        box-shadow: 0 0 0 3px rgba(80, 221, 255, 0.13);
+      }
+
+      .auth-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
       }
 
       .modal-backdrop {
@@ -790,8 +825,20 @@
           <h2>Google 로그인 필요</h2>
           <p class="caption">목업 데이터 없이 실제 유저 로봇/편성/랭킹을 불러오려면 Google 계정으로 로그인해야 한다.</p>
         </div>
-        <button class="primary" id="gateLoginButton">Google로 시작</button>
-        <p class="caption" id="loginNote">Supabase Google Provider와 Redirect URL 설정이 필요하다.</p>
+        <div class="field">
+          <label for="googleClientIdInput">Google OAuth Client ID</label>
+          <input id="googleClientIdInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="1234567890-xxxxx.apps.googleusercontent.com">
+          <p class="caption">Client Secret은 공개 앱에 저장하지 않고 Supabase 대시보드 Provider 설정에만 입력한다.</p>
+        </div>
+        <div class="field">
+          <label for="redirectUrlInput">Authorized redirect URL</label>
+          <input id="redirectUrlInput" type="text" readonly>
+        </div>
+        <div class="auth-actions">
+          <button class="secondary" id="saveGoogleClientButton">Client ID 저장</button>
+          <button class="primary" id="gateLoginButton">Google로 시작</button>
+        </div>
+        <p class="caption" id="loginNote">Google OAuth Client ID를 입력하면 이 브라우저에 저장된다.</p>
       </div>
     </section>
 
@@ -808,6 +855,7 @@
     <script>
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
+      const GOOGLE_CLIENT_ID_KEY = "nockout_google_oauth_client_id";
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       const state = {
@@ -819,6 +867,11 @@
         rankings: [],
         battle: null,
         anim: "idle"
+      };
+
+      const authConfig = {
+        googleClientId: localStorage.getItem(GOOGLE_CLIENT_ID_KEY) || "",
+        redirectTo: window.location.origin + window.location.pathname
       };
 
       const meta = {
@@ -934,10 +987,34 @@
       }
 
       async function signIn() {
+        if (!authConfig.googleClientId.trim()) {
+          document.getElementById("loginNote").textContent = "Google OAuth Client ID를 입력하고 저장한 뒤 다시 시도해줘.";
+          document.getElementById("googleClientIdInput").focus();
+          return;
+        }
         await client.auth.signInWithOAuth({
           provider: "google",
-          options: { redirectTo: window.location.origin + window.location.pathname }
+          options: { redirectTo: authConfig.redirectTo }
         });
+      }
+
+      function renderAuthConfig() {
+        document.getElementById("googleClientIdInput").value = authConfig.googleClientId;
+        document.getElementById("redirectUrlInput").value = authConfig.redirectTo;
+        document.getElementById("loginNote").textContent = authConfig.googleClientId
+          ? "Client ID 저장됨. Supabase Provider에 같은 값과 Client Secret이 들어가 있어야 로그인된다."
+          : "Google OAuth Client ID를 입력하면 이 브라우저에 저장된다.";
+      }
+
+      function saveGoogleClientId() {
+        const value = document.getElementById("googleClientIdInput").value.trim();
+        if (!value.endsWith(".apps.googleusercontent.com")) {
+          document.getElementById("loginNote").textContent = "Client ID 형식이 맞는지 확인 필요: ...apps.googleusercontent.com";
+          return;
+        }
+        authConfig.googleClientId = value;
+        localStorage.setItem(GOOGLE_CLIENT_ID_KEY, value);
+        renderAuthConfig();
       }
 
       async function loadData() {
@@ -1047,6 +1124,10 @@
       });
       document.getElementById("loginButton").addEventListener("click", signIn);
       document.getElementById("gateLoginButton").addEventListener("click", signIn);
+      document.getElementById("saveGoogleClientButton").addEventListener("click", saveGoogleClientId);
+      document.getElementById("googleClientIdInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") saveGoogleClientId();
+      });
       document.getElementById("logoutButton").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
       document.getElementById("createRobotButton").addEventListener("click", createStarterRobot);
       document.getElementById("saveLoadoutButton").addEventListener("click", saveLoadout);
@@ -1059,6 +1140,7 @@
         if (event.target.id === "modal") document.getElementById("modal").classList.remove("open");
       });
 
+      renderAuthConfig();
       setAnim("idle");
       loadData().catch((error) => {
         document.getElementById("loginNote").textContent = error.message;
