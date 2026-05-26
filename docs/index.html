@@ -817,6 +817,17 @@
           drop-shadow(0 0 30px rgba(80, 221, 255, 0.28));
       }
 
+      .auth-art .model-space {
+        inset: 2vh -2vw 0;
+        filter:
+          drop-shadow(0 34px 46px rgba(0, 0, 0, 0.72))
+          drop-shadow(0 0 30px rgba(80, 221, 255, 0.28));
+      }
+
+      .auth-art .asset-credit {
+        display: none;
+      }
+
       .auth-art::before,
       .auth-art::after {
         content: "";
@@ -1212,7 +1223,7 @@
         </div>
       </div>
       <div class="auth-art" aria-hidden="true">
-        <img src="./assets/heavy-robot.png" alt="">
+        <div class="model-space auth-model" id="authModel"></div>
       </div>
       <div class="auth-console">
         <div class="auth-status-grid" aria-hidden="true">
@@ -1250,7 +1261,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
-      const ROBOT_MODEL_URL = "./assets/heavy_robot.glb";
+      const ROBOT_MODEL_URL = "./assets/meshy_automaton.glb";
 
       const state = {
         user: null,
@@ -1325,9 +1336,9 @@
           this.clock = new THREE.Clock();
           this.scene = new THREE.Scene();
           this.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-          this.camera.position.set(options.arena ? 0.18 : 0, 0.62, 5.7);
+          this.camera.position.set(options.arena ? 0.18 : 0, options.hero ? 0.54 : 0.62, options.hero ? 5.05 : 5.7);
           this.camera.lookAt(0, 0.05, 0);
-          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Heavy robot / Scarecrow_original / CC-BY-4.0</div>';
+          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton / Meshy AI generated concept</div>';
           try {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
           } catch (error) {
@@ -1348,6 +1359,7 @@
           this.scene.add(rim);
           this.group = new THREE.Group();
           this.group.position.x = options.arena ? -0.72 : 0;
+          this.group.position.y = options.hero ? -0.1 : 0;
           this.scene.add(this.group);
           this.resize();
           window.addEventListener("resize", () => this.resize());
@@ -1363,7 +1375,7 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = 2.3 / Math.max(size.x, size.y, size.z);
+          const scale = (this.options.hero ? 2.45 : 2.3) / Math.max(size.x, size.y, size.z);
           model.position.sub(center);
           model.scale.setScalar(scale);
           model.rotation.y = this.options.arena ? -0.38 : -0.18;
@@ -1371,7 +1383,13 @@
             if (child.isMesh) {
               child.castShadow = true;
               child.frustumCulled = false;
-              if (child.material) {
+              if (!child.material) {
+                child.material = new THREE.MeshStandardMaterial({
+                  color: 0x6f7f8f,
+                  metalness: 0.48,
+                  roughness: 0.46
+                });
+              } else {
                 child.material.metalness = Math.max(child.material.metalness ?? 0, 0.36);
                 child.material.roughness = Math.min(child.material.roughness ?? 0.7, 0.72);
               }
@@ -1421,6 +1439,7 @@
       }
 
       const robotStages = [
+        new RobotStage(document.getElementById("authModel"), { hero: true }),
         new RobotStage(document.getElementById("homeModel")),
         new RobotStage(document.getElementById("arenaModel"), { arena: true })
       ];
