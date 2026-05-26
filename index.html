@@ -59,6 +59,10 @@
         padding: 14px;
       }
 
+      .app.hidden {
+        display: none;
+      }
+
       .topbar,
       .panel,
       .card,
@@ -580,26 +584,116 @@
         padding: 18px;
       }
 
-      .login {
+      .auth-screen {
         position: fixed;
         inset: 0;
         z-index: 40;
         display: none;
-        place-items: center;
-        padding: 20px;
-        background: rgba(0, 0, 0, 0.72);
+        min-height: 100dvh;
+        padding: 34px;
+        overflow: auto;
+        background:
+          linear-gradient(90deg, rgba(3, 5, 9, 0.92) 0%, rgba(5, 7, 11, 0.74) 42%, rgba(5, 7, 11, 0.25) 100%),
+          linear-gradient(180deg, rgba(5, 7, 11, 0.18), rgba(5, 7, 11, 0.88)),
+          url("./assets/arena-bg.png") center / cover no-repeat,
+          var(--bg);
       }
 
-      .login.open { display: grid; }
-
-      .login-card {
+      .auth-screen.open {
         display: grid;
-        gap: 14px;
-        width: min(540px, 92vw);
-        padding: 22px;
+        grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr);
+        align-items: stretch;
+        gap: 28px;
+      }
+
+      .auth-panel {
+        display: grid;
+        align-content: center;
+        gap: 18px;
+        min-height: calc(100dvh - 68px);
+        padding: 28px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--panel-strong);
+        background: linear-gradient(180deg, rgba(12, 20, 33, 0.96), rgba(8, 12, 20, 0.9));
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
+        backdrop-filter: blur(18px);
+      }
+
+      .auth-logo {
+        display: grid;
+        gap: 8px;
+      }
+
+      .auth-kicker {
+        color: var(--cyan);
+        font-family: Menlo, Consolas, monospace;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .auth-wordmark {
+        color: var(--text);
+        font-family: Menlo, Consolas, monospace;
+        font-size: clamp(38px, 6vw, 72px);
+        font-weight: 950;
+        line-height: 0.9;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        text-shadow: 0 0 26px rgba(80, 221, 255, 0.22);
+      }
+
+      .auth-tagline {
+        color: var(--gold);
+        font-family: Menlo, Consolas, monospace;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .auth-title h2 {
+        font-size: 24px;
+      }
+
+      .auth-art {
+        position: relative;
+        min-height: calc(100dvh - 68px);
+        overflow: hidden;
+      }
+
+      .auth-art img {
+        position: absolute;
+        right: max(4vw, 20px);
+        bottom: -4vh;
+        width: min(44vw, 620px);
+        max-height: 88dvh;
+        object-fit: contain;
+        filter: drop-shadow(0 36px 50px rgba(0, 0, 0, 0.64));
+      }
+
+      .auth-art::before,
+      .auth-art::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .auth-art::before {
+        left: 4%;
+        right: 6%;
+        bottom: 8%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(80, 221, 255, 0.7), transparent);
+        box-shadow: 0 0 28px rgba(80, 221, 255, 0.5);
+      }
+
+      .auth-art::after {
+        inset: 10% 0 12% 18%;
+        border: 1px solid rgba(80, 221, 255, 0.18);
+        border-radius: 8px;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.4;
       }
 
       .field {
@@ -660,6 +754,11 @@
         color: #ffffff;
       }
 
+      .auth-screen.logged-out-mode .login-only,
+      .auth-screen.login-mode .logout-only {
+        display: none;
+      }
+
       .modal-backdrop {
         position: fixed;
         inset: 0;
@@ -701,16 +800,31 @@
         .robot-model { transform: rotateX(-7deg) rotateY(-16deg) scale(0.82); }
         .upgrade-card { min-height: 132px; }
       }
+
+      @media (max-width: 900px) {
+        .auth-screen.open {
+          grid-template-columns: 1fr;
+          padding: 18px;
+        }
+
+        .auth-panel {
+          min-height: auto;
+        }
+
+        .auth-art {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
-    <main class="app">
+    <main class="app hidden" id="appShell">
       <header class="topbar">
         <div class="brand">
           <div class="mark" aria-hidden="true"></div>
           <div>
             <h1>NOCKOUT PROTOCOL</h1>
-            <p class="caption">Google 로그인 + Supabase 실제 데이터 기반 프로토타입</p>
+            <p class="caption">Supabase 실제 데이터 기반 프로토타입</p>
           </div>
         </div>
         <div class="account">
@@ -842,18 +956,31 @@
       </section>
     </main>
 
-    <section class="login open" id="loginGate">
-      <div class="login-card">
-        <div>
-          <h2>로그인 필요</h2>
-          <p class="caption">목업 데이터 없이 실제 유저 로봇/편성/랭킹을 불러오려면 소셜 계정으로 로그인해야 한다.</p>
+    <section class="auth-screen login-mode open" id="authScreen">
+      <div class="auth-panel">
+        <div class="auth-logo">
+          <div class="auth-kicker">CORE LINK CHECK</div>
+          <div class="auth-wordmark">NOCKOUT<br>PROTOCOL</div>
+          <div class="auth-tagline">BUILD. BREAK. KNOCKOUT.</div>
         </div>
-        <div class="social-auth" aria-label="소셜 로그인">
+        <div class="auth-title">
+          <h2 class="login-only">로그인</h2>
+          <h2 class="logout-only">로그아웃 완료</h2>
+          <p class="caption login-only">소셜 계정으로 접속하면 실제 유저 로봇, 편성, 랭킹 데이터를 불러온다.</p>
+          <p class="caption logout-only">세션이 종료됐다. 다시 접속하려면 아래 버튼으로 로그인하면 된다.</p>
+        </div>
+        <div class="social-auth login-only" aria-label="소셜 로그인">
           <button class="google" data-auth-provider="google">Google로 시작</button>
           <button class="kakao" data-auth-provider="kakao">카카오톡으로 시작</button>
           <button class="apple" data-auth-provider="apple">Apple로 시작</button>
         </div>
+        <div class="social-auth logout-only" aria-label="다시 로그인">
+          <button class="google" id="returnLoginButton">다시 로그인</button>
+        </div>
         <p class="caption" id="loginNote">Google, 카카오톡, Apple Provider를 Supabase에서 활성화하면 해당 버튼으로 로그인할 수 있다.</p>
+      </div>
+      <div class="auth-art" aria-hidden="true">
+        <img src="./assets/combat-robot.png" alt="">
       </div>
     </section>
 
@@ -871,7 +998,7 @@
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
-      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
 
       const state = {
         user: null,
@@ -881,7 +1008,8 @@
         loadout: null,
         rankings: [],
         battle: null,
-        anim: "idle"
+        anim: "idle",
+        authMode: new URL(window.location.href).searchParams.has("logged_out") ? "logged_out" : "login"
       };
 
       const authConfig = {
@@ -900,6 +1028,24 @@
 
       function cleanAuthUrl() {
         window.history.replaceState({}, document.title, authConfig.redirectTo);
+      }
+
+      function resetSessionState(authMode = "login") {
+        state.user = null;
+        state.profile = null;
+        state.robot = null;
+        state.supports = [];
+        state.loadout = null;
+        state.rankings = [];
+        state.battle = null;
+        state.authMode = authMode;
+      }
+
+      function showLoginPage(note = "") {
+        resetSessionState("login");
+        cleanAuthUrl();
+        render();
+        if (note) document.getElementById("loginNote").textContent = note;
       }
 
       const meta = {
@@ -958,7 +1104,11 @@
 
       function render() {
         const loggedIn = Boolean(state.user);
-        document.getElementById("loginGate").classList.toggle("open", !loggedIn);
+        document.getElementById("appShell").classList.toggle("hidden", !loggedIn);
+        const authScreen = document.getElementById("authScreen");
+        authScreen.classList.toggle("open", !loggedIn);
+        authScreen.classList.toggle("login-mode", state.authMode !== "logged_out");
+        authScreen.classList.toggle("logged-out-mode", state.authMode === "logged_out");
         document.getElementById("loginButton").hidden = loggedIn;
         document.getElementById("logoutButton").hidden = !loggedIn;
         document.getElementById("authState").textContent = loggedIn ? (state.profile?.display_name || state.user.email || "로그인됨") : "로그인 필요";
@@ -1015,6 +1165,11 @@
       }
 
       async function signIn(provider = "google") {
+        state.authMode = "login";
+        if (!client) {
+          document.getElementById("loginNote").textContent = "Supabase SDK 로딩 후 다시 시도해줘.";
+          return;
+        }
         const { error } = await client.auth.signInWithOAuth({
           provider,
           options: { redirectTo: authConfig.redirectTo }
@@ -1022,17 +1177,23 @@
         if (error) document.getElementById("loginNote").textContent = `${provider} 로그인 실패: ${error.message}`;
       }
 
+      async function logout() {
+        if (client) await client.auth.signOut();
+        resetSessionState("logged_out");
+        window.location.href = "./logout.html";
+      }
+
       async function loadData() {
+        if (!client) {
+          resetSessionState(state.authMode);
+          render();
+          document.getElementById("loginNote").textContent = "Supabase SDK 로딩 대기 중. 새로고침 후 다시 시도해줘.";
+          return;
+        }
         const authReturn = authReturnState();
         if (authReturn.hasError) {
           await client.auth.signOut();
-          state.user = null;
-          state.profile = null;
-          state.robot = null;
-          state.supports = [];
-          state.loadout = null;
-          state.rankings = [];
-          state.battle = null;
+          resetSessionState("login");
           cleanAuthUrl();
           render();
           document.getElementById("loginNote").textContent = `로그인 실패: ${authReturn.errorText || "다시 로그인 필요"}`;
@@ -1042,13 +1203,7 @@
         if (REQUIRE_LOGIN_ON_FRESH_ENTRY && !authReturn.isCallback) {
           const { data: sessionData } = await client.auth.getSession();
           if (sessionData.session) await client.auth.signOut();
-          state.user = null;
-          state.profile = null;
-          state.robot = null;
-          state.supports = [];
-          state.loadout = null;
-          state.rankings = [];
-          state.battle = null;
+          resetSessionState(state.authMode);
           render();
           return;
         }
@@ -1056,6 +1211,7 @@
         const { data: sessionData } = await client.auth.getSession();
         state.user = sessionData.session?.user || null;
         if (!state.user) { render(); return; }
+        state.authMode = "login";
         if (authReturn.isCallback) cleanAuthUrl();
 
         const userId = state.user.id;
@@ -1158,11 +1314,12 @@
         const upgradeButton = event.target.closest("[data-upgrade]");
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
       });
-      document.getElementById("loginButton").addEventListener("click", () => signIn("google"));
+      document.getElementById("loginButton").addEventListener("click", () => showLoginPage());
       document.querySelectorAll("[data-auth-provider]").forEach((button) => {
         button.addEventListener("click", () => signIn(button.dataset.authProvider));
       });
-      document.getElementById("logoutButton").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
+      document.getElementById("returnLoginButton").addEventListener("click", () => showLoginPage());
+      document.getElementById("logoutButton").addEventListener("click", logout);
       document.getElementById("createRobotButton").addEventListener("click", createStarterRobot);
       document.getElementById("saveLoadoutButton").addEventListener("click", saveLoadout);
       document.getElementById("startBattleButton").addEventListener("click", startBattle);
