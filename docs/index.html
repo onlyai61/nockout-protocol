@@ -725,8 +725,9 @@
 
       .auth-screen.open {
         display: grid;
-        grid-template-columns: minmax(360px, 560px) minmax(280px, 1fr) minmax(280px, 390px);
+        grid-template-columns: minmax(360px, 620px) minmax(280px, 390px);
         align-items: end;
+        justify-content: space-between;
         gap: clamp(16px, 3vw, 38px);
       }
 
@@ -1233,9 +1234,6 @@
           <p class="caption logout-only">세션이 종료됐다. 다시 접속하면 새 링크 상태로 시작한다.</p>
         </div>
       </div>
-      <div class="auth-art" aria-hidden="true">
-        <div class="model-space auth-model" id="authModel"></div>
-      </div>
       <div class="auth-console">
         <div class="auth-status-grid" aria-hidden="true">
           <div class="auth-status"><span>ARENA</span><b>ONLINE</b></div>
@@ -1497,7 +1495,6 @@
       }
 
       const robotStages = [
-        new RobotStage(document.getElementById("authModel"), { hero: true }),
         new RobotStage(document.getElementById("homeModel")),
         new RobotStage(document.getElementById("arenaModel"), { arena: true })
       ];
