@@ -3,33 +3,24 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>NOCKOUT Protocol - Loadout Wireframe</title>
+    <title>NOCKOUT Protocol - Interactive Loadout Prototype</title>
     <style>
       :root {
         color-scheme: dark;
         --bg: #05070b;
-        --glass: rgba(8, 13, 22, 0.72);
-        --glass-strong: rgba(10, 18, 31, 0.9);
-        --line: rgba(234, 242, 255, 0.18);
-        --text: #f5f8ff;
-        --muted: #9aa9bc;
-        --cyan: #53e4ff;
-        --gold: #ffcc58;
-        --green: #72f29a;
-        --coral: #ff6a5f;
-        --violet: #a78bfa;
-        --shadow: rgba(0, 0, 0, 0.42);
-      }
-
-      :root.light {
-        color-scheme: light;
-        --bg: #dfeaf6;
-        --glass: rgba(244, 248, 255, 0.72);
-        --glass-strong: rgba(255, 255, 255, 0.92);
-        --line: rgba(22, 36, 58, 0.18);
-        --text: #07111f;
-        --muted: #526176;
-        --shadow: rgba(18, 34, 58, 0.22);
+        --panel: rgba(9, 15, 25, 0.78);
+        --panel-strong: rgba(13, 21, 34, 0.94);
+        --panel-soft: rgba(255, 255, 255, 0.07);
+        --line: rgba(232, 240, 255, 0.17);
+        --line-strong: rgba(232, 240, 255, 0.28);
+        --text: #f4f8ff;
+        --muted: #9cabc0;
+        --cyan: #51d9ff;
+        --gold: #ffc857;
+        --green: #6df097;
+        --red: #ff625a;
+        --blue: #5f8cff;
+        --shadow: rgba(0, 0, 0, 0.44);
       }
 
       * {
@@ -39,75 +30,79 @@
       html,
       body {
         margin: 0;
+        width: 100%;
         min-height: 100%;
+        overflow: hidden;
         background: var(--bg);
         color: var(--text);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
-      body {
-        overflow: hidden;
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -3;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(81, 217, 255, 0.14), transparent 28%),
+          radial-gradient(circle at 80% 72%, rgba(255, 98, 90, 0.12), transparent 32%),
+          linear-gradient(135deg, #05070b 0%, #0b1018 48%, #08070a 100%);
       }
 
-      button {
-        border: 0;
-        font: inherit;
-        cursor: pointer;
-      }
-
-      .app {
-        position: relative;
-        width: 100vw;
-        height: 100dvh;
-        min-width: 760px;
-        min-height: 360px;
-        padding: 14px 16px;
-        isolation: isolate;
-      }
-
-      .app::before {
+      body::after {
         content: "";
         position: fixed;
         inset: 0;
         z-index: -2;
-        background:
-          linear-gradient(90deg, rgba(2, 6, 12, 0.56), rgba(2, 6, 12, 0.16) 42%, rgba(2, 6, 12, 0.84)),
-          linear-gradient(0deg, rgba(2, 6, 12, 0.84), transparent 44%, rgba(2, 6, 12, 0.5)),
-          url("./assets/arena-bg.png") center / cover no-repeat;
+        opacity: 0.26;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(circle at 50% 48%, #000 0%, transparent 78%);
       }
 
-      .app::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        opacity: 0.24;
-        background-image:
-          linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-        background-size: 42px 42px;
-        mask-image: radial-gradient(circle at 50% 48%, #000, transparent 72%);
+      button,
+      select {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      .app {
+        width: 100vw;
+        height: 100dvh;
+        min-width: 980px;
+        min-height: 560px;
+        padding: 14px;
       }
 
       .shell {
         display: grid;
-        grid-template-rows: 42px 1fr 56px;
-        gap: 10px;
-        width: 100%;
+        grid-template-rows: 48px 1fr;
+        gap: 12px;
         height: 100%;
       }
 
       .topbar,
-      .dock,
       .panel,
       .card,
       .modal {
         border: 1px solid var(--line);
-        background: var(--glass);
-        box-shadow: 0 16px 42px var(--shadow);
-        backdrop-filter: blur(18px);
         border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 18px 44px var(--shadow);
+        backdrop-filter: blur(18px);
       }
 
       .topbar {
@@ -125,313 +120,633 @@
       }
 
       .mark {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         flex: 0 0 auto;
-        border: 1px solid rgba(255, 204, 88, 0.7);
-        background: linear-gradient(135deg, rgba(255, 204, 88, 0.9), rgba(83, 228, 255, 0.8));
-        clip-path: polygon(50% 0, 92% 25%, 92% 76%, 50% 100%, 8% 76%, 8% 25%);
-      }
-
-      h1,
-      h2,
-      h3,
-      p {
-        margin: 0;
+        clip-path: polygon(50% 0, 94% 26%, 94% 76%, 50% 100%, 6% 76%, 6% 26%);
+        background: linear-gradient(135deg, var(--gold), var(--cyan));
       }
 
       h1 {
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1;
         letter-spacing: 0;
       }
 
       .caption {
         color: var(--muted);
-        font-size: 10px;
-        line-height: 1.2;
+        font-size: 11px;
+        line-height: 1.35;
       }
 
-      .coins {
+      .wallet {
         display: flex;
         align-items: center;
-        gap: 7px;
-        color: var(--muted);
-        font-size: 11px;
+        gap: 8px;
       }
 
-      .coin {
+      .pill,
+      .chip {
         display: inline-flex;
         align-items: center;
-        min-height: 24px;
-        padding: 0 8px;
+        justify-content: center;
+        min-height: 28px;
         border: 1px solid var(--line);
         border-radius: 999px;
+        background: var(--panel-soft);
         color: var(--text);
-        background: rgba(255, 255, 255, 0.08);
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
       }
 
-      .main {
+      .pill {
+        padding: 0 10px;
+      }
+
+      .layout {
         display: grid;
-        grid-template-columns: 84px minmax(330px, 1fr) 310px;
-        gap: 10px;
+        grid-template-columns: 90px 1fr 336px;
+        gap: 12px;
         min-height: 0;
       }
 
       .nav {
         display: grid;
-        gap: 7px;
+        gap: 8px;
         align-content: start;
       }
 
-      .nav button,
-      .action {
-        min-height: 40px;
+      .nav-button,
+      .primary,
+      .secondary,
+      .ghost,
+      .tab,
+      .upgrade-button,
+      .support button {
+        min-height: 38px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--glass-strong);
+        background: rgba(255, 255, 255, 0.08);
         color: var(--text);
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 850;
       }
 
-      .nav button.active {
+      .nav-button.active,
+      .tab.active {
+        border-color: rgba(81, 217, 255, 0.86);
         background: var(--cyan);
-        color: #041018;
+        color: #031018;
+      }
+
+      .primary {
+        border-color: rgba(255, 98, 90, 0.7);
+        background: var(--red);
+        color: white;
+      }
+
+      .secondary {
+        border-color: rgba(255, 200, 87, 0.55);
+        background: rgba(255, 200, 87, 0.16);
+        color: var(--gold);
+      }
+
+      .ghost {
+        background: transparent;
       }
 
       .stage {
-        position: relative;
-        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-width: 0;
         min-height: 0;
+        overflow: hidden;
       }
 
       .stage-head {
-        position: absolute;
-        top: 12px;
-        left: 14px;
-        right: 14px;
-        z-index: 2;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: start;
+        padding: 14px 14px 8px;
+      }
+
+      .stage-title h2 {
+        font-size: 23px;
+        letter-spacing: 0;
+      }
+
+      .tabs {
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: flex-end;
+      }
+
+      .tab {
+        min-height: 32px;
+        padding: 0 10px;
+      }
+
+      .view {
+        display: none;
+        min-height: 0;
+        padding: 0 14px 12px;
+      }
+
+      .view.active {
+        display: grid;
+      }
+
+      .home-grid {
+        grid-template-columns: minmax(360px, 1fr) 308px;
         gap: 12px;
       }
 
-      .stage-title strong {
-        display: block;
-        font-size: 20px;
-        line-height: 1.1;
-      }
-
-      .rank-pill {
-        min-width: 104px;
-        padding: 8px 10px;
-        border: 1px solid rgba(255, 204, 88, 0.55);
-        border-radius: 8px;
-        background: rgba(255, 204, 88, 0.14);
-        text-align: right;
-      }
-
-      .rank-pill strong {
-        display: block;
-        color: var(--gold);
-        font-size: 18px;
-      }
-
-      .robot-wrap {
-        position: absolute;
-        inset: 42px 108px 10px 104px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .robot-wrap::before {
-        content: "";
-        position: absolute;
-        bottom: 22px;
-        width: 280px;
-        height: 42px;
-        border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(83, 228, 255, 0.32), transparent 68%);
-        filter: blur(2px);
-      }
-
-      .robot {
+      .robot-stage {
         position: relative;
-        z-index: 1;
-        max-width: 58%;
-        max-height: 92%;
-        object-fit: contain;
-        filter: drop-shadow(0 24px 32px rgba(0, 0, 0, 0.58));
-      }
-
-      .rotate-hint {
-        position: absolute;
-        left: 50%;
-        bottom: 12px;
-        transform: translateX(-50%);
-        color: var(--muted);
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.12em;
-      }
-
-      .slot {
-        position: absolute;
-        z-index: 3;
-        width: 122px;
-        min-height: 48px;
-        padding: 8px 9px;
+        min-height: 0;
+        overflow: hidden;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: rgba(6, 10, 17, 0.68);
-        color: var(--text);
-        text-align: left;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 34%),
+          radial-gradient(ellipse at 50% 83%, rgba(81, 217, 255, 0.24), transparent 42%),
+          rgba(0, 0, 0, 0.18);
       }
 
-      .slot strong {
+      .robot-space {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        perspective: 980px;
+      }
+
+      .robot-rig {
+        position: relative;
+        width: 250px;
+        height: 360px;
+        transform-style: preserve-3d;
+        transform: rotateX(-8deg) rotateY(-18deg);
+        filter: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.5));
+      }
+
+      .robot-rig::after {
+        content: "";
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: -28px;
+        height: 42px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(81, 217, 255, 0.42), transparent 68%);
+        transform: rotateX(68deg);
+      }
+
+      .robot-part {
+        position: absolute;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 34%),
+          linear-gradient(180deg, #879bb0, #1a2634 72%);
+        box-shadow:
+          inset -14px -12px 22px rgba(0, 0, 0, 0.3),
+          inset 12px 10px 20px rgba(255, 255, 255, 0.08);
+        transform-style: preserve-3d;
+      }
+
+      .robot-part::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .torso {
+        left: 65px;
+        top: 72px;
+        width: 120px;
+        height: 132px;
+        clip-path: polygon(15% 0, 85% 0, 100% 78%, 70% 100%, 30% 100%, 0 78%);
+      }
+
+      .core {
+        left: 101px;
+        top: 116px;
+        width: 48px;
+        height: 34px;
+        background: linear-gradient(135deg, var(--cyan), #13606f);
+        box-shadow: 0 0 28px rgba(81, 217, 255, 0.54);
+      }
+
+      .head {
+        left: 87px;
+        top: 24px;
+        width: 76px;
+        height: 58px;
+        background: linear-gradient(145deg, #273647, #0d141f 72%);
+      }
+
+      .visor {
+        left: 105px;
+        top: 48px;
+        width: 40px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--red);
+        box-shadow: 0 0 20px rgba(255, 98, 90, 0.82);
+      }
+
+      .pelvis {
+        left: 76px;
+        top: 196px;
+        width: 98px;
+        height: 42px;
+        background: linear-gradient(145deg, #2e3b4b, #101924);
+      }
+
+      .arm,
+      .leg {
+        position: absolute;
+        transform-style: preserve-3d;
+        transform-origin: 50% 18%;
+      }
+
+      .arm.left { left: 36px; top: 86px; }
+      .arm.right { right: 36px; top: 86px; }
+      .leg.left { left: 72px; top: 222px; }
+      .leg.right { right: 72px; top: 222px; }
+
+      .upper-arm,
+      .forearm,
+      .thigh,
+      .shin,
+      .fist,
+      .foot {
+        position: absolute;
+        left: 0;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        background: linear-gradient(145deg, #8195aa, #182331 72%);
+        box-shadow: inset -10px -10px 18px rgba(0, 0, 0, 0.32);
+      }
+
+      .upper-arm {
+        top: 0;
+        width: 34px;
+        height: 76px;
+      }
+
+      .forearm {
+        top: 66px;
+        width: 36px;
+        height: 76px;
+        transform-origin: 50% 10%;
+        background: linear-gradient(145deg, #344354, #101924 72%);
+      }
+
+      .fist {
+        top: 132px;
+        left: -7px;
+        width: 50px;
+        height: 34px;
+        background: linear-gradient(145deg, #ff736a, #631915);
+      }
+
+      .thigh {
+        top: 0;
+        width: 38px;
+        height: 78px;
+      }
+
+      .shin {
+        top: 70px;
+        width: 36px;
+        height: 78px;
+        transform-origin: 50% 10%;
+        background: linear-gradient(145deg, #344354, #101924 72%);
+      }
+
+      .foot {
+        top: 138px;
+        left: -10px;
+        width: 58px;
+        height: 26px;
+        background: linear-gradient(145deg, var(--cyan), #123743);
+      }
+
+      .robot-rig.idle {
+        animation: idleRig 2.8s ease-in-out infinite;
+      }
+
+      .robot-rig.walk {
+        animation: walkRig 0.72s ease-in-out infinite;
+      }
+
+      .robot-rig.punch {
+        animation: punchRig 0.78s ease-in-out infinite;
+      }
+
+      .robot-rig.guard {
+        animation: guardRig 1.2s ease-in-out infinite;
+      }
+
+      .walk .arm.left,
+      .walk .leg.right {
+        animation: swingA 0.72s ease-in-out infinite;
+      }
+
+      .walk .arm.right,
+      .walk .leg.left {
+        animation: swingB 0.72s ease-in-out infinite;
+      }
+
+      .punch .arm.right {
+        animation: punchArm 0.78s ease-in-out infinite;
+      }
+
+      .punch .arm.left {
+        transform: rotateZ(22deg) rotateX(-34deg);
+      }
+
+      .guard .arm.left {
+        transform: translateX(22px) rotateZ(-44deg) rotateX(-62deg);
+      }
+
+      .guard .arm.right {
+        transform: translateX(-22px) rotateZ(44deg) rotateX(-62deg);
+      }
+
+      .guard .torso {
+        transform: translateY(10px) scaleY(0.96);
+      }
+
+      @keyframes idleRig {
+        0%, 100% { transform: rotateX(-8deg) rotateY(-18deg) translateY(0); }
+        50% { transform: rotateX(-8deg) rotateY(-12deg) translateY(-8px); }
+      }
+
+      @keyframes walkRig {
+        0%, 100% { transform: rotateX(-8deg) rotateY(-22deg) translate(0, 0); }
+        50% { transform: rotateX(-8deg) rotateY(-10deg) translate(12px, -8px); }
+      }
+
+      @keyframes punchRig {
+        0%, 100% { transform: rotateX(-8deg) rotateY(-20deg) translateX(0); }
+        50% { transform: rotateX(-10deg) rotateY(-34deg) translateX(16px); }
+      }
+
+      @keyframes guardRig {
+        0%, 100% { transform: rotateX(-8deg) rotateY(-18deg) translateY(6px); }
+        50% { transform: rotateX(-10deg) rotateY(-18deg) translateY(14px); }
+      }
+
+      @keyframes swingA {
+        0%, 100% { transform: rotateX(-28deg); }
+        50% { transform: rotateX(36deg); }
+      }
+
+      @keyframes swingB {
+        0%, 100% { transform: rotateX(36deg); }
+        50% { transform: rotateX(-28deg); }
+      }
+
+      @keyframes punchArm {
+        0%, 100% { transform: rotateZ(-18deg) rotateX(-22deg); }
+        45%, 58% { transform: translateX(24px) translateY(-8px) rotateZ(-74deg) rotateX(-86deg); }
+      }
+
+      .robot-hud {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: end;
+        pointer-events: none;
+      }
+
+      .robot-actions {
+        display: flex;
+        gap: 7px;
+        pointer-events: auto;
+      }
+
+      .robot-actions button {
+        min-width: 64px;
+      }
+
+      .status-grid {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+      }
+
+      .card {
+        padding: 10px;
+      }
+
+      .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .card h3 {
+        font-size: 14px;
+      }
+
+      .stat-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: 68px 1fr 40px;
+        gap: 8px;
+        align-items: center;
+        font-size: 11px;
+      }
+
+      .bar {
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      .bar i {
         display: block;
+        width: var(--value);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--cyan), var(--green));
+      }
+
+      .status-line {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         font-size: 12px;
       }
 
-      .slot span {
-        display: block;
-        margin-top: 3px;
+      .status-line:last-child {
+        border-bottom: 0;
+      }
+
+      .status-line span {
         color: var(--muted);
-        font-size: 10px;
       }
 
-      .slot.power {
-        top: 78px;
-        left: 16px;
-        border-color: rgba(83, 228, 255, 0.52);
+      .status-line b {
+        text-align: right;
       }
 
-      .slot.wire {
-        bottom: 62px;
-        left: 18px;
-        border-color: rgba(255, 204, 88, 0.52);
-      }
-
-      .slot.sensor {
-        top: 78px;
-        right: 16px;
-        border-color: rgba(114, 242, 154, 0.52);
-      }
-
-      .slot.lab {
-        bottom: 62px;
-        right: 18px;
-        border-color: rgba(255, 106, 95, 0.52);
-      }
-
-      .loadout {
+      .module-grid {
         display: grid;
-        grid-template-rows: auto 1fr auto;
-        gap: 8px;
-        padding: 12px;
-        min-height: 0;
-      }
-
-      .panel-head {
-        display: flex;
-        justify-content: space-between;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
 
-      .panel-head strong {
-        display: block;
-        font-size: 16px;
+      .module {
+        display: grid;
+        gap: 9px;
+        min-height: 156px;
       }
 
-      .support-list {
-        display: grid;
+      .module-top {
+        display: flex;
+        justify-content: space-between;
         gap: 8px;
-        min-height: 0;
+      }
+
+      .upgrade-button {
+        min-height: 32px;
+      }
+
+      .battery-list,
+      .training-list,
+      .support-list,
+      .rank-list {
+        display: grid;
+        gap: 9px;
+      }
+
+      .battery {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        border-color: transparent;
+        text-align: left;
+      }
+
+      .battery.active {
+        border-color: rgba(81, 217, 255, 0.82);
+        background: rgba(81, 217, 255, 0.13);
       }
 
       .support {
         display: grid;
-        grid-template-columns: 42px 1fr 70px;
-        gap: 8px;
+        grid-template-columns: 46px 1fr 76px;
+        gap: 9px;
         align-items: center;
-        min-height: 62px;
-        padding: 8px;
       }
 
       .bot-icon {
         display: grid;
         place-items: center;
-        width: 42px;
-        height: 42px;
+        width: 46px;
+        height: 46px;
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.08);
         color: #051018;
-        font-weight: 900;
+        font-size: 16px;
+        font-weight: 950;
       }
 
-      .support h3 {
-        font-size: 13px;
-      }
-
-      .support p {
-        margin-top: 3px;
-        color: var(--muted);
-        font-size: 10px;
-        line-height: 1.25;
-      }
-
-      .support button,
-      .mini {
-        min-height: 32px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text);
-        font-size: 11px;
-        font-weight: 800;
-      }
-
-      .dock {
+      .right-panel {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 130px;
+        grid-template-rows: auto 1fr auto;
+        gap: 10px;
+        min-height: 0;
+        padding: 12px;
+      }
+
+      .start-stack {
+        display: grid;
         gap: 8px;
-        align-items: center;
-        padding: 8px;
       }
 
-      .metric {
+      .loadout-summary {
+        display: grid;
+        gap: 8px;
+        overflow: auto;
+        min-height: 0;
+      }
+
+      .scorebox {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .scorebox .card {
         min-width: 0;
-        padding: 0 8px;
+        padding: 9px;
       }
 
-      .metric span {
-        display: block;
-        color: var(--muted);
-        font-size: 10px;
-      }
-
-      .metric strong {
+      .scorebox strong {
         display: block;
         margin-top: 3px;
-        color: var(--text);
-        font-size: 15px;
+        font-size: 16px;
       }
 
-      .action {
-        background: var(--coral);
-        color: white;
+      .training-grid {
+        grid-template-columns: 310px 1fr;
+        gap: 12px;
+      }
+
+      .training-card {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .arena-card {
+        position: relative;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .arena-card::after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 18%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 200, 87, 0.7), transparent);
       }
 
       .modal-backdrop {
         position: fixed;
         inset: 0;
-        z-index: 10;
+        z-index: 30;
         display: none;
         place-items: center;
         padding: 18px;
-        background: rgba(0, 0, 0, 0.64);
+        background: rgba(0, 0, 0, 0.68);
       }
 
       .modal-backdrop.open {
@@ -439,77 +754,101 @@
       }
 
       .modal {
-        width: min(540px, 92vw);
-        max-height: 82dvh;
-        padding: 18px;
+        width: min(620px, 92vw);
+        max-height: 84dvh;
         overflow: auto;
-        background: var(--glass-strong);
+        padding: 18px;
+        background: var(--panel-strong);
       }
 
       .modal-head {
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 14px;
-        margin-bottom: 14px;
+        gap: 16px;
+        margin-bottom: 12px;
       }
 
       .modal h2 {
-        font-size: 20px;
+        font-size: 22px;
       }
 
       .close {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.12);
         color: var(--text);
+        font-size: 18px;
         font-weight: 900;
       }
 
-      .modal-grid {
+      .modal-body {
         display: grid;
         gap: 8px;
       }
 
-      .row {
+      .modal-row {
         display: grid;
         grid-template-columns: 1fr auto;
-        gap: 10px;
+        gap: 12px;
         align-items: center;
-        min-height: 46px;
+        min-height: 50px;
         padding: 10px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: rgba(255, 255, 255, 0.06);
       }
 
-      .row small {
+      .modal-row small {
         display: block;
         margin-top: 3px;
         color: var(--muted);
       }
 
-      .row b {
+      .modal-row b {
         color: var(--gold);
       }
 
-      @media (max-height: 370px) {
+      @media (max-width: 1050px) {
         .app {
+          min-width: 820px;
+        }
+
+        .layout {
+          grid-template-columns: 78px 1fr 292px;
+        }
+
+        .home-grid {
+          grid-template-columns: minmax(320px, 1fr) 272px;
+        }
+
+        .module-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-height: 650px) {
+        .app {
+          min-height: 500px;
           padding: 10px;
         }
 
         .shell {
-          grid-template-rows: 38px 1fr 50px;
+          grid-template-rows: 44px 1fr;
           gap: 8px;
         }
 
-        .support {
-          min-height: 54px;
+        .layout {
+          gap: 8px;
         }
 
-        .robot {
-          max-height: 84%;
+        .view {
+          padding-bottom: 8px;
+        }
+
+        .support {
+          min-height: 58px;
         }
       }
     </style>
@@ -521,119 +860,201 @@
           <div class="brand">
             <div class="mark" aria-hidden="true"></div>
             <div>
-              <h1>NOCKOUT LOADOUT WIREFRAME</h1>
-              <p class="caption">전투봇 1대 + 서포트봇 3대 / 모바일 가로 UI</p>
+              <h1>NOCKOUT PROTOCOL UI PROTOTYPE</h1>
+              <p class="caption">홈에서 상태 확인, 전투 시작, 업그레이드, 정비, 연습 전투까지 클릭 가능</p>
             </div>
           </div>
-          <div class="coins">
-            <span class="coin">RC 2,430</span>
-            <span class="coin">VC 820</span>
-            <span class="coin">WC 640</span>
-            <button class="mini" data-theme>Light</button>
+          <div class="wallet">
+            <span class="pill" id="rc">RC 2,430</span>
+            <span class="pill" id="vc">VC 820</span>
+            <span class="pill" id="wc">WC 640</span>
+            <button class="ghost" data-modal="저장">저장</button>
           </div>
         </header>
 
-        <section class="main">
+        <section class="layout">
           <nav class="nav" aria-label="Main navigation">
-            <button class="active" data-modal="홈">홈</button>
-            <button data-modal="업그레이드">업그레이드</button>
-            <button data-modal="정비실">정비실</button>
-            <button data-modal="리그">리그</button>
-            <button data-modal="훈련">훈련</button>
+            <button class="nav-button active" data-view="home">홈</button>
+            <button class="nav-button" data-view="upgrade">업그레이드</button>
+            <button class="nav-button" data-view="garage">정비실</button>
+            <button class="nav-button" data-view="league">리그</button>
+            <button class="nav-button" data-view="training">훈련</button>
           </nav>
 
-          <section class="panel stage" aria-label="Combat bot preview">
+          <section class="panel stage">
             <div class="stage-head">
               <div class="stage-title">
-                <strong>MECH BOXER</strong>
-                <p class="caption">나중에 Unity 3D 모델 360도 회전 영역</p>
+                <h2 id="viewTitle">홈 / MECH BOXER 상태</h2>
+                <p class="caption" id="viewCaption">전투봇 현재 상태와 배터리, 장착 서포트봇, 시작 버튼을 한 화면에 배치</p>
               </div>
-              <button class="rank-pill" data-modal="랭킹">
-                <span class="caption">예상 랭킹</span>
-                <strong>TOP 12%</strong>
-              </button>
+              <div class="tabs">
+                <button class="tab active" data-animation="idle">대기</button>
+                <button class="tab" data-animation="walk">이동</button>
+                <button class="tab" data-animation="punch">펀치</button>
+                <button class="tab" data-animation="guard">가드</button>
+              </div>
             </div>
 
-            <button class="slot power" data-modal="전원설계">
-              <strong>전원설계</strong>
-              <span>효율 82% / 과열 주의</span>
-            </button>
-            <button class="slot wire" data-modal="배선">
-              <strong>배선</strong>
-              <span>신호 안정 76%</span>
-            </button>
-            <button class="slot sensor" data-modal="카메라·센서">
-              <strong>카메라·센서</strong>
-              <span>표적 인식 91%</span>
-            </button>
-            <button class="slot lab" data-modal="측정실">
-              <strong>측정실</strong>
-              <span>진단 리포트 열기</span>
-            </button>
+            <section class="view home-grid active" data-page="home">
+              <div class="robot-stage">
+                <div class="robot-space" aria-label="움직이는 3D 전투봇 리그">
+                  <div class="robot-rig idle" id="robotRig">
+                    <div class="robot-part head"></div>
+                    <div class="robot-part visor"></div>
+                    <div class="robot-part torso"></div>
+                    <div class="robot-part core"></div>
+                    <div class="robot-part pelvis"></div>
+                    <div class="arm left">
+                      <div class="upper-arm"></div>
+                      <div class="forearm"></div>
+                      <div class="fist"></div>
+                    </div>
+                    <div class="arm right">
+                      <div class="upper-arm"></div>
+                      <div class="forearm"></div>
+                      <div class="fist"></div>
+                    </div>
+                    <div class="leg left">
+                      <div class="thigh"></div>
+                      <div class="shin"></div>
+                      <div class="foot"></div>
+                    </div>
+                    <div class="leg right">
+                      <div class="thigh"></div>
+                      <div class="shin"></div>
+                      <div class="foot"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="robot-hud">
+                  <div>
+                    <span class="chip">3D PROCEDURAL RIG</span>
+                    <span class="chip" id="animationLabel">IDLE</span>
+                  </div>
+                  <div class="robot-actions">
+                    <button class="secondary" data-action="practice">연습 전투</button>
+                    <button class="primary" data-action="start">전투 시작</button>
+                  </div>
+                </div>
+              </div>
 
-            <div class="robot-wrap">
-              <img class="robot" src="./assets/combat-robot.png" alt="전투봇">
-            </div>
-            <div class="rotate-hint">DRAG TO ROTATE 360</div>
+              <aside class="status-grid">
+                <article class="card">
+                  <div class="card-head">
+                    <h3>현재 상태</h3>
+                    <button class="ghost" data-modal="상태 상세">상세</button>
+                  </div>
+                  <div class="status-line"><span>프레임</span><b>중형 복서 MK-1</b></div>
+                  <div class="status-line"><span>내구도</span><b id="hpText">86%</b></div>
+                  <div class="status-line"><span>배터리</span><b id="batteryText">Titan Cell S2</b></div>
+                  <div class="status-line"><span>랭킹 예상</span><b style="color: var(--gold)">TOP 12%</b></div>
+                </article>
+
+                <article class="card">
+                  <div class="card-head">
+                    <h3>전투 스텟</h3>
+                    <button class="ghost" data-view-jump="upgrade">강화</button>
+                  </div>
+                  <div class="stat-list" id="homeStats"></div>
+                </article>
+
+                <article class="card">
+                  <div class="card-head">
+                    <h3>배터리 선택</h3>
+                    <button class="ghost" data-modal="배터리 설명">보기</button>
+                  </div>
+                  <div class="battery-list" id="batteryList"></div>
+                </article>
+              </aside>
+            </section>
+
+            <section class="view" data-page="upgrade">
+              <div class="module-grid" id="upgradeGrid"></div>
+            </section>
+
+            <section class="view" data-page="garage">
+              <div class="support-list" id="supportList"></div>
+            </section>
+
+            <section class="view" data-page="league">
+              <div class="rank-list">
+                <article class="card">
+                  <div class="card-head">
+                    <h3>편성 랭킹</h3>
+                    <button class="secondary" data-modal="랭킹 산식">산식 보기</button>
+                  </div>
+                  <div class="status-line"><span>1위 / Iron Choir</span><b>9,820</b></div>
+                  <div class="status-line"><span>2위 / Vector Lab</span><b id="scoreLeague">8,420</b></div>
+                  <div class="status-line"><span>3위 / Null Arena</span><b>7,960</b></div>
+                  <div class="status-line"><span>공유 방식</span><b>@vector_claw 랭킹 보드</b></div>
+                </article>
+                <article class="card">
+                  <div class="card-head">
+                    <h3>리그 입장</h3>
+                    <button class="primary" data-action="start">전투 시작하기</button>
+                  </div>
+                  <p class="caption">실제 매치 전에는 편성 저장, 배터리 확인, 서포트봇 효과 확인을 거친다.</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="view training-grid" data-page="training">
+              <article class="card training-card">
+                <div class="card-head">
+                  <h3>연습 전투</h3>
+                  <button class="primary" data-action="practice">입장</button>
+                </div>
+                <button class="secondary" data-animation="walk">이동 루틴</button>
+                <button class="secondary" data-animation="punch">펀치 루틴</button>
+                <button class="secondary" data-animation="guard">방어 루틴</button>
+                <button class="ghost" data-modal="훈련 목표">훈련 목표</button>
+              </article>
+              <article class="card arena-card">
+                <div class="card-head">
+                  <h3>프랙티스 아레나</h3>
+                  <span class="chip" id="practiceState">READY</span>
+                </div>
+                <p class="caption">오른쪽 아래 버튼이나 훈련 루틴을 누르면 3D 로봇이 바로 움직인다. 실제 Unity 단계에서는 이 리그/훈련 흐름을 씬 전환으로 연결하면 된다.</p>
+              </article>
+            </section>
           </section>
 
-          <aside class="panel loadout" aria-label="Support bot loadout">
-            <div class="panel-head">
-              <div>
-                <strong>서포트봇 3대</strong>
-                <p class="caption">전투 후 정비 / 랭킹 점수 보정</p>
-              </div>
-              <button class="mini" data-modal="편성 규칙">규칙</button>
+          <aside class="panel right-panel">
+            <div class="start-stack">
+              <button class="primary" data-action="start">전투 시작하기</button>
+              <button class="secondary" data-action="practice">연습 전투하기</button>
+              <button class="ghost" data-modal="편성 저장">현재 편성 저장</button>
             </div>
 
-            <div class="support-list">
-              <article class="card support">
-                <div class="bot-icon" style="background: var(--cyan)">W</div>
-                <div>
-                  <h3>PIT-01 / 바퀴형</h3>
-                  <p>기본 정비. 수리비 -8%, 배터리 회복 +5%</p>
+            <div class="loadout-summary">
+              <article class="card">
+                <div class="card-head">
+                  <h3>전투봇</h3>
+                  <button class="ghost" data-modal="전투봇 변경">변경</button>
                 </div>
-                <button data-modal="PIT-01">커스텀</button>
+                <div class="status-line"><span>이름</span><b>MECH BOXER</b></div>
+                <div class="status-line"><span>역할</span><b>근접 복서</b></div>
+                <div class="status-line"><span>상태</span><b style="color: var(--green)">출전 가능</b></div>
               </article>
 
-              <article class="card support">
-                <div class="bot-icon" style="background: var(--green)">Q</div>
-                <div>
-                  <h3>QUAD-K9 / 4족</h3>
-                  <p>파손 회수. 부품 회수율 +18%, 안정성 보너스</p>
+              <article class="card">
+                <div class="card-head">
+                  <h3>서포트봇 3대</h3>
+                  <button class="ghost" data-view-jump="garage">편집</button>
                 </div>
-                <button data-modal="QUAD-K9">커스텀</button>
-              </article>
-
-              <article class="card support">
-                <div class="bot-icon" style="background: var(--gold)">B</div>
-                <div>
-                  <h3>BIPED-7 / 2족</h3>
-                  <p>정밀 튜닝. 업그레이드 비용 -10%</p>
-                </div>
-                <button data-modal="BIPED-7">커스텀</button>
+                <div class="status-line"><span>PIT-01</span><b>바퀴형</b></div>
+                <div class="status-line"><span>QUAD-K9</span><b>4족 보행</b></div>
+                <div class="status-line"><span>BIPED-7</span><b>2족 보행</b></div>
               </article>
             </div>
 
-            <button class="action" data-modal="랭킹">편성 랭킹 만들기</button>
+            <div class="scorebox">
+              <article class="card"><span class="caption">편성 점수</span><strong id="scoreText">8,420</strong></article>
+              <article class="card"><span class="caption">안정성</span><strong style="color: var(--green)">A-</strong></article>
+              <article class="card"><span class="caption">코스트</span><strong id="costText">72</strong></article>
+            </div>
           </aside>
         </section>
-
-        <footer class="dock">
-          <div class="metric">
-            <span>편성 점수</span>
-            <strong>8,420</strong>
-          </div>
-          <div class="metric">
-            <span>정비 안정성</span>
-            <strong style="color: var(--green)">A-</strong>
-          </div>
-          <div class="metric">
-            <span>빌드 성향</span>
-            <strong>회복형 복서</strong>
-          </div>
-          <button class="action" data-modal="출전 확인">UI 흐름 확인</button>
-        </footer>
       </section>
     </main>
 
@@ -642,130 +1063,288 @@
         <div class="modal-head">
           <div>
             <h2 data-modal-title>상세</h2>
-            <p class="caption" data-modal-caption>눌렀을 때 상세 정보를 modal로 보여주는 구조</p>
+            <p class="caption" data-modal-caption>클릭한 버튼의 세부 정보</p>
           </div>
           <button class="close" data-close>×</button>
         </div>
-        <div class="modal-grid" data-modal-body></div>
+        <div class="modal-body" data-modal-body></div>
       </section>
     </div>
 
     <script>
-      const data = {
-        "홈": [
-          ["목적", "전투봇과 서포트봇 3대 편성을 한 화면에서 확인"],
-          ["정보량", "가로폰 첫 화면에는 핵심 점수와 선택 상태만 노출"],
-          ["상세", "부품, 정비봇, 랭킹은 모두 modal로 분리"]
+      const state = {
+        view: "home",
+        animation: "idle",
+        score: 8420,
+        cost: 72,
+        hp: 86,
+        credits: { rc: 2430, vc: 820, wc: 640 },
+        battery: "Titan Cell S2",
+        stats: {
+          power: { label: "공격", value: 74, cost: 120, coin: "RC" },
+          armor: { label: "장갑", value: 68, cost: 95, coin: "RC" },
+          speed: { label: "기동", value: 61, cost: 80, coin: "VC" },
+          cooling: { label: "냉각", value: 72, cost: 70, coin: "VC" },
+          sensor: { label: "센서", value: 83, cost: 110, coin: "WC" },
+          battery: { label: "전원", value: 79, cost: 90, coin: "WC" }
+        }
+      };
+
+      const viewMeta = {
+        home: ["홈 / MECH BOXER 상태", "전투봇 현재 상태와 배터리, 장착 서포트봇, 시작 버튼을 한 화면에 배치"],
+        upgrade: ["업그레이드 / 부품별 강화", "공격, 장갑, 기동, 냉각, 센서, 전원을 각각 강화하는 구조"],
+        garage: ["정비실 / 서포트봇 커스텀", "바퀴형, 4족 보행, 2족 보행 서포트봇을 각각 커스텀"],
+        league: ["리그 / 랭킹", "편성 점수와 친구 랭킹 비교, 전투 시작 진입"],
+        training: ["훈련 / 연습 전투", "전투 전 조작과 애니메이션 루틴을 테스트하는 화면"]
+      };
+
+      const modalData = {
+        "상태 상세": [
+          ["현재 판단", "배터리 79%, 내구도 86%, 냉각 안정. 바로 출전 가능"],
+          ["위험 요소", "장갑 수치가 공격보다 낮아 장기전에서 손상률 상승"],
+          ["추천", "장갑 1회 강화 후 리그 입장"]
         ],
-        "업그레이드": [
-          ["측정실", "멀티미터 / 부하 테스트 / 전투 리포트"],
-          ["전원설계", "배터리, 컨버터, 과열 안정성 강화"],
-          ["배선", "전선 등급, 커넥터, 신호 안정성 강화"],
-          ["카메라·센서", "표적 인식, 시야각, 충격 감지 강화"]
+        "배터리 설명": [
+          ["Titan Cell S2", "균형형. 기본 추천 배터리"],
+          ["Sprint Pack R", "속도 +8, 전투 지속시간 -6"],
+          ["Heavy Core XL", "지속시간 +12, 기동 -5"]
         ],
-        "정비실": [
-          ["서포트봇 슬롯", "최대 3대 장착"],
-          ["커스텀", "4족 / 바퀴 / 2족 타입별 섀시, 작업 암, AI 루틴 강화"],
-          ["역할", "전투 중 직접 싸우지 않고 전투 후 회복과 랭킹에 영향"]
+        "랭킹 산식": [
+          ["전투봇", "공격, 장갑, 기동, 센서, 전원 평균"],
+          ["서포트봇", "3대 조합 보너스와 정비 안정성"],
+          ["패널티", "코스트 과다, 배터리 부족, 냉각 부족"]
         ],
-        "리그": [
-          ["랭킹 방식", "전투봇 성능 + 서포트봇 조합 + 정비 안정성으로 편성 점수 계산"],
-          ["공유", "@vector_claw 랭킹 보드처럼 친구 편성과 비교 가능"],
-          ["MVP", "전투 시작 없이 편성 랭킹 UI부터 확인"]
+        "훈련 목표": [
+          ["이동", "가속과 감속, 피격 후 자세 복구"],
+          ["펀치", "선딜, 타격, 복귀 타이밍 확인"],
+          ["가드", "상체 낮춤, 팔 위치, 충격 흡수 표현"]
         ],
-        "훈련": [
-          ["목적", "나중에 조작, 콤보, 회피 타이밍 연습으로 연결"],
-          ["현재", "이번 와이어프레임에서는 버튼만 노출"]
+        "저장": [
+          ["저장됨", "현재 UI 프로토타입에서는 로컬 상태만 갱신"],
+          ["다음 단계", "Supabase나 GitHub-backed ranking storage 연결 가능"]
         ],
-        "전원설계": [
-          ["현재 상태", "효율 82%, 순간 출력 +12, 과열 위험 중간"],
-          ["추천", "VC 80으로 컨버터 안정화 먼저 강화"],
-          ["서포트 영향", "PIT-01 장착 시 전투 후 배터리 회복 +5%"]
+        "편성 저장": [
+          ["저장 슬롯", "MECH BOXER + PIT-01 + QUAD-K9 + BIPED-7"],
+          ["랭킹", "현재 예상 TOP 12%"],
+          ["상태", "출전 가능"]
         ],
-        "배선": [
-          ["현재 상태", "신호 안정 76%, 피격 후 접촉 불량 위험"],
-          ["추천", "WC 95로 방진 커넥터 교체"],
-          ["서포트 영향", "QUAD-K9 장착 시 파손 부품 회수율 증가"]
-        ],
-        "카메라·센서": [
-          ["현재 상태", "표적 인식 91%, 암전 아레나 보정 낮음"],
-          ["추천", "RC 120으로 저조도 카메라 강화"],
-          ["랭킹 영향", "센서형 빌드는 회피 점수에 보너스"]
-        ],
-        "측정실": [
-          ["진단", "전투 후 손상률, 전압 흔들림, 센서 로그 확인"],
-          ["결과", "측정 결과가 업그레이드 추천과 랭킹 점수에 반영"],
-          ["UI", "전체 표는 modal 내부에서만 보여줌"]
-        ],
-        "PIT-01": [
-          ["타입", "바퀴형 기본 정비봇"],
-          ["강화", "작업 암 Lv.3, 배터리 도킹 Lv.2"],
-          ["효과", "수리비 -8%, 배터리 회복 +5%"]
-        ],
-        "QUAD-K9": [
-          ["타입", "4족 보행 회수봇"],
-          ["강화", "견인 다리 Lv.4, 파손 스캐너 Lv.2"],
-          ["효과", "부품 회수율 +18%, 전투 후 안정성 보너스"]
-        ],
-        "BIPED-7": [
-          ["타입", "2족 보행 정밀 튜닝봇"],
-          ["강화", "정밀 손 Lv.3, 튜닝 AI Lv.2"],
-          ["효과", "업그레이드 비용 -10%"]
-        ],
-        "편성 규칙": [
-          ["전투봇", "한 경기에는 전투봇 1대"],
-          ["서포트봇", "정비봇/서포트봇 최대 3대"],
-          ["핵심", "서포트봇은 작은 전투봇이 아니라 전투 사이클을 바꾸는 보조 유닛"]
-        ],
-        "랭킹": [
-          ["1위", "Iron Choir / 9,820 / 드론 분석형"],
-          ["2위", "Vector Lab / 8,420 / 바퀴 + 4족 + 2족 정비"],
-          ["3위", "Null Arena / 7,960 / 중장갑 수리형"],
-          ["다음 액션", "편성 저장 후 친구 랭킹과 비교"]
-        ],
-        "출전 확인": [
-          ["현재 범위", "게임 시작 없음. UI 흐름만 검증"],
-          ["다음 제작", "이 화면을 Unity Canvas 또는 WebGL UI로 재현"],
-          ["주의", "전투 로직은 아직 연결하지 않음"]
+        "전투봇 변경": [
+          ["현재", "MECH BOXER"],
+          ["추가 예정", "중장갑형, 고속형, 장거리형"],
+          ["원칙", "고정 주인공 없이 보유 로봇 중 선택"]
         ]
       };
 
-      const backdrop = document.querySelector("[data-backdrop]");
-      const title = document.querySelector("[data-modal-title]");
-      const caption = document.querySelector("[data-modal-caption]");
-      const body = document.querySelector("[data-modal-body]");
+      const batteries = [
+        ["Titan Cell S2", "균형형", "+0 전체 밸런스", 0],
+        ["Sprint Pack R", "고속형", "기동 +8 / 지속 -6", 8],
+        ["Heavy Core XL", "지속형", "전원 +12 / 기동 -5", 12]
+      ];
 
-      function openModal(key) {
-        title.textContent = key;
-        caption.textContent = "세부 정보는 화면을 덮는 modal로 확인";
-        body.innerHTML = "";
-        (data[key] || data["홈"]).forEach(([label, value]) => {
+      const supports = [
+        ["PIT-01", "바퀴형", "수리비 -8%, 배터리 회복 +5%", "W", "var(--cyan)"],
+        ["QUAD-K9", "4족 보행", "부품 회수율 +18%, 안정성 보너스", "Q", "var(--green)"],
+        ["BIPED-7", "2족 보행", "업그레이드 비용 -10%, 정밀 튜닝", "B", "var(--gold)"]
+      ];
+
+      const views = document.querySelectorAll("[data-page]");
+      const navButtons = document.querySelectorAll("[data-view]");
+      const viewTitle = document.getElementById("viewTitle");
+      const viewCaption = document.getElementById("viewCaption");
+      const backdrop = document.querySelector("[data-backdrop]");
+      const modalTitle = document.querySelector("[data-modal-title]");
+      const modalCaption = document.querySelector("[data-modal-caption]");
+      const modalBody = document.querySelector("[data-modal-body]");
+
+      function setView(view) {
+        state.view = view;
+        views.forEach((panel) => panel.classList.toggle("active", panel.dataset.page === view));
+        navButtons.forEach((button) => button.classList.toggle("active", button.dataset.view === view));
+        viewTitle.textContent = viewMeta[view][0];
+        viewCaption.textContent = viewMeta[view][1];
+      }
+
+      function setAnimation(mode) {
+        state.animation = mode;
+        document.querySelectorAll("[data-animation]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.animation === mode);
+        });
+        document.getElementById("animationLabel").textContent = mode.toUpperCase();
+        document.getElementById("practiceState").textContent = mode === "idle" ? "READY" : mode.toUpperCase();
+        document.getElementById("robotRig").className = `robot-rig ${mode}`;
+      }
+
+      function openModal(key, rows = null) {
+        modalTitle.textContent = key;
+        modalCaption.textContent = "버튼을 눌렀을 때 나오는 세부 정보";
+        modalBody.innerHTML = "";
+        (rows || modalData[key] || [["확인", "이 버튼은 클릭 가능한 상태로 연결되어 있음"]]).forEach(([label, value]) => {
           const row = document.createElement("div");
-          row.className = "row";
-          row.innerHTML = `<span>${label}<small>${value}</small></span><b>보기</b>`;
-          body.appendChild(row);
+          row.className = "modal-row";
+          row.innerHTML = `<span>${label}<small>${value}</small></span><b>확인</b>`;
+          modalBody.appendChild(row);
         });
         backdrop.classList.add("open");
       }
+
+      function renderStats() {
+        const homeStats = document.getElementById("homeStats");
+        const upgradeGrid = document.getElementById("upgradeGrid");
+        homeStats.innerHTML = "";
+        upgradeGrid.innerHTML = "";
+
+        Object.entries(state.stats).forEach(([key, stat]) => {
+          const row = document.createElement("div");
+          row.className = "stat-row";
+          row.innerHTML = `<span>${stat.label}</span><div class="bar" style="--value: ${stat.value}%"><i></i></div><b>${stat.value}</b>`;
+          homeStats.appendChild(row);
+
+          const card = document.createElement("article");
+          card.className = "card module";
+          card.innerHTML = `
+            <div class="module-top">
+              <div>
+                <h3>${stat.label} 업그레이드</h3>
+                <p class="caption">${stat.coin} ${stat.cost} 사용 / 현재 ${stat.value}</p>
+              </div>
+              <span class="chip">Lv.${Math.floor(stat.value / 10)}</span>
+            </div>
+            <div class="bar" style="--value: ${stat.value}%"><i></i></div>
+            <button class="upgrade-button" data-upgrade="${key}">${stat.label} +1 강화</button>
+          `;
+          upgradeGrid.appendChild(card);
+        });
+
+        document.querySelectorAll("[data-upgrade]").forEach((button) => {
+          button.addEventListener("click", () => upgrade(button.dataset.upgrade));
+        });
+      }
+
+      function renderBatteries() {
+        const list = document.getElementById("batteryList");
+        list.innerHTML = "";
+        batteries.forEach(([name, type, desc]) => {
+          const button = document.createElement("button");
+          button.className = `card battery${state.battery === name ? " active" : ""}`;
+          button.innerHTML = `<span><b>${name}</b><small class="caption">${type} / ${desc}</small></span><b>장착</b>`;
+          button.addEventListener("click", () => {
+            state.battery = name;
+            document.getElementById("batteryText").textContent = name;
+            renderBatteries();
+          });
+          list.appendChild(button);
+        });
+      }
+
+      function renderSupports() {
+        const list = document.getElementById("supportList");
+        list.innerHTML = "";
+        supports.forEach(([name, type, desc, icon, color]) => {
+          const card = document.createElement("article");
+          card.className = "card support";
+          card.innerHTML = `
+            <div class="bot-icon" style="background: ${color}">${icon}</div>
+            <div>
+              <h3>${name} / ${type}</h3>
+              <p class="caption">${desc}</p>
+            </div>
+            <button data-support="${name}">커스텀</button>
+          `;
+          list.appendChild(card);
+        });
+        document.querySelectorAll("[data-support]").forEach((button) => {
+          button.addEventListener("click", () => {
+            openModal(button.dataset.support, [
+              ["섀시", "바퀴 / 4족 / 2족 프레임 교체 가능"],
+              ["작업장비", "작업 암, 센서, 견인 장치, 튜닝 AI 강화"],
+              ["효과", "전투 후 수리, 회수, 업그레이드 비용에 영향"]
+            ]);
+          });
+        });
+      }
+
+      function upgrade(key) {
+        const stat = state.stats[key];
+        const coin = stat.coin.toLowerCase();
+        if (state.credits[coin] >= stat.cost && stat.value < 99) {
+          state.credits[coin] -= stat.cost;
+          stat.value += 3;
+          state.score += 75;
+          state.cost += 1;
+          updateNumbers();
+          renderStats();
+          openModal(`${stat.label} 강화 완료`, [
+            ["결과", `${stat.label} 수치가 ${stat.value}로 상승`],
+            ["편성 점수", `${state.score.toLocaleString()}점`],
+            ["다음", "다른 스텟을 강화하거나 전투 시작 가능"]
+          ]);
+        } else {
+          openModal(`${stat.label} 강화 실패`, [
+            ["이유", `${stat.coin}가 부족하거나 최대치에 가까움`],
+            ["필요 비용", `${stat.coin} ${stat.cost}`]
+          ]);
+        }
+      }
+
+      function updateNumbers() {
+        document.getElementById("rc").textContent = `RC ${state.credits.rc.toLocaleString()}`;
+        document.getElementById("vc").textContent = `VC ${state.credits.vc.toLocaleString()}`;
+        document.getElementById("wc").textContent = `WC ${state.credits.wc.toLocaleString()}`;
+        document.getElementById("scoreText").textContent = state.score.toLocaleString();
+        document.getElementById("scoreLeague").textContent = state.score.toLocaleString();
+        document.getElementById("costText").textContent = state.cost;
+        document.getElementById("hpText").textContent = `${state.hp}%`;
+      }
+
+      document.querySelectorAll("[data-view]").forEach((button) => {
+        button.addEventListener("click", () => setView(button.dataset.view));
+      });
+
+      document.querySelectorAll("[data-view-jump]").forEach((button) => {
+        button.addEventListener("click", () => setView(button.dataset.viewJump));
+      });
 
       document.querySelectorAll("[data-modal]").forEach((button) => {
         button.addEventListener("click", () => openModal(button.dataset.modal));
       });
 
-      document.querySelector("[data-close]").addEventListener("click", () => {
-        backdrop.classList.remove("open");
+      document.querySelectorAll("[data-animation]").forEach((button) => {
+        button.addEventListener("click", () => setAnimation(button.dataset.animation));
       });
 
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const action = button.dataset.action;
+          if (action === "practice") {
+            setView("training");
+            setAnimation("walk");
+            openModal("연습 전투 입장", [
+              ["상태", "프랙티스 아레나 진입"],
+              ["조작", "이동, 펀치, 가드 루틴 버튼 연결"],
+              ["로봇", "3D 모델이 훈련 애니메이션으로 전환"]
+            ]);
+          }
+          if (action === "start") {
+            setView("league");
+            setAnimation("guard");
+            openModal("전투 시작 확인", [
+              ["전투봇", "MECH BOXER"],
+              ["서포트봇", "PIT-01 + QUAD-K9 + BIPED-7"],
+              ["다음 단계", "Unity에서는 여기서 매치 씬 로딩"]
+            ]);
+          }
+        });
+      });
+
+      document.querySelector("[data-close]").addEventListener("click", () => backdrop.classList.remove("open"));
       backdrop.addEventListener("click", (event) => {
-        if (event.target === backdrop) {
-          backdrop.classList.remove("open");
-        }
+        if (event.target === backdrop) backdrop.classList.remove("open");
       });
 
-      document.querySelector("[data-theme]").addEventListener("click", (event) => {
-        document.documentElement.classList.toggle("light");
-        event.currentTarget.textContent = document.documentElement.classList.contains("light") ? "Dark" : "Light";
-      });
+      renderStats();
+      renderBatteries();
+      renderSupports();
+      updateNumbers();
     </script>
   </body>
 </html>
