@@ -530,9 +530,126 @@
       }
 
       .upgrade-card {
+        position: relative;
         display: grid;
+        grid-template-rows: auto auto 1fr auto;
+        gap: 12px;
+        min-height: 176px;
+        overflow: hidden;
+      }
+
+      .upgrade-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.78;
+        background:
+          radial-gradient(circle at 18% 12%, var(--upgrade-glow), transparent 34%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%);
+        pointer-events: none;
+      }
+
+      .upgrade-card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .upgrade-top {
+        display: grid;
+        grid-template-columns: 48px 1fr auto;
         gap: 10px;
-        min-height: 152px;
+        align-items: center;
+      }
+
+      .upgrade-icon {
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 38%),
+          var(--upgrade-glow);
+        color: #061018;
+        font-size: 21px;
+        font-weight: 950;
+        box-shadow: 0 0 28px var(--upgrade-glow);
+      }
+
+      .upgrade-stat {
+        display: grid;
+        gap: 6px;
+      }
+
+      .upgrade-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .upgrade-cta {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .upgrade-button {
+        min-height: 44px;
+        border: 1px solid rgba(80, 221, 255, 0.56);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(80, 221, 255, 0.26), rgba(255, 200, 90, 0.16)),
+          rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 950;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+      }
+
+      .upgrade-button:disabled {
+        cursor: default;
+        border-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        box-shadow: none;
+      }
+
+      .upgrade-empty {
+        display: grid;
+        grid-column: 1 / -1;
+        place-items: center;
+        min-height: 520px;
+        padding: 28px;
+        border: 1px dashed rgba(80, 221, 255, 0.34);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 50% 28%, rgba(80, 221, 255, 0.14), transparent 32%),
+          rgba(255, 255, 255, 0.03);
+      }
+
+      .upgrade-empty-box {
+        display: grid;
+        gap: 14px;
+        max-width: 390px;
+        text-align: center;
+      }
+
+      .upgrade-empty-icon {
+        display: grid;
+        place-items: center;
+        width: 76px;
+        height: 76px;
+        margin: 0 auto;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--cyan), var(--gold));
+        color: #061018;
+        font-size: 34px;
+        font-weight: 950;
       }
 
       .support-row,
@@ -1575,15 +1692,51 @@
       }
 
       function renderUpgrades(robot) {
-        if (!robot) return empty("업그레이드할 전투봇이 없음");
-        const fields = [["attack", "공격"], ["armor", "장갑"], ["speed", "기동"], ["cooling", "냉각"], ["sensor", "센서"], ["power", "전원"]];
-        return fields.map(([key, label]) => `
-          <article class="card upgrade-card">
-            <div class="card-head"><h3>${label}</h3><span class="chip">${robot[key]}</span></div>
-            <div class="bar" style="--value:${robot[key]}%"><i></i></div>
-            <button class="secondary" data-upgrade="${key}">${label} 실제 데이터 +1</button>
-          </article>
-        `).join("");
+        if (!robot) {
+          return `
+            <div class="upgrade-empty">
+              <div class="upgrade-empty-box">
+                <div class="upgrade-empty-icon">+</div>
+                <h3>업그레이드할 전투봇이 없음</h3>
+                <p class="caption">기본 전투봇을 생성하면 공격, 장갑, 기동, 냉각, 센서, 전원 슬롯을 바로 강화할 수 있음</p>
+                <button class="primary" data-create-upgrade-robot>기본 전투봇 생성</button>
+              </div>
+            </div>
+          `;
+        }
+        const fields = [
+          { key: "attack", label: "공격", icon: "ATK", tone: "rgba(255, 95, 87, 0.44)", desc: "타격 피해량", cost: "RC 120" },
+          { key: "armor", label: "장갑", icon: "ARM", tone: "rgba(135, 153, 173, 0.5)", desc: "내구/방어력", cost: "RC 110" },
+          { key: "speed", label: "기동", icon: "SPD", tone: "rgba(80, 221, 255, 0.44)", desc: "이동/회피 반응", cost: "RC 95" },
+          { key: "cooling", label: "냉각", icon: "CLD", tone: "rgba(112, 243, 154, 0.38)", desc: "연속 전투 안정성", cost: "RC 90" },
+          { key: "sensor", label: "센서", icon: "SNS", tone: "rgba(255, 200, 90, 0.42)", desc: "탐지/락온 정확도", cost: "RC 105" },
+          { key: "power", label: "전원", icon: "PWR", tone: "rgba(178, 128, 255, 0.42)", desc: "출력/배터리 효율", cost: "RC 130" }
+        ];
+        return fields.map(({ key, label, icon, tone, desc, cost }) => {
+          const value = Number(robot[key] || 0);
+          const capped = value >= 99;
+          return `
+            <article class="card upgrade-card" style="--upgrade-glow:${tone}">
+              <div class="upgrade-top">
+                <div class="upgrade-icon">${icon}</div>
+                <div>
+                  <h3>${label} 슬롯</h3>
+                  <p class="caption">${desc}</p>
+                </div>
+                <span class="chip">Lv ${value}</span>
+              </div>
+              <div class="upgrade-stat">
+                <div class="upgrade-meta"><span>현재 성능</span><b>${value}/99</b></div>
+                <div class="bar" style="--value:${value}%"><i></i></div>
+              </div>
+              <div class="upgrade-meta"><span>강화 결과</span><b>${capped ? "MAX" : `Lv ${value + 1}`}</b></div>
+              <div class="upgrade-cta">
+                <button class="upgrade-button" data-upgrade="${key}" ${capped ? "disabled" : ""}>${capped ? "최대 강화" : `${label} 강화`}</button>
+                <span class="chip">${cost}</span>
+              </div>
+            </article>
+          `;
+        }).join("");
       }
 
       function renderSupports() {
@@ -1704,6 +1857,7 @@
         ]);
         state.robot = robot;
         await loadData();
+        return state.robot;
       }
 
       async function upgrade(field) {
@@ -1727,7 +1881,10 @@
 
       async function startBattle() {
         if (!state.user) return signIn();
-        if (!state.robot) return showModal("전투봇 필요", "먼저 기본 로봇을 생성해야 전투장에 들어갈 수 있음");
+        if (!state.robot) {
+          const robot = await createStarterRobot();
+          if (!robot) return;
+        }
         state.trainingMode = false;
         await saveLoadout();
         const { data, error } = await client.from("battle_sessions").insert({
@@ -1764,6 +1921,8 @@
       document.addEventListener("click", (event) => {
         const upgradeButton = event.target.closest("[data-upgrade]");
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
+        const createUpgradeRobotButton = event.target.closest("[data-create-upgrade-robot]");
+        if (createUpgradeRobotButton) createStarterRobot();
       });
       document.getElementById("loginButton").addEventListener("click", () => showLoginPage());
       document.querySelectorAll("[data-auth-provider]").forEach((button) => {
