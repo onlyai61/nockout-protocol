@@ -27,6 +27,10 @@
         --green: #70f39a;
         --red: #ff5f57;
         --steel: #8799ad;
+        --ui-window: url("./assets/ui/window_transparent.png");
+        --ui-button: url("./assets/ui/button1.png");
+        --ui-button-active: url("./assets/ui/button_active.png");
+        --ui-bar: url("./assets/ui/progress_bar_background.png");
       }
 
       * { box-sizing: border-box; }
@@ -2332,6 +2336,7 @@
     <script type="module">
       import * as THREE from "three";
       import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+      import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
       import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
       import { clone as cloneSkeleton } from "three/addons/utils/SkeletonUtils.js";
 
@@ -2346,8 +2351,14 @@
           storage: window.localStorage
         }
       }) || null;
-      const ROBOT_ASSET_VERSION = "gen1-animation-20260527";
-      const ROBOT_MODEL_URL = `./assets/gen1_animation.glb?v=${ROBOT_ASSET_VERSION}`;
+      const ROBOT_ASSET_VERSION = "meshy-gen1-fbx-20260527";
+      const ROBOT_MODEL_URL = `./assets/gen1-meshy/Meshy_AI_gen_1_biped_Animation_Walking_withSkin.fbx?v=${ROBOT_ASSET_VERSION}`;
+      const ROBOT_TEXTURE_URLS = {
+        map: `./assets/gen1-meshy/Meshy_AI_gen_1_biped_texture_0.png?v=${ROBOT_ASSET_VERSION}`,
+        metalnessMap: `./assets/gen1-meshy/Meshy_AI_gen_1_biped_texture_0_metallic.png?v=${ROBOT_ASSET_VERSION}`,
+        normalMap: `./assets/gen1-meshy/Meshy_AI_gen_1_biped_texture_0_normal.png?v=${ROBOT_ASSET_VERSION}`,
+        roughnessMap: `./assets/gen1-meshy/Meshy_AI_gen_1_biped_texture_0_roughness.png?v=${ROBOT_ASSET_VERSION}`
+      };
       const ARENA_FLOOR_Y = 0;
       const UNITY_COMBAT_CAMERA = {
         fov: 34,
@@ -2552,7 +2563,32 @@
       dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/libs/draco/");
       const gltfLoader = new GLTFLoader();
       gltfLoader.setDRACOLoader(dracoLoader);
-      const robotAsset = gltfLoader.loadAsync(ROBOT_MODEL_URL);
+      const fbxLoader = new FBXLoader();
+      const textureLoader = new THREE.TextureLoader();
+
+      async function loadRobotTextures() {
+        const entries = await Promise.all(Object.entries(ROBOT_TEXTURE_URLS).map(async ([key, url]) => {
+          const texture = await textureLoader.loadAsync(url);
+          if (key === "map") texture.colorSpace = THREE.SRGBColorSpace;
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          return [key, texture];
+        }));
+        return Object.fromEntries(entries);
+      }
+
+      async function loadRobotAsset() {
+        if (/\.fbx(\?|$)/i.test(ROBOT_MODEL_URL)) {
+          const [scene, textures] = await Promise.all([
+            fbxLoader.loadAsync(ROBOT_MODEL_URL),
+            loadRobotTextures()
+          ]);
+          return { scene, animations: scene.animations || [], textures };
+        }
+        return gltfLoader.loadAsync(ROBOT_MODEL_URL);
+      }
+
+      const robotAsset = loadRobotAsset();
 
       class RobotStage {
         constructor(container, options = {}) {
@@ -2682,6 +2718,7 @@
 
         mount(gltf) {
           const model = cloneSkeleton(gltf.scene);
+          const textures = gltf.textures || null;
           model.updateMatrixWorld(true);
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
@@ -2706,6 +2743,13 @@
               const materials = hasMaterialArray ? child.material : [child.material];
               const tunedMaterials = materials.map((material) => {
                 const next = material ? material.clone() : new THREE.MeshStandardMaterial();
+                if (textures?.map) {
+                  next.map = textures.map;
+                  if (next.color) next.color.setHex(0xffffff);
+                }
+                if (textures?.normalMap && "normalMap" in next) next.normalMap = textures.normalMap;
+                if (textures?.metalnessMap && "metalnessMap" in next) next.metalnessMap = textures.metalnessMap;
+                if (textures?.roughnessMap && "roughnessMap" in next) next.roughnessMap = textures.roughnessMap;
                 if (!next.map && next.color) next.color.setHex(0xb8c8d8);
                 if (next.emissive && !next.emissiveMap) {
                   next.emissive.setHex(0x071522);
