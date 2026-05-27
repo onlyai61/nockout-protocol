@@ -1720,8 +1720,8 @@
           <section class="view" data-page="training">
             <div class="list">
               <article class="card">
-                <div class="card-head"><h3>샌드백 훈련</h3><button class="primary" id="practiceButton">훈련장 입장</button></div>
-                <p class="caption">상대 AI 없이 매달린 샌드백을 타격하며 펀치 모션과 타격감을 확인한다.</p>
+                <div class="card-head"><h3>연습 훈련</h3><button class="primary" id="practiceButton">훈련장 입장</button></div>
+                <p class="caption">매칭 없이 전투장에 들어가 이동, 점프, 주먹, 발차기 조작을 확인한다.</p>
               </article>
               <article class="card">
                 <button class="secondary" data-anim="walk">이동 루틴</button>
@@ -1748,12 +1748,8 @@
                 </div>
               </div>
               <div class="arena-hud">
-                <span class="chip" id="battleState">전투 대기</span>
+                <span class="chip" id="battleState" hidden>전투 대기</span>
                 <div>
-                  <button class="secondary" data-anim="guard">가드</button>
-                  <button class="primary" data-anim="punch">펀치</button>
-                  <button class="secondary" data-anim="hit">피격</button>
-                  <button class="secondary" data-anim="knockdown">다운</button>
                   <button class="ghost" id="endBattleHudButton">나가기</button>
                 </div>
               </div>
@@ -1765,7 +1761,7 @@
               </article>
               <article class="card">
                 <h3>아레나 목표</h3>
-                <p class="caption">전투 시작하기를 누르면 이 화면으로 바로 들어오고, Supabase에 battle_sessions 행을 생성한다.</p>
+                <p class="caption">전투 시작하기에서 모드를 고르고, 연습 훈련을 선택하면 조작 테스트 전투장으로 입장한다.</p>
               </article>
             </aside>
           </section>
@@ -1774,7 +1770,6 @@
         <aside class="panel side">
           <div class="side-actions">
             <button class="primary" id="startBattleButton">전투 시작하기</button>
-            <button class="secondary" id="startPracticeButton">샌드백 훈련하기</button>
           </div>
           <article class="card">
             <div class="card-head"><h3>현재 편성</h3><button class="ghost" id="saveLoadoutButton">저장</button></div>
@@ -2026,7 +2021,7 @@
         garage: ["정비실", "유저가 보유한 서포트봇 데이터를 보여준다"],
         league: ["리그", "저장된 랭킹 엔트리를 표시한다"],
         friends: ["친구", "친구 코드로 유저를 추가하고 목록을 관리한다"],
-        training: ["훈련", "샌드백 타격으로 펀치 루틴을 확인한다"],
+        training: ["훈련", "매칭 없이 전투 조작을 테스트한다"],
         arena: ["전투장", "전투 시작 후 들어오는 아레나 화면"]
       };
 
@@ -2521,11 +2516,11 @@
         document.querySelector("[data-page='arena']").classList.toggle("battle-live", state.combatMode);
         const battleNotice = state.combatNotice ? line("기록", state.combatNotice) : "";
         document.getElementById("battleInfo").innerHTML = state.trainingMode
-          ? line("모드", "샌드백 훈련") + line("목표", "펀치 타격감 확인") + line("세션", "로컬")
+          ? line("모드", "연습 훈련") + line("목표", "전투 조작 확인") + line("세션", "로컬")
           : state.battle
             ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name) + battleNotice
             : empty("전투 세션 없음");
-        document.getElementById("battleState").textContent = state.trainingMode ? "SANDBAG TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
+        document.getElementById("battleState").textContent = state.trainingMode ? "PRACTICE TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
         document.getElementById("enemyTarget").hidden = state.trainingMode;
         document.getElementById("sandbagTarget").hidden = !state.trainingMode;
         setAnim(state.anim);
@@ -2839,49 +2834,39 @@
         return true;
       }
 
-      async function startBattle() {
+      function showBattleModeMenu() {
+        showModal("전투 모드 선택", "입장할 전투 모드를 선택해줘.");
+        document.getElementById("modalBody").innerHTML = `
+          <button class="primary" data-battle-mode="duel">1:1 배틀</button>
+          <button class="secondary" data-battle-mode="ranked">랭킹전</button>
+          <button class="primary" data-battle-mode="practice">연습 훈련</button>
+        `;
+      }
+
+      async function startPracticeTraining() {
         if (!state.user) return signIn();
         if (!state.robot) {
           const robot = await createStarterRobot();
           if (!robot) return;
         }
         state.trainingMode = false;
-        state.combatNotice = "";
-        await saveLoadout();
-        const { data, error } = await client.from("battle_sessions").insert({
-          user_id: state.user.id,
-          combat_robot_id: state.robot.id,
-          arena_name: "Practice Ring",
-          status: "active"
-        }).select("*").single();
-        if (error) {
-          state.combatNotice = `DB 기록 실패, 로컬 전투로 시작: ${error.message}`;
-          state.battle = {
-            id: `local-${Date.now()}`,
-            status: "local",
-            arena_name: "Practice Ring"
-          };
-        } else {
-          state.battle = data;
-        }
+        state.combatNotice = "연습 훈련 모드";
+        state.battle = {
+          id: `practice-${Date.now()}`,
+          status: "practice",
+          arena_name: "Practice Ring"
+        };
         state.combatMode = true;
         state.controls = { x: 0, y: 0 };
         arenaStage.resetCombatView(true);
         setView("arena");
         setAnim("walk");
+        document.getElementById("modal").classList.remove("open");
         render();
       }
 
       function startSandbagTraining() {
-        state.battle = null;
-        state.combatNotice = "";
-        state.trainingMode = true;
-        state.combatMode = false;
-        state.controls = { x: 0, y: 0 };
-        arenaStage.resetCombatView(true);
-        setView("arena");
-        setAnim("walk");
-        render();
+        startPracticeTraining();
       }
 
       function showModal(title, text) {
@@ -2905,6 +2890,13 @@
         if (createUpgradeRobotButton) createStarterRobot();
         const removeFriendButton = event.target.closest("[data-remove-friend]");
         if (removeFriendButton) removeFriend(removeFriendButton.dataset.removeFriend);
+        const battleModeButton = event.target.closest("[data-battle-mode]");
+        if (battleModeButton) {
+          const mode = battleModeButton.dataset.battleMode;
+          if (mode === "practice") startPracticeTraining();
+          if (mode === "duel") showModal("1:1 배틀", "준비중입니다.");
+          if (mode === "ranked") showModal("랭킹전", "준비중입니다.");
+        }
       });
       document.getElementById("loginButton").addEventListener("click", () => showLoginPage());
       document.querySelectorAll("[data-auth-provider]").forEach((button) => {
@@ -2921,8 +2913,7 @@
       document.getElementById("friendCodeInput").addEventListener("keydown", (event) => {
         if (event.key === "Enter") addFriend();
       });
-      document.getElementById("startBattleButton").addEventListener("click", startBattle);
-      document.getElementById("startPracticeButton").addEventListener("click", startSandbagTraining);
+      document.getElementById("startBattleButton").addEventListener("click", showBattleModeMenu);
       document.getElementById("practiceButton").addEventListener("click", startSandbagTraining);
       document.querySelectorAll("[data-combat-action]").forEach((button) => {
         button.addEventListener("click", () => combatAction(button.dataset.combatAction));
