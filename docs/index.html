@@ -537,9 +537,45 @@
 
       .stats,
       .list,
-      .upgrade-grid {
+      .upgrade-grid,
+      .friend-tools {
         display: grid;
         gap: 9px;
+      }
+
+      .friend-tools {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+      }
+
+      .friend-tools input {
+        min-height: 44px;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        padding: 0 12px;
+        font: 850 12px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0;
+        outline: none;
+      }
+
+      .friend-tools input:focus {
+        border-color: rgba(80, 221, 255, 0.7);
+        box-shadow: 0 0 0 3px rgba(80, 221, 255, 0.12);
+      }
+
+      .friend-card {
+        display: grid;
+        grid-template-columns: 46px 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .friend-code {
+        user-select: all;
+        font-family: Menlo, Consolas, monospace;
       }
 
       .stat {
@@ -1394,6 +1430,7 @@
           <button data-view="upgrade">업그레이드</button>
           <button data-view="garage">정비실</button>
           <button data-view="league">리그</button>
+          <button data-view="friends">친구</button>
           <button data-view="training">훈련</button>
           <button data-view="arena">전투장</button>
         </nav>
@@ -1445,6 +1482,23 @@
 
           <section class="view" data-page="league">
             <div class="list" id="rankingList"></div>
+          </section>
+
+          <section class="view" data-page="friends">
+            <div class="list">
+              <article class="card">
+                <div class="card-head">
+                  <h3>친구 추가</h3>
+                  <span class="chip friend-code" id="myFriendCode">CODE -</span>
+                </div>
+                <div class="friend-tools">
+                  <input id="friendCodeInput" placeholder="친구 코드 입력 / 예: NKO-1234ABCD" autocomplete="off">
+                  <button class="primary" id="addFriendButton">친구 추가</button>
+                </div>
+                <p class="caption" id="friendNote">상대의 친구 코드를 입력하면 친구 목록에 추가된다.</p>
+              </article>
+              <div class="list" id="friendsList"></div>
+            </div>
           </section>
 
           <section class="view" data-page="training">
@@ -1507,6 +1561,10 @@
           <article class="card">
             <div class="card-head"><h3>현재 편성</h3><button class="ghost" id="saveLoadoutButton">저장</button></div>
             <div id="loadoutSummary"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h3>친구</h3><button class="ghost" data-view-jump="friends">추가</button></div>
+            <div id="friendSummary"></div>
           </article>
           <article class="card">
             <div class="card-head"><h3>서포트봇</h3><button class="ghost" data-view-jump="garage">편집</button></div>
@@ -1591,6 +1649,7 @@
         profile: null,
         robot: null,
         supports: [],
+        friends: [],
         loadout: null,
         rankings: [],
         battle: null,
@@ -1624,6 +1683,7 @@
         state.profile = null;
         state.robot = null;
         state.supports = [];
+        state.friends = [];
         state.loadout = null;
         state.rankings = [];
         state.battle = null;
@@ -1645,6 +1705,7 @@
         upgrade: ["업그레이드", "선택된 실제 로봇 행의 스텟을 업데이트한다"],
         garage: ["정비실", "유저가 보유한 서포트봇 데이터를 보여준다"],
         league: ["리그", "저장된 랭킹 엔트리를 표시한다"],
+        friends: ["친구", "친구 코드로 유저를 추가하고 목록을 관리한다"],
         training: ["훈련", "샌드백 타격으로 펀치 루틴을 확인한다"],
         arena: ["전투장", "전투 시작 후 들어오는 아레나 화면"]
       };
@@ -2057,6 +2118,9 @@
         document.getElementById("upgradeGrid").innerHTML = renderUpgrades(robot);
         document.getElementById("supportList").innerHTML = renderSupports();
         document.getElementById("supportSummary").innerHTML = state.supports.length ? state.supports.slice(0, 3).map((bot) => line(bot.name, bot.frame_type)).join("") : empty("보유 서포트봇 없음");
+        document.getElementById("friendsList").innerHTML = renderFriends();
+        document.getElementById("friendSummary").innerHTML = state.friends.length ? state.friends.slice(0, 3).map((friend) => line(friend.display_name || "플레이어", friend.friend_code)).join("") : empty("친구 없음");
+        document.getElementById("myFriendCode").textContent = state.profile?.friend_code || "CODE -";
         document.getElementById("loadoutSummary").innerHTML = robot ? line("전투봇", robot.name) + line("편성", state.loadout?.name || "미저장") : empty("편성할 전투봇 없음");
         document.getElementById("rankingList").innerHTML = renderRankings();
         document.querySelector("[data-page='arena']").classList.toggle("battle-live", state.combatMode);
@@ -2123,6 +2187,20 @@
         `).join("");
       }
 
+      function renderFriends() {
+        if (!state.friends.length) return empty("추가된 친구 없음<br><small>내 친구 코드를 공유하거나 상대 코드를 입력하면 목록에 표시된다.</small>");
+        return state.friends.map((friend) => `
+          <article class="card friend-card">
+            <div class="icon">${(friend.display_name || friend.friend_code || "N").slice(0, 1).toUpperCase()}</div>
+            <div>
+              <h3>${friend.display_name || "NOCKOUT 플레이어"}</h3>
+              <p class="caption">${friend.friend_code || friend.id.slice(0, 8)}</p>
+            </div>
+            <button class="ghost" data-remove-friend="${friend.id}">삭제</button>
+          </article>
+        `).join("");
+      }
+
       function renderRankings() {
         if (!state.rankings.length) return empty("랭킹 데이터 없음<br><small>전투/편성 저장 후 ranking_entries에 쌓이게 된다.</small>");
         return state.rankings.map((row, index) => `
@@ -2185,25 +2263,96 @@
         if (authReturn.isCallback) cleanAuthUrl();
 
         const userId = state.user.id;
+        const fallbackFriendCode = `NKO-${userId.replaceAll("-", "").slice(0, 8).toUpperCase()}`;
         await client.from("profiles").upsert({
           id: userId,
           display_name: state.user.user_metadata?.full_name || state.user.email,
-          avatar_url: state.user.user_metadata?.avatar_url || null
+          avatar_url: state.user.user_metadata?.avatar_url || null,
+          friend_code: fallbackFriendCode
         }, { onConflict: "id" });
 
-        const [{ data: profile }, { data: robots }, { data: supports }, { data: loadouts }, { data: rankings }] = await Promise.all([
+        const [{ data: profile }, { data: robots }, { data: supports }, { data: loadouts }, { data: rankings }, friends] = await Promise.all([
           client.from("profiles").select("*").eq("id", userId).maybeSingle(),
           client.from("robots").select("*").eq("user_id", userId).order("created_at", { ascending: true }),
           client.from("support_bots").select("*").eq("user_id", userId).order("created_at", { ascending: true }),
           client.from("loadouts").select("*").eq("user_id", userId).order("updated_at", { ascending: false }).limit(1),
-          client.from("ranking_entries").select("user_id, display_name, score, created_at").order("score", { ascending: false }).limit(20)
+          client.from("ranking_entries").select("user_id, display_name, score, created_at").order("score", { ascending: false }).limit(20),
+          loadFriends(userId)
         ]);
 
         state.profile = profile;
         state.robot = await normalizeLegacyStarterRobot(robots?.[0] || null);
         state.supports = supports || [];
+        state.friends = friends || [];
         state.loadout = loadouts?.[0] || null;
         state.rankings = rankings || [];
+        render();
+      }
+
+      async function loadFriends(userId) {
+        if (!client || !userId) return [];
+        const { data: links, error } = await client
+          .from("friendships")
+          .select("id, friend_user_id, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
+        if (error) return [];
+        const ids = [...new Set((links || []).map((link) => link.friend_user_id).filter(Boolean))];
+        if (!ids.length) return [];
+        const { data: profiles } = await client
+          .from("profile_cards")
+          .select("id, display_name, avatar_url, friend_code")
+          .in("id", ids);
+        const profileById = new Map((profiles || []).map((profile) => [profile.id, profile]));
+        return (links || []).map((link) => ({ ...link, ...(profileById.get(link.friend_user_id) || { id: link.friend_user_id }) }));
+      }
+
+      async function addFriend() {
+        if (!state.user) return signIn();
+        const input = document.getElementById("friendCodeInput");
+        const note = document.getElementById("friendNote");
+        const code = input.value.trim().toUpperCase();
+        if (!code) {
+          note.textContent = "친구 코드를 입력해줘.";
+          return;
+        }
+        if (code === state.profile?.friend_code) {
+          note.textContent = "내 친구 코드는 추가할 수 없음.";
+          return;
+        }
+        const { data: target, error: lookupError } = await client
+          .from("profile_cards")
+          .select("id, display_name, friend_code")
+          .eq("friend_code", code)
+          .maybeSingle();
+        if (lookupError) {
+          note.textContent = "친구 검색 실패. DB 마이그레이션 적용이 필요할 수 있음.";
+          return;
+        }
+        if (!target) {
+          note.textContent = "해당 친구 코드를 찾지 못함.";
+          return;
+        }
+        const { error } = await client.from("friendships").upsert({
+          user_id: state.user.id,
+          friend_user_id: target.id,
+          status: "accepted"
+        }, { onConflict: "user_id,friend_user_id" });
+        if (error) {
+          note.textContent = `친구 추가 실패: ${error.message}`;
+          return;
+        }
+        input.value = "";
+        note.textContent = `${target.display_name || target.friend_code} 추가 완료.`;
+        state.friends = await loadFriends(state.user.id);
+        render();
+      }
+
+      async function removeFriend(friendId) {
+        if (!state.user || !friendId) return;
+        const { error } = await client.from("friendships").delete().eq("user_id", state.user.id).eq("friend_user_id", friendId);
+        if (error) return showModal("친구 삭제 실패", error.message);
+        state.friends = await loadFriends(state.user.id);
         render();
       }
 
@@ -2313,6 +2462,8 @@
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
         const createUpgradeRobotButton = event.target.closest("[data-create-upgrade-robot]");
         if (createUpgradeRobotButton) createStarterRobot();
+        const removeFriendButton = event.target.closest("[data-remove-friend]");
+        if (removeFriendButton) removeFriend(removeFriendButton.dataset.removeFriend);
       });
       document.getElementById("loginButton").addEventListener("click", () => showLoginPage());
       document.querySelectorAll("[data-auth-provider]").forEach((button) => {
@@ -2322,6 +2473,10 @@
       document.getElementById("logoutButton").addEventListener("click", logout);
       document.getElementById("createRobotButton").addEventListener("click", createStarterRobot);
       document.getElementById("saveLoadoutButton").addEventListener("click", saveLoadout);
+      document.getElementById("addFriendButton").addEventListener("click", addFriend);
+      document.getElementById("friendCodeInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") addFriend();
+      });
       document.getElementById("startBattleButton").addEventListener("click", startBattle);
       document.getElementById("startPracticeButton").addEventListener("click", startSandbagTraining);
       document.getElementById("practiceButton").addEventListener("click", startSandbagTraining);
