@@ -1846,9 +1846,13 @@
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
         fov: 45,
-        offset: new THREE.Vector3(0.58, 1.42, -5.4),
+        distance: 4.8,
+        height: 1.58,
+        shoulder: 0.46,
         targetOffset: new THREE.Vector3(0, 0.72, 0.1),
-        followLerp: 0.24
+        followLerp: 0.16,
+        targetLerp: 0.22,
+        rotationLerp: 0.16
       };
       let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
@@ -2071,6 +2075,9 @@
           this.scene.add(this.group);
           this.velocity = new THREE.Vector3();
           this.playerPosition = new THREE.Vector3(0, 0, options.arena ? -0.45 : 0);
+          this.combatYaw = 0;
+          this.combatCameraTarget = this.playerPosition.clone().add(UNITY_COMBAT_CAMERA.targetOffset);
+          this.combatCameraPosition = new THREE.Vector3();
           this.jumpVelocity = 0;
           this.actionUntil = 0;
           this.lastSize = { width: 0, height: 0 };
@@ -2187,6 +2194,7 @@
         resetCombatView(force = false) {
           if (!this.options.arena || !this.group) return;
           this.playerPosition.set(0, 0, -0.15);
+          this.combatYaw = 0;
           this.jumpVelocity = 0;
           this.group.position.set(this.playerPosition.x, this.playerPosition.y, this.playerPosition.z);
           this.group.rotation.set(0, 0, 0);
@@ -2319,10 +2327,9 @@
 
           if (moving) {
             const targetYaw = Math.atan2(input.x, input.y);
-            this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, targetYaw, 0.18);
-          } else {
-            this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, 0.28, 0.05);
+            this.combatYaw = THREE.MathUtils.lerp(this.combatYaw, targetYaw, UNITY_COMBAT_CAMERA.rotationLerp);
           }
+          this.group.rotation.y = this.combatYaw;
 
           this.group.position.x = this.playerPosition.x;
           this.group.position.y = this.playerPosition.y + Math.sin(t * 2.4) * (moving ? 0.012 : 0.007);
@@ -2361,18 +2368,27 @@
         }
 
         updateCombatCamera(force = false) {
+          const forward = new THREE.Vector3(Math.sin(this.combatYaw), 0, Math.cos(this.combatYaw)).normalize();
+          const right = new THREE.Vector3(forward.z, 0, -forward.x).normalize();
           const target = this.playerPosition.clone().add(UNITY_COMBAT_CAMERA.targetOffset);
-          const cameraPosition = this.playerPosition.clone().add(UNITY_COMBAT_CAMERA.offset);
+          const cameraPosition = this.playerPosition.clone()
+            .addScaledVector(forward, -UNITY_COMBAT_CAMERA.distance)
+            .addScaledVector(right, UNITY_COMBAT_CAMERA.shoulder);
+          cameraPosition.y += UNITY_COMBAT_CAMERA.height;
           if (this.playerPosition.y > 0.01) {
             target.y += this.playerPosition.y * 0.25;
             cameraPosition.y += this.playerPosition.y * 0.15;
           }
           if (force) {
+            this.combatCameraTarget.copy(target);
+            this.combatCameraPosition.copy(cameraPosition);
             this.camera.position.copy(cameraPosition);
           } else {
-            this.camera.position.lerp(cameraPosition, UNITY_COMBAT_CAMERA.followLerp);
+            this.combatCameraTarget.lerp(target, UNITY_COMBAT_CAMERA.targetLerp);
+            this.combatCameraPosition.lerp(cameraPosition, UNITY_COMBAT_CAMERA.followLerp);
+            this.camera.position.copy(this.combatCameraPosition);
           }
-          this.camera.lookAt(target);
+          this.camera.lookAt(this.combatCameraTarget);
         }
       }
 
