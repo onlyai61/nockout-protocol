@@ -2252,8 +2252,8 @@
           storage: window.localStorage
         }
       }) || null;
-      const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-walkfix-20260527";
-      const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
+      const ROBOT_ASSET_VERSION = "gen1-animation-20260527";
+      const ROBOT_MODEL_URL = `./assets/gen1_animation.glb?v=${ROBOT_ASSET_VERSION}`;
       const ARENA_FLOOR_Y = 0;
       const UNITY_COMBAT_CAMERA = {
         fov: 42,
@@ -2475,7 +2475,7 @@
           this.camera = new THREE.PerspectiveCamera(cameraProfile.fov, 1, cameraProfile.near, 100);
           this.camera.position.set(...cameraProfile.position);
           this.camera.lookAt(...cameraProfile.target);
-          this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton Biped / Meshy AI generated concept</div>';
+          this.container.innerHTML = '<div class="model-loading">LOADING GEN-1</div><div class="asset-credit">NOCKOUT GEN-1 basic biped combat frame</div>';
           try {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
           } catch (error) {
