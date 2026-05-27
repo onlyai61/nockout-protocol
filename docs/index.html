@@ -2676,8 +2676,9 @@
         }
 
         sanitizeClip(clip, normalizedName) {
-          if (!["walking", "running"].includes(normalizedName)) return clip;
-          const safeTracks = clip.tracks.filter((track) => !/^Hips\.position$/i.test(track.name));
+          const rootMotionPattern = /^(Hips|Armature|Root|mixamorigHips|mixamorig:hips)\.position$/i;
+          const safeTracks = clip.tracks.filter((track) => !rootMotionPattern.test(track.name));
+          if (safeTracks.length === clip.tracks.length) return clip;
           return new THREE.AnimationClip(clip.name, clip.duration, safeTracks);
         }
 
