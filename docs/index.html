@@ -590,6 +590,62 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      #upgradeGrid {
+        grid-column: 1 / -1;
+      }
+
+      .upgrade-preview {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1fr);
+        gap: 14px;
+        align-items: stretch;
+        grid-column: 1 / -1;
+        min-height: 260px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 28% 86%, rgba(80, 221, 255, 0.18), transparent 34%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 52%),
+          rgba(5, 10, 17, 0.82);
+      }
+
+      .upgrade-preview::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.2;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 38px 38px;
+        pointer-events: none;
+      }
+
+      .upgrade-model {
+        position: relative;
+        min-height: 260px;
+      }
+
+      .upgrade-copy {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        align-content: center;
+        gap: 8px;
+        padding: 22px 22px 22px 0;
+      }
+
+      .upgrade-copy h3 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .upgrade-copy .caption {
+        max-width: 520px;
+      }
+
       .upgrade-card {
         position: relative;
         display: grid;
@@ -1371,10 +1427,26 @@
         .app { min-height: 560px; padding: 10px; }
         .robot-model { transform: rotateX(-7deg) rotateY(-16deg) scale(0.82); }
         .arena-stage .model-space { inset: 6% 0 16%; }
+        .upgrade-preview,
+        .upgrade-model { min-height: 210px; }
         .upgrade-card { min-height: 132px; }
       }
 
       @media (max-width: 900px) {
+        .upgrade-grid,
+        .upgrade-preview {
+          grid-template-columns: 1fr;
+        }
+
+        .upgrade-copy {
+          padding: 0 18px 18px;
+        }
+
+        .upgrade-preview,
+        .upgrade-model {
+          min-height: 220px;
+        }
+
         .auth-screen.open {
           grid-template-columns: 1fr;
           padding: 18px;
@@ -1473,7 +1545,17 @@
           </section>
 
           <section class="view" data-page="upgrade">
-            <div class="upgrade-grid" id="upgradeGrid"></div>
+            <div class="upgrade-grid">
+              <article class="upgrade-preview">
+                <div class="model-space upgrade-model" id="upgradeModel"></div>
+                <div class="upgrade-copy">
+                  <span class="chip">RIG REST POSE</span>
+                  <h3>정자세 대기</h3>
+                  <p class="caption">업그레이드 중에는 전투 액션 클립을 재생하지 않고 리깅 기본 포즈로 대기한다.</p>
+                </div>
+              </article>
+              <div class="upgrade-grid" id="upgradeGrid"></div>
+            </div>
           </section>
 
           <section class="view" data-page="garage">
@@ -1866,7 +1948,19 @@
 
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
-          const nextName = anim === "punch" || anim === "kick" || anim === "guard" || anim === "idle" || anim === "jump" ? "boxing_guard_prep_straight_punch" : "walking";
+          const nextName = {
+            walk: "walking",
+            punch: "right_jab_from_guard",
+            kick: "left_short_hook_from_guard",
+            guard: "boxing_guard_prep_straight_punch",
+            jump: "running"
+          }[anim] || null;
+          if (!nextName || this.options.staticIdle) {
+            Object.values(this.actions).forEach((action) => action.stop());
+            this.activeAction = null;
+            this.resetRigPose();
+            return;
+          }
           const nextAction = this.actions[nextName];
           Object.values(this.actions).forEach((action) => {
             if (action !== nextAction) action.fadeOut(0.18);
@@ -1877,11 +1971,17 @@
           }
           nextAction.enabled = true;
           nextAction.paused = false;
-          nextAction.timeScale = anim === "punch" || anim === "kick" ? 1.45 : anim === "jump" ? 0.85 : anim === "idle" ? 0.08 : anim === "guard" ? 0.28 : 1;
+          nextAction.timeScale = anim === "punch" || anim === "kick" ? 1.35 : anim === "jump" ? 1.1 : anim === "guard" ? 0.72 : 1;
           if (this.activeAction !== nextAction) {
             nextAction.reset().fadeIn(0.18).play();
             this.activeAction = nextAction;
           }
+        }
+
+        resetRigPose() {
+          this.model?.traverse((child) => {
+            if (child.isSkinnedMesh) child.skeleton.pose();
+          });
         }
 
         resize() {
@@ -1910,9 +2010,9 @@
             const baseY = this.options.arena ? -0.38 : -0.18;
             const baseX = this.options.arena ? -1.06 : 0;
             const idleY = this.options.arena ? -0.3 : 0.16;
-            this.group.position.y = idleY + Math.sin(t * 2.4) * 0.028;
+            this.group.position.y = this.options.staticIdle ? 0.02 : idleY + Math.sin(t * 2.4) * 0.028;
             this.group.rotation.z = 0;
-            this.group.rotation.y = Math.sin(t * 0.7) * 0.04;
+            this.group.rotation.y = this.options.staticIdle ? 0 : Math.sin(t * 0.7) * 0.04;
             this.model.rotation.y = baseY;
             if (this.anim === "walk") {
               this.group.position.x = baseX + Math.sin(t * 5.4) * (this.options.arena ? 0.05 : 0.08);
@@ -1994,6 +2094,7 @@
 
       const robotStages = [
         new RobotStage(document.getElementById("homeModel")),
+        new RobotStage(document.getElementById("upgradeModel"), { staticIdle: true }),
         new RobotStage(document.getElementById("arenaModel"), { arena: true })
       ];
 
@@ -2009,6 +2110,7 @@
         document.querySelectorAll("[data-view]").forEach((el) => el.classList.toggle("active", el.dataset.view === view));
         document.getElementById("viewTitle").textContent = meta[view][0];
         document.getElementById("viewCaption").textContent = meta[view][1];
+        if (view === "upgrade") setAnim("idle");
         requestAnimationFrame(() => robotStages.forEach((stage) => stage.resize?.()));
       }
 
@@ -2359,7 +2461,8 @@
       async function normalizeLegacyStarterRobot(robot) {
         if (!robot) return null;
         const legacy = Object.entries(LEGACY_STARTER_STATS).every(([key, value]) => Number(robot[key]) === value);
-        if (!legacy) return robot;
+        const starterOverscaled = robot.name === "NKO-BASIC-01" && UPGRADE_FIELDS.every(({ key }) => Number(robot[key]) >= 30);
+        if (!legacy && !starterOverscaled) return robot;
         const { data, error } = await client.from("robots").update(STARTER_STATS).eq("id", robot.id).select("*").single();
         return error ? { ...robot, ...STARTER_STATS } : data;
       }
