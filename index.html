@@ -134,7 +134,7 @@
         min-width: 0;
       }
 
-      .brand,
+      .top-settings,
       .account {
         display: flex;
         align-items: center;
@@ -151,6 +151,34 @@
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+
+      .top-settings {
+        flex: 1 1 auto;
+      }
+
+      .settings-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 32px;
+        padding: 0 10px;
+        border: 1px solid rgba(80, 221, 255, 0.34);
+        border-radius: 8px;
+        background: rgba(80, 221, 255, 0.08);
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .settings-label::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 14px rgba(80, 221, 255, 0.7);
       }
 
       .mark {
@@ -300,8 +328,24 @@
         background-size: 44px 44px;
       }
 
+      .robot-stage::after {
+        content: "";
+        position: absolute;
+        z-index: 0;
+        inset: 8% 10% 14%;
+        background: url("./assets/combat-robot.png") center bottom / contain no-repeat;
+        opacity: 0.9;
+        filter: drop-shadow(0 34px 34px rgba(0, 0, 0, 0.64));
+        transition: opacity 0.24s ease;
+      }
+
+      .robot-stage.has-live-model::after {
+        opacity: 0;
+      }
+
       .model-space {
         position: absolute;
+        z-index: 1;
         inset: 0;
         display: grid;
         place-items: center;
@@ -1583,7 +1627,7 @@
           border-radius: 8px;
         }
 
-        .brand {
+        .top-settings {
           gap: 8px;
         }
 
@@ -1600,12 +1644,14 @@
           font-size: 20px;
         }
 
-        .brand .caption,
         #viewCaption,
         #creditVC,
-        #creditWC,
-        .account-actions {
+        #creditWC {
           display: none;
+        }
+
+        .account-actions {
+          gap: 5px;
         }
 
         .account {
@@ -1685,18 +1731,23 @@
 
         .home-view {
           grid-template-columns: 1fr;
-          grid-template-rows: minmax(520px, 70dvh) auto;
+          grid-template-rows: minmax(330px, 56dvh) auto;
           gap: 8px;
         }
 
         .home-view .robot-stage {
-          min-height: 520px;
-          height: 70dvh;
-          max-height: 760px;
+          min-height: 330px;
+          height: 56dvh;
+          max-height: 520px;
         }
 
         #homeModel {
-          inset: -14% -22% -10%;
+          inset: -4% -8% -3%;
+        }
+
+        .robot-stage::after {
+          inset: 4% 6% 10%;
+          opacity: 0.95;
         }
 
         .home-view .status-panel,
@@ -1914,18 +1965,8 @@
   <body>
     <main class="app hidden" id="appShell">
       <header class="topbar">
-        <div class="brand">
-          <div class="mark" aria-hidden="true"></div>
-          <div>
-            <h1>NOCKOUT PROTOCOL</h1>
-            <p class="caption">모바일 전투봇 프로토타입</p>
-          </div>
-        </div>
-        <div class="account">
-          <span class="pill" id="authState">연결 확인 중</span>
-          <span class="pill" id="creditRC">RC -</span>
-          <span class="pill" id="creditVC">VC -</span>
-          <span class="pill" id="creditWC">WC -</span>
+        <div class="top-settings" aria-label="설정">
+          <span class="settings-label">설정</span>
           <div class="account-actions">
             <button class="ghost" id="profileButton" hidden>프로필</button>
             <button class="ghost" id="nicknameButton" hidden>닉네임</button>
@@ -1933,6 +1974,12 @@
             <button class="ghost" id="loginButton">로그인</button>
             <button class="ghost" id="logoutButton" hidden>로그아웃</button>
           </div>
+        </div>
+        <div class="account">
+          <span class="pill" id="authState">연결 확인 중</span>
+          <span class="pill" id="creditRC">RC -</span>
+          <span class="pill" id="creditVC">VC -</span>
+          <span class="pill" id="creditWC">WC -</span>
         </div>
       </header>
 
@@ -2522,7 +2569,8 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const fitSize = this.options.arena ? 1.08 : this.options.home ? 3.45 : this.options.hero ? 1.08 : 1.12;
+          const mobileHome = this.options.home && window.matchMedia("(max-width: 900px)").matches;
+          const fitSize = this.options.arena ? 1.08 : mobileHome ? 2.25 : this.options.home ? 3.45 : this.options.hero ? 1.08 : 1.12;
           const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
@@ -2561,6 +2609,7 @@
           });
           this.model = model;
           this.group.add(model);
+          if (this.options.home) this.container.closest(".robot-stage")?.classList.add("has-live-model");
           this.mixer = new THREE.AnimationMixer(model);
           this.actions = {};
           gltf.animations.forEach((clip) => {
@@ -2651,6 +2700,12 @@
           if (width === this.lastSize?.width && height === this.lastSize?.height) return;
           this.lastSize = { width, height };
           this.camera.aspect = width / height;
+          if (this.options.home) {
+            const mobileHome = width <= 900;
+            this.camera.fov = mobileHome ? 26 : 18;
+            this.camera.position.set(0, mobileHome ? 1.06 : 0.98, mobileHome ? 4.05 : 2.85);
+            this.camera.lookAt(0, mobileHome ? 0.72 : 0.64, 0);
+          }
           this.camera.updateProjectionMatrix();
           this.renderer.setSize(width, height, false);
         }
