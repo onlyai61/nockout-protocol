@@ -1938,7 +1938,7 @@
           <div class="stage-head">
             <div>
               <h2 id="viewTitle">홈</h2>
-              <p class="caption" id="viewCaption">로그인한 유저의 실제 로봇/편성 데이터를 불러온다</p>
+              <p class="caption" id="viewCaption">내 전투봇과 바로 전투 진입을 우선 보여준다</p>
             </div>
             <div>
               <button class="chip-button" data-anim="idle">대기</button>
@@ -2159,6 +2159,21 @@
         { key: "power", label: "전원", icon: "PWR", tone: "rgba(178, 128, 255, 0.42)", desc: "출력/배터리 효율", cost: 130 }
       ];
       const upgradeByKey = Object.fromEntries(UPGRADE_FIELDS.map((field) => [field.key, field]));
+      const BATTERY_OPTIONS = [
+        { name: "Titan Cell S2", capacity: 100, desc: "균형형 기본 배터리" },
+        { name: "Volt Rush X", capacity: 88, desc: "기동/순간 출력 우선" },
+        { name: "Iron Core L", capacity: 128, desc: "장기전 내구 우선" }
+      ];
+      const SUPPORT_FRAMES = [
+        ["wheeled", "휠형"],
+        ["quadruped", "사족형"],
+        ["biped", "이족형"]
+      ];
+      const SUPPORT_ROLES = [
+        ["repair", "수리"],
+        ["parts_recovery", "부품 회수"],
+        ["precision_tuning", "정밀 튜닝"]
+      ];
 
       const state = {
         user: null,
@@ -2886,7 +2901,7 @@
               </div>
               <div class="upgrade-meta"><span>강화 결과</span><b>${capped ? "MAX" : `Lv ${value + 1}`}</b></div>
               <div class="upgrade-cta">
-                <button class="upgrade-button" data-upgrade="${key}" ${capped || !affordable ? "disabled" : ""}>${capped ? "최대 강화" : affordable ? `${label} 강화` : "RC 부족"}</button>
+                <button class="upgrade-button" data-upgrade="${key}">${capped ? "최대 강화" : affordable ? `${label} 강화` : "RC 부족"}</button>
                 <span class="chip">RC ${cost}</span>
               </div>
             </article>
@@ -2930,6 +2945,11 @@
 
       async function signIn(provider = "google") {
         state.authMode = "login";
+        if (provider !== "google") {
+          const providerName = provider === "kakao" ? "카카오톡" : "Apple";
+          document.getElementById("loginNote").textContent = `${providerName} 로그인은 준비중입니다. 지금은 Google로 시작해줘.`;
+          return;
+        }
         if (!client) {
           document.getElementById("loginNote").textContent = "Supabase SDK 로딩 후 다시 시도해줘.";
           return;
@@ -3108,6 +3128,10 @@
 
       async function createStarterRobot() {
         if (!state.user) return signIn();
+        if (state.robot) {
+          showModal("전투봇 생성", "이미 사용 중인 전투봇이 있음. 지금은 기본 전투봇을 하나만 운용한다.");
+          return state.robot;
+        }
         const userId = state.user.id;
         const { data: robot, error } = await client.from("robots").insert({
           user_id: userId,
@@ -3130,23 +3154,34 @@
       }
 
       async function upgrade(field) {
-        if (!state.robot) return;
+        if (!state.user) return signIn();
+        if (!state.robot) return showModal("업그레이드", "먼저 기본 전투봇을 생성해줘.");
         const upgradeInfo = upgradeByKey[field];
         if (!upgradeInfo) return;
+        const currentValue = Number(state.robot[field] || 0);
+        if (currentValue >= 99) return showModal("최대 강화", `${upgradeInfo.label} 슬롯은 이미 최대 레벨임.`);
         const currentRc = Number(state.profile?.rc || 0);
         if (currentRc < upgradeInfo.cost) {
           return showModal("RC 부족", `${upgradeInfo.label} 강화에는 RC ${upgradeInfo.cost}가 필요함. 현재 보유 RC는 ${currentRc}.`);
         }
-        const next = Math.min(99, Number(state.robot[field]) + 1);
+        const next = Math.min(99, currentValue + 1);
         const { error: creditError } = await client.from("profiles").update({ rc: currentRc - upgradeInfo.cost }).eq("id", state.user.id);
         if (creditError) return showModal("강화 실패", creditError.message);
         const { error } = await client.from("robots").update({ [field]: next }).eq("id", state.robot.id);
         if (error) return showModal("업그레이드 실패", error.message);
         await loadData();
+        showModal("강화 완료", `${upgradeInfo.label} 슬롯이 Lv ${next}로 강화됨.`);
       }
 
       async function saveLoadout() {
-        if (!state.user || !state.robot) return false;
+        if (!state.user) {
+          signIn();
+          return false;
+        }
+        if (!state.robot) {
+          showModal("편성 저장", "저장할 전투봇이 없음. 먼저 기본 전투봇을 생성해줘.");
+          return false;
+        }
         const supportIds = state.supports.slice(0, 3).map((bot) => bot.id);
         const score = ["attack", "armor", "speed", "cooling", "sensor", "power"].reduce((sum, key) => sum + Number(state.robot[key] || 0), 0);
         const payload = { user_id: state.user.id, name: "Primary Loadout", combat_robot_id: state.robot.id, support_bot_ids: supportIds, score };
@@ -3158,7 +3193,58 @@
         const { error: rankError } = await client.from("ranking_entries").insert({ user_id: state.user.id, display_name: state.profile?.display_name, loadout_name: payload.name, score });
         if (rankError) state.combatNotice = `랭킹 기록 실패: ${rankError.message}`;
         await loadData();
+        showModal("편성 저장 완료", `현재 전투봇과 서포트봇 ${supportIds.length}기가 저장됨. 전투력 점수 ${score}.`);
         return true;
+      }
+
+      function showBatteryMenu() {
+        if (!state.user) return signIn();
+        if (!state.robot) return showModal("배터리 교체", "먼저 기본 전투봇을 생성해줘.");
+        showModal("배터리 교체", "장착할 배터리를 선택해줘.");
+        document.getElementById("modalBody").innerHTML = BATTERY_OPTIONS.map((battery) => `
+          <button class="secondary" data-battery="${battery.name}" data-capacity="${battery.capacity}">
+            ${battery.name} / ${battery.capacity}% / ${battery.desc}
+          </button>
+        `).join("");
+      }
+
+      async function equipBattery(name, capacity) {
+        if (!state.user || !state.robot) return;
+        const { error } = await client.from("robots").update({
+          battery_name: name,
+          battery_capacity: Number(capacity)
+        }).eq("id", state.robot.id);
+        if (error) return showModal("배터리 교체 실패", error.message);
+        await loadData();
+        showModal("배터리 교체 완료", `${name} 장착 완료.`);
+      }
+
+      function showSupportCustomizer(supportId) {
+        const bot = state.supports.find((support) => support.id === supportId);
+        if (!bot) return showModal("서포트봇", "서포트봇 데이터를 찾지 못함.");
+        showModal("서포트봇 커스텀", `${bot.name}의 프레임과 역할을 선택해줘.`);
+        document.getElementById("modalBody").innerHTML = `
+          <article class="card">
+            ${line("현재 프레임", bot.frame_type)}
+            ${line("현재 역할", bot.role)}
+          </article>
+          <article class="card">
+            <div class="card-head"><h3>프레임</h3></div>
+            ${SUPPORT_FRAMES.map(([value, label]) => `<button class="secondary" data-support-frame="${value}" data-support-id="${bot.id}">${label}</button>`).join("")}
+          </article>
+          <article class="card">
+            <div class="card-head"><h3>역할</h3></div>
+            ${SUPPORT_ROLES.map(([value, label]) => `<button class="secondary" data-support-role="${value}" data-support-id="${bot.id}">${label}</button>`).join("")}
+          </article>
+        `;
+      }
+
+      async function updateSupport(supportId, patch) {
+        if (!state.user) return signIn();
+        const { error } = await client.from("support_bots").update(patch).eq("id", supportId).eq("user_id", state.user.id);
+        if (error) return showModal("서포트봇 저장 실패", error.message);
+        await loadData();
+        showSupportCustomizer(supportId);
       }
 
       function showBattleModeMenu() {
@@ -3215,6 +3301,16 @@
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
         const createUpgradeRobotButton = event.target.closest("[data-create-upgrade-robot]");
         if (createUpgradeRobotButton) createStarterRobot();
+        const modalButton = event.target.closest("[data-modal]");
+        if (modalButton?.dataset.modal === "battery") showBatteryMenu();
+        const batteryButton = event.target.closest("[data-battery]");
+        if (batteryButton) equipBattery(batteryButton.dataset.battery, batteryButton.dataset.capacity);
+        const supportButton = event.target.closest("[data-support]");
+        if (supportButton) showSupportCustomizer(supportButton.dataset.support);
+        const supportFrameButton = event.target.closest("[data-support-frame]");
+        if (supportFrameButton) updateSupport(supportFrameButton.dataset.supportId, { frame_type: supportFrameButton.dataset.supportFrame });
+        const supportRoleButton = event.target.closest("[data-support-role]");
+        if (supportRoleButton) updateSupport(supportRoleButton.dataset.supportId, { role: supportRoleButton.dataset.supportRole });
         const removeFriendButton = event.target.closest("[data-remove-friend]");
         if (removeFriendButton) removeFriend(removeFriendButton.dataset.removeFriend);
         const battleModeButton = event.target.closest("[data-battle-mode]");
