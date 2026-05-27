@@ -89,11 +89,25 @@
       .app.combat-live .layout {
         grid-template-columns: 1fr;
         gap: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
       }
 
       .app.combat-live .panel.stage {
         border: 0;
         border-radius: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
+      }
+
+      .app.combat-live .view.active,
+      .app.combat-live .arena-view {
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
+        padding: 0;
       }
 
       .topbar,
@@ -806,6 +820,7 @@
       .arena-view.battle-live {
         grid-template-columns: 1fr;
         padding: 0;
+        min-height: 100dvh;
       }
 
       .arena-view.battle-live .status-panel {
@@ -833,7 +848,9 @@
       .arena-view.battle-live .arena-stage {
         border: 0;
         border-radius: 0;
-        min-height: 100%;
+        width: 100%;
+        height: 100%;
+        min-height: 100dvh;
         background:
           linear-gradient(180deg, rgba(7, 10, 16, 0.2), rgba(7, 10, 16, 0.92)),
           radial-gradient(ellipse at 50% 74%, rgba(255, 200, 90, 0.24), transparent 48%),
