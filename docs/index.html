@@ -16,10 +16,10 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #05070b;
-        --panel: rgba(9, 15, 25, 0.82);
-        --panel-strong: rgba(12, 20, 33, 0.96);
-        --line: rgba(232, 240, 255, 0.16);
+        --bg: #07090d;
+        --panel: rgba(13, 18, 27, 0.84);
+        --panel-strong: rgba(14, 19, 29, 0.96);
+        --line: rgba(232, 240, 255, 0.14);
         --text: #f4f8ff;
         --muted: #9aaabd;
         --cyan: #50ddff;
@@ -42,8 +42,7 @@
         height: 100%;
         overflow: hidden;
         background:
-          radial-gradient(circle at 20% 15%, rgba(80, 221, 255, 0.13), transparent 30%),
-          radial-gradient(circle at 82% 72%, rgba(255, 95, 87, 0.12), transparent 34%),
+          linear-gradient(180deg, rgba(20, 26, 36, 0.7), rgba(6, 8, 12, 0.96)),
           var(--bg);
         color: var(--text);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -119,15 +118,11 @@
       .panel,
       .card,
       .modal {
-        border: 0;
-        border-radius: 0;
-        background:
-          linear-gradient(180deg, rgba(4, 8, 14, 0.2), rgba(4, 8, 14, 0.2)),
-          var(--ui-window) center / 100% 100% no-repeat;
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.42),
-          inset 0 0 0 1px rgba(80, 221, 255, 0.12);
-        backdrop-filter: blur(14px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(16, 22, 33, 0.9), rgba(9, 13, 20, 0.9));
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+        backdrop-filter: blur(12px);
       }
 
       .topbar {
@@ -169,8 +164,10 @@
         padding: 0 10px;
         border: 0;
         border-radius: 0;
-        background: var(--ui-button) center / 100% 100% no-repeat;
-        color: var(--cyan);
+        border: 1px solid rgba(80, 221, 255, 0.22);
+        border-radius: 8px;
+        background: rgba(80, 221, 255, 0.08);
+        color: rgba(234, 255, 255, 0.9);
         font-size: 12px;
         font-weight: 900;
         white-space: nowrap;
@@ -221,7 +218,9 @@
         align-content: start;
         gap: 7px;
         padding: 7px 5px;
-        background: var(--ui-window) center / 100% 100% no-repeat;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(10, 15, 24, 0.86);
       }
 
       .nav button,
@@ -230,37 +229,37 @@
       .ghost,
       .chip-button {
         min-height: 40px;
-        border: 0;
-        border-radius: 0;
-        background: var(--ui-button) center / 100% 100% no-repeat;
+        border: 1px solid rgba(232, 240, 255, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.07);
         color: #eaffff;
         font-size: 12px;
         font-weight: 850;
-        text-shadow: 0 0 10px rgba(0, 225, 255, 0.65), 0 2px 0 rgba(0, 0, 0, 0.68);
+        text-shadow: none;
       }
 
       .nav button.active {
-        background-image: var(--ui-button-active);
+        border-color: rgba(80, 221, 255, 0.5);
+        background:
+          linear-gradient(rgba(80, 221, 255, 0.14), rgba(80, 221, 255, 0.14)),
+          var(--ui-button-active) center / 100% 100% no-repeat;
         color: #ffffff;
-        filter: brightness(1.12) saturate(1.18);
+        filter: none;
       }
 
       .primary {
-        background-image:
-          linear-gradient(rgba(255, 95, 87, 0.48), rgba(255, 95, 87, 0.48)),
-          var(--ui-button-active);
+        border-color: rgba(255, 95, 87, 0.46);
+        background: linear-gradient(180deg, rgba(255, 95, 87, 0.9), rgba(176, 49, 45, 0.92));
         color: white;
       }
 
       .secondary {
-        background-image:
-          linear-gradient(rgba(255, 200, 90, 0.22), rgba(255, 200, 90, 0.22)),
-          var(--ui-button);
+        background: rgba(255, 200, 90, 0.12);
         color: var(--gold);
       }
 
       .ghost {
-        background-image: var(--ui-button);
+        background: rgba(255, 255, 255, 0.07);
       }
 
       .pill,
@@ -305,12 +304,12 @@
 
       .home-view {
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(460px, 1fr) auto;
-        gap: 10px;
+        grid-template-rows: minmax(500px, 1fr) auto;
+        gap: 12px;
       }
 
       .home-view .robot-stage {
-        min-height: clamp(500px, 68vh, 760px);
+        min-height: clamp(520px, 70vh, 780px);
       }
 
       .robot-stage,
@@ -318,13 +317,12 @@
         position: relative;
         overflow: hidden;
         min-width: 0;
-        border: 0;
-        border-radius: 0;
+        border: 1px solid rgba(232, 240, 255, 0.12);
+        border-radius: 8px;
         background:
-          var(--ui-window) center / 100% 100% no-repeat,
-          linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 38%),
-          radial-gradient(ellipse at 50% 82%, rgba(80, 221, 255, 0.22), transparent 42%),
-          rgba(0, 0, 0, 0.2);
+          linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 34%),
+          radial-gradient(ellipse at 50% 82%, rgba(80, 221, 255, 0.14), transparent 42%),
+          rgba(7, 11, 18, 0.72);
       }
 
       .robot-stage::before,
@@ -333,7 +331,7 @@
         position: absolute;
         z-index: 0;
         inset: 0;
-        opacity: 0.22;
+        opacity: 0.1;
         background-image:
           linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
@@ -344,15 +342,15 @@
         content: "";
         position: absolute;
         z-index: 1;
-        inset: 8% 10% 14%;
-        background: url("./assets/heavy-robot.png") center center / contain no-repeat;
-        opacity: 0.72;
+        inset: 10% 18% 16%;
+        background: url("./assets/combat-robot.png") center center / contain no-repeat;
+        opacity: 0.2;
         filter: drop-shadow(0 34px 34px rgba(0, 0, 0, 0.64));
         transition: opacity 0.24s ease;
       }
 
       .robot-stage.has-live-model::after {
-        opacity: 0.18;
+        opacity: 0.04;
       }
 
       .model-space {
@@ -366,7 +364,7 @@
       }
 
       #homeModel {
-        inset: -12% -18% -8%;
+        inset: -8% -8% -6%;
       }
 
       .home-view .status-panel {
@@ -386,9 +384,9 @@
       .asset-credit {
         position: absolute;
         z-index: 2;
-        border: 0;
-        border-radius: 0;
-        background: var(--ui-button) center / 100% 100% no-repeat;
+        border: 1px solid rgba(232, 240, 255, 0.12);
+        border-radius: 7px;
+        background: rgba(8, 13, 21, 0.7);
         color: rgba(244, 248, 255, 0.72);
         font-size: 10px;
         letter-spacing: 0.08em;
@@ -711,19 +709,19 @@
         overflow: hidden;
         border: 0;
         border-radius: 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
         background:
-          var(--ui-window) center / 100% 100% no-repeat,
-          radial-gradient(ellipse at 42% 88%, rgba(80, 221, 255, 0.3), transparent 42%),
-          radial-gradient(circle at 26% 42%, rgba(255, 200, 90, 0.12), transparent 26%),
-          linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 52%),
-          rgba(5, 10, 17, 0.82);
+          radial-gradient(ellipse at 42% 88%, rgba(80, 221, 255, 0.13), transparent 42%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.045), transparent 52%),
+          rgba(7, 11, 18, 0.82);
       }
 
       .upgrade-preview::before {
         content: "";
         position: absolute;
         inset: 0;
-        opacity: 0.2;
+        opacity: 0.09;
         background-image:
           linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
           linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
@@ -747,11 +745,9 @@
         display: grid;
         gap: 8px;
         padding: 16px 18px;
-        border: 0;
-        border-radius: 0;
-        background:
-          linear-gradient(90deg, rgba(5, 8, 13, 0.36), rgba(5, 8, 13, 0.36)),
-          var(--ui-window) center / 100% 100% no-repeat;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(8, 13, 21, 0.74);
         backdrop-filter: blur(14px);
       }
 
@@ -808,10 +804,7 @@
         height: 48px;
         border: 0;
         border-radius: 0;
-        background:
-          linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 38%),
-          var(--ui-button-active) center / 100% 100% no-repeat,
-          var(--upgrade-glow);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 38%), var(--upgrade-glow);
         color: #061018;
         font-size: 21px;
         font-weight: 950;
@@ -843,9 +836,9 @@
         min-height: 44px;
         border: 0;
         border-radius: 0;
-        background:
-          linear-gradient(135deg, rgba(80, 221, 255, 0.26), rgba(255, 200, 90, 0.16)),
-          var(--ui-button) center / 100% 100% no-repeat;
+        border: 1px solid rgba(80, 221, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(80, 221, 255, 0.1);
         color: var(--text);
         font-size: 12px;
         font-weight: 950;
@@ -1007,11 +1000,11 @@
       .combat-controls {
         position: absolute;
         z-index: 5;
-        inset: auto 24px 24px 24px;
+        inset: auto max(34px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(34px, env(safe-area-inset-left));
         display: none;
         align-items: end;
         justify-content: space-between;
-        gap: 24px;
+        gap: clamp(36px, 10vw, 128px);
         pointer-events: none;
       }
 
@@ -1021,8 +1014,8 @@
 
       .joystick {
         position: relative;
-        width: clamp(128px, 12vw, 162px);
-        height: clamp(128px, 12vw, 162px);
+        width: clamp(152px, 19vmin, 196px);
+        height: clamp(152px, 19vmin, 196px);
         border: 0;
         border-radius: 50%;
         background: url("./assets/ui/joystick_back.png") center / contain no-repeat;
@@ -1051,28 +1044,49 @@
 
       .combat-buttons {
         display: grid;
-        grid-template-columns: repeat(3, clamp(84px, 7vw, 108px));
-        grid-auto-rows: clamp(52px, 4.8vw, 64px);
-        align-items: end;
-        gap: 10px;
-        padding: 12px 14px;
-        background: url("./assets/ui/window_transparent.png") center / 100% 100% no-repeat;
+        grid-template-columns: repeat(3, clamp(62px, 8.8vmin, 86px));
+        grid-template-rows: repeat(3, clamp(50px, 7.4vmin, 72px));
+        align-items: center;
+        justify-items: center;
+        gap: clamp(4px, 1vmin, 10px);
+        min-width: clamp(210px, 28vmin, 288px);
+        min-height: clamp(174px, 23vmin, 238px);
+        padding: clamp(8px, 1.6vmin, 14px);
+        background:
+          radial-gradient(circle at 68% 48%, rgba(0, 225, 255, 0.18), transparent 54%),
+          url("./assets/ui/window_transparent.png") center / 100% 100% no-repeat;
         pointer-events: auto;
       }
 
       .combat-action {
-        width: 100%;
-        height: 100%;
+        width: clamp(62px, 8.8vmin, 88px);
+        height: clamp(50px, 7.4vmin, 74px);
         border: 0;
         border-radius: 0;
         background: url("./assets/ui/button1.png") center / 100% 100% no-repeat;
         color: #eaffff;
-        font-size: 12px;
+        font-size: clamp(11px, 1.55vmin, 14px);
         font-weight: 950;
         text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45), 0 0 12px rgba(0, 225, 255, 0.72);
         box-shadow: none;
         filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.42));
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .combat-action.jump-hit {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .combat-action.primary-hit {
+        grid-column: 3;
+        grid-row: 2;
+      }
+
+      .combat-action.secondary-hit {
+        grid-column: 1;
+        grid-row: 3;
       }
 
       .combat-action:active {
@@ -2043,18 +2057,27 @@
         }
 
         .combat-controls {
-          inset: auto 12px 14px 12px;
-          gap: 10px;
+          inset: auto max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+          gap: 24px;
+        }
+
+        .joystick {
+          width: clamp(144px, 21vmin, 178px);
+          height: clamp(144px, 21vmin, 178px);
         }
 
         .combat-buttons {
-          grid-template-columns: repeat(3, minmax(72px, 1fr));
-          grid-auto-rows: 48px;
-          gap: 8px;
-          padding: 9px 10px;
+          grid-template-columns: repeat(3, clamp(62px, 9.2vmin, 76px));
+          grid-template-rows: repeat(3, clamp(52px, 7.6vmin, 64px));
+          min-width: clamp(210px, 30vmin, 250px);
+          min-height: clamp(174px, 24vmin, 208px);
+          gap: 5px;
+          padding: 8px;
         }
 
         .combat-action {
+          width: clamp(62px, 9.2vmin, 78px);
+          height: clamp(52px, 7.6vmin, 66px);
           font-size: 11px;
         }
       }
@@ -2091,7 +2114,7 @@
         }
 
         .app.combat-live .combat-controls {
-          inset: auto 16px 14px 16px;
+          inset: auto max(22px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(22px, env(safe-area-inset-left));
         }
       }
 
@@ -2435,6 +2458,7 @@
         combatMode: false,
         controls: { x: 0, y: 0 },
         anim: "idle",
+        booted: false,
         authMode: new URL(window.location.href).searchParams.has("logged_out") ? "logged_out" : "login"
       };
 
@@ -2748,7 +2772,7 @@
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
           const mobileHome = this.options.home && window.matchMedia("(max-width: 900px), (max-width: 1180px) and (max-height: 720px)").matches;
-          const fitSize = this.options.arena ? 1.62 : mobileHome ? 2.2 : this.options.home ? 1.8 : this.options.hero ? 1.08 : 1.12;
+          const fitSize = this.options.arena ? 1.62 : mobileHome ? 2.18 : this.options.home ? 1.86 : this.options.hero ? 1.08 : 1.12;
           const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
@@ -2758,7 +2782,7 @@
           } else {
             model.position.copy(center).multiplyScalar(-scale);
           }
-          model.rotation.y = this.options.arena ? 0 : -0.18;
+          model.rotation.y = this.options.home || this.options.arena ? 0 : -0.18;
           model.traverse((child) => {
             if (child.isMesh) {
               child.castShadow = true;
@@ -2936,9 +2960,9 @@
           this.camera.aspect = width / height;
           if (this.options.home) {
             const mobileHome = width <= 900 || (width <= 1180 && height <= 720);
-            this.camera.fov = mobileHome ? 22 : 21;
-            this.camera.position.set(0, mobileHome ? 1.24 : 1.08, mobileHome ? 5.9 : 5.35);
-            this.camera.lookAt(0, mobileHome ? 0.86 : 0.68, 0);
+            this.camera.fov = mobileHome ? 21 : 20;
+            this.camera.position.set(0, mobileHome ? 1.18 : 1.06, mobileHome ? 6.2 : 5.75);
+            this.camera.lookAt(0, mobileHome ? 0.84 : 0.72, 0);
           }
           this.camera.updateProjectionMatrix();
           this.renderer.setSize(width, height, false);
@@ -2956,12 +2980,12 @@
               this.renderer.render(this.scene, this.camera);
               return;
             }
-            const baseY = this.options.arena ? 0 : -0.18;
+            const baseY = this.options.arena || this.options.home ? 0 : -0.18;
             const baseX = this.options.arena ? 0 : 0;
             const idleY = this.options.arena ? 0.02 : 0.16;
             this.group.position.y = this.options.staticIdle ? 0.02 : idleY + Math.sin(t * 2.4) * 0.028;
             this.group.rotation.z = 0;
-            this.group.rotation.y = this.options.staticIdle ? 0 : Math.sin(t * 0.7) * 0.04;
+            this.group.rotation.y = this.options.staticIdle || this.options.home ? 0 : Math.sin(t * 0.7) * 0.04;
             this.model.rotation.y = baseY;
             if (this.anim === "walk") {
               this.group.position.x = baseX + Math.sin(t * 5.4) * (this.options.arena ? 0.05 : 0.08);
@@ -3126,13 +3150,15 @@
         const joystick = document.getElementById("moveJoystick");
         const knob = document.getElementById("moveJoystickKnob");
         if (!joystick || !knob) return;
+        let activePointerId = null;
 
         const updateFromEvent = (event) => {
+          event.preventDefault?.();
           const pointer = event.touches?.[0] || event;
           const rect = joystick.getBoundingClientRect();
           const centerX = rect.left + rect.width / 2;
           const centerY = rect.top + rect.height / 2;
-          const max = rect.width * 0.34;
+          const max = rect.width * 0.38;
           const rawX = pointer.clientX - centerX;
           const rawY = pointer.clientY - centerY;
           const distance = Math.min(max, Math.hypot(rawX, rawY));
@@ -3141,8 +3167,8 @@
           const y = Math.sin(angle) * distance;
           knob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
           state.controls = {
-            x: Math.abs(x / max) < 0.08 ? 0 : x / max,
-            y: Math.abs(y / max) < 0.08 ? 0 : -y / max
+            x: Math.abs(x / max) < 0.1 ? 0 : x / max,
+            y: Math.abs(y / max) < 0.1 ? 0 : -y / max
           };
           if (state.combatMode && Math.hypot(state.controls.x, state.controls.y) > 0.12 && !["punch", "kick", "jump", "hit", "knockdown"].includes(state.anim)) {
             setAnim("walk");
@@ -3150,14 +3176,21 @@
         };
 
         joystick.addEventListener("pointerdown", (event) => {
+          activePointerId = event.pointerId;
           joystick.setPointerCapture?.(event.pointerId);
           updateFromEvent(event);
         });
         joystick.addEventListener("pointermove", (event) => {
-          if (event.buttons) updateFromEvent(event);
+          if (activePointerId === event.pointerId && event.buttons) updateFromEvent(event);
         });
-        joystick.addEventListener("pointerup", resetJoystick);
-        joystick.addEventListener("pointercancel", resetJoystick);
+        const endPointer = (event) => {
+          if (activePointerId !== null && event.pointerId !== activePointerId) return;
+          activePointerId = null;
+          resetJoystick();
+        };
+        joystick.addEventListener("pointerup", endPointer);
+        joystick.addEventListener("pointercancel", endPointer);
+        joystick.addEventListener("lostpointercapture", endPointer);
       }
 
       function line(label, value) {
@@ -3386,6 +3419,10 @@
         state.loadout = loadouts?.[0] || null;
         state.rankings = rankings || [];
         render();
+        if (!state.booted) {
+          state.booted = true;
+          setView("home");
+        }
       }
 
       async function loadFriends(userId) {
