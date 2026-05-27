@@ -119,11 +119,15 @@
       .panel,
       .card,
       .modal {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
-        backdrop-filter: blur(18px);
+        border: 0;
+        border-radius: 0;
+        background:
+          linear-gradient(180deg, rgba(4, 8, 14, 0.2), rgba(4, 8, 14, 0.2)),
+          var(--ui-window) center / 100% 100% no-repeat;
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.42),
+          inset 0 0 0 1px rgba(80, 221, 255, 0.12);
+        backdrop-filter: blur(14px);
       }
 
       .topbar {
@@ -163,9 +167,9 @@
         gap: 7px;
         min-height: 32px;
         padding: 0 10px;
-        border: 1px solid rgba(80, 221, 255, 0.34);
-        border-radius: 8px;
-        background: rgba(80, 221, 255, 0.08);
+        border: 0;
+        border-radius: 0;
+        background: var(--ui-button) center / 100% 100% no-repeat;
         color: var(--cyan);
         font-size: 12px;
         font-weight: 900;
@@ -202,20 +206,22 @@
 
       .layout {
         display: grid;
-        grid-template-columns: 92px minmax(0, 1fr) 260px;
+        grid-template-columns: 96px minmax(0, 1fr) 276px;
         gap: 12px;
         min-height: 0;
         min-width: 0;
       }
 
       .app[data-view="upgrade"] .layout {
-        grid-template-columns: 92px minmax(0, 1fr) 280px;
+        grid-template-columns: 96px minmax(0, 1fr) 292px;
       }
 
       .nav {
         display: grid;
         align-content: start;
-        gap: 8px;
+        gap: 7px;
+        padding: 7px 5px;
+        background: var(--ui-window) center / 100% 100% no-repeat;
       }
 
       .nav button,
@@ -224,33 +230,37 @@
       .ghost,
       .chip-button {
         min-height: 40px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.08);
-        color: var(--text);
+        border: 0;
+        border-radius: 0;
+        background: var(--ui-button) center / 100% 100% no-repeat;
+        color: #eaffff;
         font-size: 12px;
         font-weight: 850;
+        text-shadow: 0 0 10px rgba(0, 225, 255, 0.65), 0 2px 0 rgba(0, 0, 0, 0.68);
       }
 
       .nav button.active {
-        border-color: rgba(80, 221, 255, 0.82);
-        background: var(--cyan);
-        color: #031018;
+        background-image: var(--ui-button-active);
+        color: #ffffff;
+        filter: brightness(1.12) saturate(1.18);
       }
 
       .primary {
-        background: var(--red);
+        background-image:
+          linear-gradient(rgba(255, 95, 87, 0.48), rgba(255, 95, 87, 0.48)),
+          var(--ui-button-active);
         color: white;
       }
 
       .secondary {
-        border-color: rgba(255, 200, 90, 0.58);
-        background: rgba(255, 200, 90, 0.14);
+        background-image:
+          linear-gradient(rgba(255, 200, 90, 0.22), rgba(255, 200, 90, 0.22)),
+          var(--ui-button);
         color: var(--gold);
       }
 
       .ghost {
-        background: transparent;
+        background-image: var(--ui-button);
       }
 
       .pill,
@@ -295,12 +305,12 @@
 
       .home-view {
         grid-template-columns: 1fr;
-        grid-template-rows: minmax(520px, 1fr) auto;
+        grid-template-rows: minmax(460px, 1fr) auto;
         gap: 10px;
       }
 
       .home-view .robot-stage {
-        min-height: clamp(560px, 76vh, 860px);
+        min-height: clamp(500px, 68vh, 760px);
       }
 
       .robot-stage,
@@ -308,9 +318,10 @@
         position: relative;
         overflow: hidden;
         min-width: 0;
-        border: 1px solid var(--line);
-        border-radius: 8px;
+        border: 0;
+        border-radius: 0;
         background:
+          var(--ui-window) center / 100% 100% no-repeat,
           linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 38%),
           radial-gradient(ellipse at 50% 82%, rgba(80, 221, 255, 0.22), transparent 42%),
           rgba(0, 0, 0, 0.2);
@@ -360,6 +371,7 @@
 
       .home-view .status-panel {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: minmax(116px, auto);
       }
 
       .model-space canvas {
@@ -374,9 +386,9 @@
       .asset-credit {
         position: absolute;
         z-index: 2;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 999px;
-        background: rgba(5, 8, 13, 0.62);
+        border: 0;
+        border-radius: 0;
+        background: var(--ui-button) center / 100% 100% no-repeat;
         color: rgba(244, 248, 255, 0.72);
         font-size: 10px;
         letter-spacing: 0.08em;
@@ -593,7 +605,7 @@
         min-height: 0;
       }
 
-      .card { padding: 11px; }
+      .card { padding: 14px 16px; }
 
       .card-head,
       .line {
@@ -616,10 +628,10 @@
       .line b { text-align: right; }
 
       .bar {
-        height: 8px;
+        height: 10px;
         overflow: hidden;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.09);
+        border-radius: 0;
+        background: var(--ui-bar) center / 100% 100% no-repeat;
       }
 
       .bar i {
@@ -627,7 +639,9 @@
         width: var(--value);
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, var(--cyan), var(--green));
+        background:
+          linear-gradient(90deg, rgba(80, 221, 255, 0.92), rgba(112, 243, 154, 0.92)),
+          url("./assets/ui/bar_blue.png") center / 100% 100% no-repeat;
       }
 
       .stats,
@@ -695,9 +709,10 @@
         grid-column: 1 / -1;
         min-height: clamp(360px, 42vh, 520px);
         overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 8px;
+        border: 0;
+        border-radius: 0;
         background:
+          var(--ui-window) center / 100% 100% no-repeat,
           radial-gradient(ellipse at 42% 88%, rgba(80, 221, 255, 0.3), transparent 42%),
           radial-gradient(circle at 26% 42%, rgba(255, 200, 90, 0.12), transparent 26%),
           linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 52%),
@@ -732,9 +747,11 @@
         display: grid;
         gap: 8px;
         padding: 16px 18px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 999px 8px 8px 999px;
-        background: rgba(5, 8, 13, 0.66);
+        border: 0;
+        border-radius: 0;
+        background:
+          linear-gradient(90deg, rgba(5, 8, 13, 0.36), rgba(5, 8, 13, 0.36)),
+          var(--ui-window) center / 100% 100% no-repeat;
         backdrop-filter: blur(14px);
       }
 
@@ -757,7 +774,7 @@
         display: grid;
         grid-template-rows: auto auto 1fr auto;
         gap: 12px;
-        min-height: 176px;
+        min-height: 166px;
         overflow: hidden;
       }
 
@@ -789,10 +806,11 @@
         place-items: center;
         width: 48px;
         height: 48px;
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        border-radius: 8px;
+        border: 0;
+        border-radius: 0;
         background:
           linear-gradient(145deg, rgba(255, 255, 255, 0.22), transparent 38%),
+          var(--ui-button-active) center / 100% 100% no-repeat,
           var(--upgrade-glow);
         color: #061018;
         font-size: 21px;
@@ -823,11 +841,11 @@
 
       .upgrade-button {
         min-height: 44px;
-        border: 1px solid rgba(80, 221, 255, 0.56);
-        border-radius: 8px;
+        border: 0;
+        border-radius: 0;
         background:
           linear-gradient(135deg, rgba(80, 221, 255, 0.26), rgba(255, 200, 90, 0.16)),
-          rgba(255, 255, 255, 0.08);
+          var(--ui-button) center / 100% 100% no-repeat;
         color: var(--text);
         font-size: 12px;
         font-weight: 950;
@@ -896,7 +914,7 @@
 
       .side {
         grid-template-rows: auto auto;
-        padding: 12px;
+        padding: 14px 12px;
       }
 
       .app[data-view="upgrade"] .side {
@@ -915,6 +933,12 @@
       .side-actions {
         display: grid;
         gap: 8px;
+      }
+
+      .side-actions .primary {
+        min-height: 62px;
+        font-size: 15px;
+        letter-spacing: 0;
       }
 
       .arena-view {
@@ -2724,7 +2748,7 @@
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
           const mobileHome = this.options.home && window.matchMedia("(max-width: 900px), (max-width: 1180px) and (max-height: 720px)").matches;
-          const fitSize = this.options.arena ? 1.62 : mobileHome ? 5.2 : this.options.home ? 3.65 : this.options.hero ? 1.08 : 1.12;
+          const fitSize = this.options.arena ? 1.62 : mobileHome ? 2.2 : this.options.home ? 1.8 : this.options.hero ? 1.08 : 1.12;
           const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
@@ -2912,9 +2936,9 @@
           this.camera.aspect = width / height;
           if (this.options.home) {
             const mobileHome = width <= 900 || (width <= 1180 && height <= 720);
-            this.camera.fov = mobileHome ? 18 : 17;
-            this.camera.position.set(0, mobileHome ? 1.12 : 0.98, mobileHome ? 3.25 : 2.7);
-            this.camera.lookAt(0, mobileHome ? 0.82 : 0.66, 0);
+            this.camera.fov = mobileHome ? 22 : 21;
+            this.camera.position.set(0, mobileHome ? 1.24 : 1.08, mobileHome ? 5.9 : 5.35);
+            this.camera.lookAt(0, mobileHome ? 0.86 : 0.68, 0);
           }
           this.camera.updateProjectionMatrix();
           this.renderer.setSize(width, height, false);
