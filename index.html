@@ -170,7 +170,7 @@
 
       .layout {
         display: grid;
-        grid-template-columns: 92px 1fr 330px;
+        grid-template-columns: 92px minmax(0, 1fr) 260px;
         gap: 12px;
         min-height: 0;
         min-width: 0;
@@ -262,12 +262,13 @@
       .view.active { display: grid; }
 
       .home-view {
-        grid-template-columns: minmax(420px, 1fr) 320px;
-        gap: 12px;
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(440px, 1fr) auto;
+        gap: 10px;
       }
 
       .home-view .robot-stage {
-        min-height: clamp(430px, 68vh, 760px);
+        min-height: clamp(460px, 70vh, 760px);
       }
 
       .robot-stage,
@@ -305,7 +306,11 @@
       }
 
       #homeModel {
-        inset: -8% -4% -4%;
+        inset: -2% -2% 0;
+      }
+
+      .home-view .status-panel {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .model-space canvas {
@@ -841,7 +846,7 @@
       }
 
       .side {
-        grid-template-rows: auto auto 1fr auto;
+        grid-template-rows: auto auto;
         padding: 12px;
       }
 
@@ -849,6 +854,9 @@
         grid-template-rows: auto auto auto;
       }
 
+      .side-friends,
+      .side-support,
+      .side-meta,
       .app[data-view="upgrade"] .side-friends,
       .app[data-view="upgrade"] .side-support,
       .app[data-view="upgrade"] .side-meta {
@@ -1611,7 +1619,7 @@
           right: 8px;
           bottom: max(8px, env(safe-area-inset-bottom));
           display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
+          grid-template-columns: repeat(5, minmax(0, 1fr));
           gap: 5px;
           padding: 7px;
           border: 1px solid var(--line);
@@ -1629,6 +1637,10 @@
         }
 
         .nav button[data-view="arena"] {
+          display: none;
+        }
+
+        .nav button[data-view="friends"] {
           display: none;
         }
 
@@ -1660,23 +1672,28 @@
 
         .home-view {
           grid-template-columns: 1fr;
-          grid-template-rows: minmax(360px, 52dvh) auto;
-          gap: 10px;
+          grid-template-rows: minmax(430px, 62dvh) auto;
+          gap: 8px;
         }
 
         .home-view .robot-stage {
-          min-height: 360px;
-          height: 52dvh;
-          max-height: 540px;
+          min-height: 430px;
+          height: 62dvh;
+          max-height: 620px;
         }
 
         #homeModel {
-          inset: -13% -18% -8%;
+          inset: -3% -8% 0;
         }
 
+        .home-view .status-panel,
         .status-panel {
           grid-template-columns: 1fr;
           gap: 9px;
+        }
+
+        .home-view .status-panel .home-secondary {
+          display: none;
         }
 
         .card {
@@ -1868,7 +1885,7 @@
         }
 
         .home-view {
-          grid-template-columns: minmax(0, 1fr) 260px;
+          grid-template-columns: 1fr;
         }
 
         .home-view .robot-stage {
@@ -1876,7 +1893,7 @@
         }
 
         #homeModel {
-          inset: -10% -14% -6%;
+          inset: -3% -6% 0;
         }
       }
     </style>
@@ -1888,7 +1905,7 @@
           <div class="mark" aria-hidden="true"></div>
           <div>
             <h1>NOCKOUT PROTOCOL</h1>
-            <p class="caption">Supabase 실제 데이터 기반 프로토타입</p>
+            <p class="caption">모바일 전투봇 프로토타입</p>
           </div>
         </div>
         <div class="account">
@@ -1936,18 +1953,18 @@
               <div class="model-space" id="homeModel"></div>
             </div>
             <aside class="status-panel">
-              <article class="card">
+              <article class="card home-primary">
                 <div class="card-head">
                   <h3>현재 전투봇</h3>
                   <button class="ghost" id="createRobotButton">기본 로봇 생성</button>
                 </div>
                 <div id="robotStatus"></div>
               </article>
-              <article class="card">
+              <article class="card home-secondary">
                 <div class="card-head"><h3>스텟</h3><button class="ghost" data-view-jump="upgrade">강화</button></div>
                 <div class="stats" id="statsList"></div>
               </article>
-              <article class="card">
+              <article class="card home-secondary">
                 <div class="card-head"><h3>장착 배터리</h3><button class="ghost" data-modal="battery">교체</button></div>
                 <div id="batteryStatus"></div>
               </article>
@@ -2296,9 +2313,9 @@
       }
 
       const meta = {
-        home: ["홈", "로그인한 유저의 실제 로봇/편성 데이터를 불러온다"],
-        upgrade: ["업그레이드", "선택된 실제 로봇 행의 스텟을 업데이트한다"],
-        garage: ["정비실", "유저가 보유한 서포트봇 데이터를 보여준다"],
+        home: ["홈", "내 전투봇과 바로 전투 진입을 우선 보여준다"],
+        upgrade: ["업그레이드", "전투봇 스텟을 강화한다"],
+        garage: ["정비실", "보유한 서포트봇을 관리한다"],
         league: ["리그", "저장된 랭킹 엔트리를 표시한다"],
         friends: ["친구", "친구 코드로 유저를 추가하고 목록을 관리한다"],
         training: ["훈련", "매칭 없이 전투 조작을 테스트한다"],
@@ -2321,7 +2338,7 @@
           const cameraProfile = options.arena
             ? { fov: UNITY_COMBAT_CAMERA.fov, near: 0.04, position: [0, 1.58, 5.2], target: [-0.38, 0.02, 0] }
             : options.home
-              ? { fov: 30, near: 0.08, position: [0, 0.48, 4.05], target: [0, 0.48, 0] }
+              ? { fov: 26, near: 0.08, position: [0, 1.04, 4.8], target: [0, 0.62, 0] }
               : { fov: 34, near: 0.1, position: [0, options.hero ? 0.46 : 0.62, options.hero ? 6.45 : 5.7], target: [0, options.hero ? 0.16 : 0.05, 0] };
           this.camera = new THREE.PerspectiveCamera(cameraProfile.fov, 1, cameraProfile.near, 100);
           this.camera.position.set(...cameraProfile.position);
@@ -2426,13 +2443,13 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const fitSize = this.options.arena ? 1.08 : this.options.home ? 1.95 : this.options.hero ? 1.08 : 1.12;
+          const fitSize = this.options.arena ? 1.08 : this.options.home ? 1.32 : this.options.hero ? 1.08 : 1.12;
           const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
             model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
           } else if (this.options.home) {
-            model.position.set(-center.x * scale, -bounds.min.y * scale - 0.78, -center.z * scale);
+            model.position.set(-center.x * scale, -bounds.min.y * scale - 0.08, -center.z * scale);
           } else {
             model.position.copy(center).multiplyScalar(-scale);
           }
