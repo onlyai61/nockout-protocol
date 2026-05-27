@@ -1842,7 +1842,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
-      const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
+      const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-walkfix-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
         fov: 45,
@@ -2185,7 +2185,9 @@
           this.mixer = new THREE.AnimationMixer(model);
           this.actions = {};
           gltf.animations.forEach((clip) => {
-            this.actions[this.normalizeClipName(clip.name)] = this.mixer.clipAction(clip);
+            const normalizedName = this.normalizeClipName(clip.name);
+            const safeClip = this.sanitizeClip(clip, normalizedName);
+            this.actions[normalizedName] = this.mixer.clipAction(safeClip);
           });
           this.applyRigAnimation(this.anim);
           this.container.querySelector(".model-loading")?.remove();
@@ -2215,6 +2217,12 @@
           return String(name || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
         }
 
+        sanitizeClip(clip, normalizedName) {
+          if (!["walking", "running"].includes(normalizedName)) return clip;
+          const safeTracks = clip.tracks.filter((track) => !/^Hips\.position$/i.test(track.name));
+          return new THREE.AnimationClip(clip.name, clip.duration, safeTracks);
+        }
+
         findRigAction(names) {
           return names.map((name) => this.actions[this.normalizeClipName(name)]).find(Boolean) || null;
         }
@@ -2222,7 +2230,7 @@
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
           const nextAction = this.findRigAction({
-            walk: ["Walking", "Running"],
+            walk: ["Running", "Walking"],
             punch: ["Right_Jab_from_Guard", "Boxing_Guard_Prep_Straight_Punch"],
             kick: ["Left_Short_Hook_from_Guard", "Right_Upper_Hook_from_Guard"],
             guard: ["Boxing_Guard_Prep_Straight_Punch"],
@@ -2455,7 +2463,7 @@
           knob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
           state.controls = {
             x: Math.abs(x / max) < 0.08 ? 0 : x / max,
-            y: Math.abs(y / max) < 0.08 ? 0 : y / max
+            y: Math.abs(y / max) < 0.08 ? 0 : -y / max
           };
           if (state.combatMode && Math.hypot(state.controls.x, state.controls.y) > 0.12 && !["punch", "kick", "jump", "hit", "knockdown"].includes(state.anim)) {
             setAnim("walk");
