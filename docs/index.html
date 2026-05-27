@@ -134,7 +134,7 @@
         min-width: 0;
       }
 
-      .brand,
+      .top-settings,
       .account {
         display: flex;
         align-items: center;
@@ -151,6 +151,34 @@
         display: flex;
         align-items: center;
         gap: 6px;
+      }
+
+      .top-settings {
+        flex: 1 1 auto;
+      }
+
+      .settings-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 32px;
+        padding: 0 10px;
+        border: 1px solid rgba(80, 221, 255, 0.34);
+        border-radius: 8px;
+        background: rgba(80, 221, 255, 0.08);
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .settings-label::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 14px rgba(80, 221, 255, 0.7);
       }
 
       .mark {
@@ -1583,7 +1611,7 @@
           border-radius: 8px;
         }
 
-        .brand {
+        .top-settings {
           gap: 8px;
         }
 
@@ -1600,12 +1628,14 @@
           font-size: 20px;
         }
 
-        .brand .caption,
         #viewCaption,
         #creditVC,
-        #creditWC,
-        .account-actions {
+        #creditWC {
           display: none;
+        }
+
+        .account-actions {
+          gap: 5px;
         }
 
         .account {
@@ -1914,18 +1944,8 @@
   <body>
     <main class="app hidden" id="appShell">
       <header class="topbar">
-        <div class="brand">
-          <div class="mark" aria-hidden="true"></div>
-          <div>
-            <h1>NOCKOUT PROTOCOL</h1>
-            <p class="caption">모바일 전투봇 프로토타입</p>
-          </div>
-        </div>
-        <div class="account">
-          <span class="pill" id="authState">연결 확인 중</span>
-          <span class="pill" id="creditRC">RC -</span>
-          <span class="pill" id="creditVC">VC -</span>
-          <span class="pill" id="creditWC">WC -</span>
+        <div class="top-settings" aria-label="설정">
+          <span class="settings-label">설정</span>
           <div class="account-actions">
             <button class="ghost" id="profileButton" hidden>프로필</button>
             <button class="ghost" id="nicknameButton" hidden>닉네임</button>
@@ -1933,6 +1953,12 @@
             <button class="ghost" id="loginButton">로그인</button>
             <button class="ghost" id="logoutButton" hidden>로그아웃</button>
           </div>
+        </div>
+        <div class="account">
+          <span class="pill" id="authState">연결 확인 중</span>
+          <span class="pill" id="creditRC">RC -</span>
+          <span class="pill" id="creditVC">VC -</span>
+          <span class="pill" id="creditWC">WC -</span>
         </div>
       </header>
 
