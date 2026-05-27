@@ -1574,6 +1574,84 @@
         background: var(--panel-strong);
       }
 
+      .modal .caption:empty {
+        display: none;
+      }
+
+      .modal.battle-modal {
+        width: min(1080px, 94vw);
+        padding: 22px;
+        border: 1px solid rgba(80, 221, 255, 0.42);
+        background:
+          linear-gradient(180deg, rgba(4, 8, 15, 0.72), rgba(4, 7, 12, 0.92)),
+          radial-gradient(ellipse at 50% 112%, rgba(80, 221, 255, 0.22), transparent 52%),
+          url("./assets/keyart-arena.jpg") center / cover no-repeat,
+          var(--panel-strong);
+        box-shadow:
+          0 28px 80px rgba(0, 0, 0, 0.72),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12),
+          0 0 46px rgba(80, 221, 255, 0.18);
+      }
+
+      .battle-modal .modal-head h2 {
+        font-family: Impact, Haettenschweiler, "Arial Black", Menlo, Consolas, monospace;
+        font-size: clamp(32px, 4vw, 56px);
+        line-height: 0.95;
+        text-transform: uppercase;
+        text-shadow: 0 0 24px rgba(80, 221, 255, 0.38), 0 3px 0 rgba(0, 0, 0, 0.9);
+      }
+
+      .battle-mode-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .battle-mode-card {
+        position: relative;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 8px;
+        min-height: clamp(104px, 13vw, 150px);
+        border: 0;
+        border-radius: 0;
+        padding: 20px 14px;
+        background: url("./assets/ui/button1.png") center / 100% 100% no-repeat;
+        color: #eaffff;
+        box-shadow: none;
+        text-align: center;
+        text-shadow: 0 0 12px rgba(0, 225, 255, 0.72), 0 2px 0 rgba(0, 0, 0, 0.82);
+        transition: transform 0.14s ease, filter 0.14s ease;
+      }
+
+      .battle-mode-card:hover,
+      .battle-mode-card:focus-visible {
+        transform: translateY(-2px);
+        filter: brightness(1.18) saturate(1.1);
+      }
+
+      .battle-mode-card:active {
+        transform: translateY(1px);
+        background-image: url("./assets/ui/button_active.png");
+      }
+
+      .battle-mode-card b {
+        font-size: clamp(20px, 2.2vw, 31px);
+        font-weight: 950;
+      }
+
+      .battle-mode-card span {
+        color: rgba(234, 255, 255, 0.72);
+        font: 850 11px/1.2 Menlo, Consolas, monospace;
+      }
+
+      .battle-mode-card.ranked {
+        color: #ffe58e;
+        text-shadow: 0 0 14px rgba(255, 200, 90, 0.76), 0 2px 0 rgba(0, 0, 0, 0.82);
+      }
+
       .modal-head {
         display: flex;
         justify-content: space-between;
@@ -1894,6 +1972,21 @@
           overflow: hidden;
         }
 
+        .modal.battle-modal {
+          width: 96vw;
+          padding: 14px;
+        }
+
+        .battle-mode-grid {
+          grid-template-columns: repeat(3, minmax(150px, 1fr));
+          overflow-x: auto;
+          padding-bottom: 4px;
+        }
+
+        .battle-mode-card {
+          min-height: 116px;
+        }
+
         .auth-wordmark {
           font-size: clamp(52px, 18vw, 88px);
         }
@@ -2143,7 +2236,7 @@
 
         <aside class="panel side">
           <div class="side-actions">
-            <button class="primary" id="startBattleButton">전투 시작하기</button>
+            <button class="primary" id="startBattleButton">전투하기</button>
           </div>
           <article class="card">
             <div class="card-head"><h3>현재 편성</h3><button class="ghost" id="saveLoadoutButton">저장</button></div>
@@ -3402,11 +3495,14 @@
       }
 
       function showBattleModeMenu() {
-        showModal("전투 모드 선택", "입장할 전투 모드를 선택해줘.");
+        showModal("전투하기", "");
+        document.querySelector("#modal .modal").classList.add("battle-modal");
         document.getElementById("modalBody").innerHTML = `
-          <button class="primary" data-battle-mode="duel">1:1 배틀</button>
-          <button class="secondary" data-battle-mode="ranked">랭킹전</button>
-          <button class="primary" data-battle-mode="practice">샌드백 훈련</button>
+          <div class="battle-mode-grid">
+            <button class="battle-mode-card duel" data-battle-mode="duel"><b>1:1 배틀</b><span>DUEL MATCH</span></button>
+            <button class="battle-mode-card ranked" data-battle-mode="ranked"><b>랭킹전</b><span>RANKED ARENA</span></button>
+            <button class="battle-mode-card practice" data-battle-mode="practice"><b>샌드백 훈련</b><span>SANDBAG TEST</span></button>
+          </div>
         `;
       }
 
@@ -3437,6 +3533,7 @@
       }
 
       function showModal(title, text) {
+        document.querySelector("#modal .modal").classList.remove("battle-modal");
         document.getElementById("modalTitle").textContent = title;
         document.getElementById("modalText").textContent = text;
         document.getElementById("modalBody").innerHTML = "";
