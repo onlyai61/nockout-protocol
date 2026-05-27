@@ -1388,7 +1388,7 @@
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
       const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
-      const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-merged-20260527";
+      const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
 
       const state = {
@@ -1507,7 +1507,7 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = (this.options.arena ? 1.46 : this.options.hero ? 1.68 : 2.3) / Math.max(size.x, size.y, size.z);
+          const scale = (this.options.arena ? 0.92 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           model.position.copy(center).multiplyScalar(-scale);
           model.rotation.y = this.options.arena ? -0.38 : -0.18;
@@ -1518,7 +1518,7 @@
               const hasMaterialArray = Array.isArray(child.material);
               const materials = hasMaterialArray ? child.material : [child.material];
               const tunedMaterials = materials.map((material) => {
-                const next = material || new THREE.MeshStandardMaterial();
+                const next = material ? material.clone() : new THREE.MeshStandardMaterial();
                 if (!next.map && next.color) next.color.setHex(0xb8c8d8);
                 if (next.emissive && !next.emissiveMap) {
                   next.emissive.setHex(0x071522);
@@ -1527,8 +1527,11 @@
                 next.metalness = Math.max(next.metalness ?? 0, 0.42);
                 next.roughness = Math.min(next.roughness ?? 0.7, 0.58);
                 next.side = THREE.DoubleSide;
-                next.transparent = false;
-                next.opacity = 1;
+                if (next.transparent || next.alphaMap || next.opacity < 1) {
+                  next.transparent = true;
+                  next.alphaTest = Math.max(next.alphaTest || 0, 0.28);
+                  next.depthWrite = true;
+                }
                 return next;
               });
               child.material = hasMaterialArray ? tunedMaterials : tunedMaterials[0];
@@ -1552,7 +1555,7 @@
 
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
-          const nextName = anim === "punch" ? "boxing_guard_prep_straight_punch" : "walking";
+          const nextName = anim === "punch" || anim === "guard" || anim === "idle" ? "boxing_guard_prep_straight_punch" : "walking";
           const nextAction = this.actions[nextName];
           Object.values(this.actions).forEach((action) => {
             if (action !== nextAction) action.fadeOut(0.18);
@@ -1563,7 +1566,7 @@
           }
           nextAction.enabled = true;
           nextAction.paused = false;
-          nextAction.timeScale = anim === "punch" ? 1.45 : anim === "idle" ? 0.22 : anim === "guard" ? 0.55 : 1;
+          nextAction.timeScale = anim === "punch" ? 1.45 : anim === "idle" ? 0.08 : anim === "guard" ? 0.28 : 1;
           if (this.activeAction !== nextAction) {
             nextAction.reset().fadeIn(0.18).play();
             this.activeAction = nextAction;
@@ -1590,7 +1593,7 @@
             this.mixer?.update(delta);
             const baseY = this.options.arena ? -0.38 : -0.18;
             const baseX = this.options.arena ? -1.06 : 0;
-            const idleY = this.options.arena ? -0.42 : 0;
+            const idleY = this.options.arena ? -0.3 : 0.16;
             this.group.position.y = idleY + Math.sin(t * 2.4) * 0.028;
             this.group.rotation.z = 0;
             this.group.rotation.y = Math.sin(t * 0.7) * 0.04;
