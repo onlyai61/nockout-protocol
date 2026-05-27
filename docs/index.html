@@ -862,6 +862,10 @@
         background-size: 72px 72px;
       }
 
+      .arena-view.battle-live .arena-stage .model-space {
+        inset: 0;
+      }
+
       .arena-view.battle-live .enemy,
       .arena-view.battle-live .sandbag {
         display: none;
@@ -1759,6 +1763,94 @@
         authMode: new URL(window.location.href).searchParams.has("logged_out") ? "logged_out" : "login"
       };
 
+      const robotSfx = {
+        context: null,
+        unlocked: false,
+        lastPlayed: {},
+
+        getContext() {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return null;
+          if (!this.context) {
+            this.context = new AudioContextClass();
+            this.master = this.context.createGain();
+            this.master.gain.value = 0.34;
+            this.master.connect(this.context.destination);
+          }
+          return this.context;
+        },
+
+        unlock() {
+          const context = this.getContext();
+          if (!context) return;
+          if (context.state === "suspended") context.resume();
+          this.unlocked = true;
+        },
+
+        envelope(duration, peak = 0.24) {
+          const context = this.getContext();
+          const gain = context.createGain();
+          const now = context.currentTime;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(peak, now + 0.008);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          gain.connect(this.master);
+          return gain;
+        },
+
+        tone(frequency, start, duration, type = "square", volume = 0.16) {
+          const context = this.getContext();
+          const oscillator = context.createOscillator();
+          oscillator.type = type;
+          oscillator.frequency.setValueAtTime(frequency, context.currentTime + start);
+          oscillator.frequency.exponentialRampToValueAtTime(Math.max(80, frequency * 0.72), context.currentTime + start + duration);
+          oscillator.connect(this.envelope(start + duration + 0.025, volume));
+          oscillator.start(context.currentTime + start);
+          oscillator.stop(context.currentTime + start + duration);
+        },
+
+        noise(start, duration, volume = 0.13) {
+          const context = this.getContext();
+          const sampleRate = context.sampleRate;
+          const buffer = context.createBuffer(1, Math.max(1, Math.floor(sampleRate * duration)), sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < data.length; i += 1) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+          }
+          const source = context.createBufferSource();
+          const filter = context.createBiquadFilter();
+          filter.type = "bandpass";
+          filter.frequency.value = 1450;
+          filter.Q.value = 6.5;
+          source.buffer = buffer;
+          source.connect(filter);
+          filter.connect(this.envelope(start + duration + 0.02, volume));
+          source.start(context.currentTime + start);
+          source.stop(context.currentTime + start + duration);
+        },
+
+        play(kind) {
+          this.unlock();
+          const context = this.getContext();
+          if (!context || !this.unlocked) return;
+          const now = performance.now();
+          if (now - (this.lastPlayed[kind] || 0) < 140) return;
+          this.lastPlayed[kind] = now;
+
+          if (kind === "jump") {
+            this.tone(520, 0, 0.055, "sawtooth", 0.12);
+            this.tone(910, 0.048, 0.04, "square", 0.1);
+            this.noise(0.018, 0.07, 0.08);
+            return;
+          }
+
+          const base = kind === "kick" ? 230 : 290;
+          this.tone(base, 0, 0.045, "square", 0.18);
+          this.tone(base * 2.4, 0.032, 0.034, "sawtooth", 0.13);
+          this.noise(0.006, 0.052, kind === "kick" ? 0.12 : 0.16);
+        }
+      };
+
       const authConfig = {
         redirectTo: window.location.origin + window.location.pathname
       };
@@ -1822,8 +1914,8 @@
           this.anim = "idle";
           this.clock = new THREE.Clock();
           this.scene = new THREE.Scene();
-          this.camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-          this.camera.position.set(options.arena ? 0.42 : 0, options.hero ? 0.46 : 0.62, options.arena ? 7.2 : options.hero ? 6.45 : 5.7);
+          this.camera = new THREE.PerspectiveCamera(options.arena ? 46 : 34, 1, 0.1, 100);
+          this.camera.position.set(options.arena ? 0 : 0, options.hero ? 0.46 : 0.62, options.arena ? 5.2 : options.hero ? 6.45 : 5.7);
           this.camera.lookAt(options.arena ? -0.38 : 0, options.hero ? 0.16 : options.arena ? 0.02 : 0.05, 0);
           this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton Biped / Meshy AI generated concept</div>';
           try {
@@ -1845,18 +1937,21 @@
           rim.position.set(3.4, 2.6, -2.8);
           this.scene.add(rim);
           this.group = new THREE.Group();
-          this.group.position.x = options.arena ? -1.06 : 0;
-          this.group.position.y = options.arena ? -0.42 : options.hero ? -0.34 : 0;
+          this.group.position.x = 0;
+          this.group.position.y = options.arena ? 0 : options.hero ? -0.34 : 0;
           this.scene.add(this.group);
           this.velocity = new THREE.Vector3();
-          this.playerPosition = new THREE.Vector3(options.arena ? -0.35 : 0, 0, options.arena ? 0.72 : 0);
+          this.playerPosition = new THREE.Vector3(0, 0, options.arena ? 0.25 : 0);
           this.jumpVelocity = 0;
           this.actionUntil = 0;
           this.lastSize = { width: 0, height: 0 };
           this.resizeObserver = new ResizeObserver(() => this.resize());
           this.resizeObserver.observe(this.container);
           this.resize();
-          if (options.arena) this.createArenaWorld();
+          if (options.arena) {
+            this.createArenaWorld();
+            this.resetCombatView(true);
+          }
           window.addEventListener("resize", () => this.resize());
           robotAsset.then((gltf) => this.mount(gltf)).catch(() => {
             const loading = this.container.querySelector(".model-loading");
@@ -1901,7 +1996,7 @@
           const dummyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.44, 0.16, 24), dummyMaterial);
           dummyBase.position.y = 0.08;
           dummy.add(dummyHead, dummyBody, dummyBase);
-          dummy.position.set(1.55, 0, -1.58);
+          dummy.position.set(2.15, 0, 2.45);
           dummy.rotation.y = -0.42;
           this.scene.add(dummy);
           this.dummy = dummy;
@@ -1913,9 +2008,13 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = (this.options.arena ? 0.92 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
+          const scale = (this.options.arena ? 18 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
-          model.position.copy(center).multiplyScalar(-scale);
+          if (this.options.arena) {
+            model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+          } else {
+            model.position.copy(center).multiplyScalar(-scale);
+          }
           model.rotation.y = this.options.arena ? -0.38 : -0.18;
           model.traverse((child) => {
             if (child.isMesh) {
@@ -1952,6 +2051,15 @@
           });
           this.applyRigAnimation(this.anim);
           this.container.querySelector(".model-loading")?.remove();
+        }
+
+        resetCombatView(force = false) {
+          if (!this.options.arena || !this.group) return;
+          this.playerPosition.set(0, 0, 0.25);
+          this.jumpVelocity = 0;
+          this.group.position.set(this.playerPosition.x, this.playerPosition.y, this.playerPosition.z);
+          this.group.rotation.set(0, 0, 0);
+          this.updateCombatCamera(force);
         }
 
         setAnim(anim) {
@@ -2002,6 +2110,7 @@
         }
 
         resize() {
+          if (!this.renderer) return;
           const rect = this.container.getBoundingClientRect();
           const width = Math.max(1, rect.width);
           const height = Math.max(1, rect.height);
@@ -2025,8 +2134,8 @@
               return;
             }
             const baseY = this.options.arena ? -0.38 : -0.18;
-            const baseX = this.options.arena ? -1.06 : 0;
-            const idleY = this.options.arena ? -0.3 : 0.16;
+            const baseX = this.options.arena ? 0 : 0;
+            const idleY = this.options.arena ? 0.02 : 0.16;
             this.group.position.y = this.options.staticIdle ? 0.02 : idleY + Math.sin(t * 2.4) * 0.028;
             this.group.rotation.z = 0;
             this.group.rotation.y = this.options.staticIdle ? 0 : Math.sin(t * 0.7) * 0.04;
@@ -2055,7 +2164,7 @@
           this.playerPosition.x += input.x * speed * delta;
           this.playerPosition.z += input.y * speed * delta;
           this.playerPosition.x = THREE.MathUtils.clamp(this.playerPosition.x, -2.65, 2.65);
-          this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -2.35, 2.55);
+          this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -1.65, 2.75);
 
           this.jumpVelocity -= 7.4 * delta;
           this.playerPosition.y = Math.max(0, this.playerPosition.y + this.jumpVelocity * delta);
@@ -2074,7 +2183,7 @@
           }
 
           this.group.position.x = this.playerPosition.x;
-          this.group.position.y = this.playerPosition.y + Math.sin(t * 2.4) * (moving ? 0.018 : 0.012);
+          this.group.position.y = this.playerPosition.y + Math.sin(t * 2.4) * (moving ? 0.012 : 0.007);
           this.group.position.z = this.playerPosition.z;
           this.model.rotation.y = -0.08;
           this.group.rotation.z = 0;
@@ -2099,21 +2208,30 @@
             this.dummy.rotation.z = THREE.MathUtils.lerp(this.dummy.rotation.z, impact ? 0.18 : 0, 0.16);
           }
 
+          this.updateCombatCamera(false);
+        }
+
+        updateCombatCamera(force = false) {
+          const yaw = this.group.rotation.y || 0;
+          const target = new THREE.Vector3(this.playerPosition.x, this.playerPosition.y + 0.82, this.playerPosition.z + 0.26);
           const behind = new THREE.Vector3(
-            this.playerPosition.x - Math.sin(this.group.rotation.y) * 2.25,
-            this.playerPosition.y + 1.32,
-            this.playerPosition.z - Math.cos(this.group.rotation.y) * 2.25
+            this.playerPosition.x - Math.sin(yaw) * 2.35,
+            this.playerPosition.y + 1.56,
+            this.playerPosition.z - Math.cos(yaw) * 2.55
           );
-          this.camera.position.lerp(behind, 0.09);
-          this.camera.lookAt(this.playerPosition.x, this.playerPosition.y + 0.78, this.playerPosition.z + 0.34);
+          if (force) {
+            this.camera.position.copy(behind);
+          } else {
+            this.camera.position.lerp(behind, 0.12);
+          }
+          this.camera.lookAt(target);
         }
       }
 
-      const robotStages = [
-        new RobotStage(document.getElementById("homeModel")),
-        new RobotStage(document.getElementById("upgradeModel"), { staticIdle: true }),
-        new RobotStage(document.getElementById("arenaModel"), { arena: true })
-      ];
+      const homeStage = new RobotStage(document.getElementById("homeModel"));
+      const upgradeStage = new RobotStage(document.getElementById("upgradeModel"), { staticIdle: true });
+      const arenaStage = new RobotStage(document.getElementById("arenaModel"), { arena: true });
+      const robotStages = [homeStage, upgradeStage, arenaStage];
 
       function setView(view) {
         if (view !== "arena") {
@@ -2141,6 +2259,7 @@
       }
 
       function combatAction(action) {
+        robotSfx.play(action);
         if (!state.combatMode) return setAnim(action === "kick" ? "punch" : action);
         setAnim(action);
       }
@@ -2552,6 +2671,7 @@
         state.battle = data;
         state.combatMode = true;
         state.controls = { x: 0, y: 0 };
+        arenaStage.resetCombatView(true);
         setView("arena");
         setAnim("walk");
         render();
@@ -2562,6 +2682,7 @@
         state.trainingMode = true;
         state.combatMode = false;
         state.controls = { x: 0, y: 0 };
+        arenaStage.resetCombatView(true);
         setView("arena");
         setAnim("punch");
         render();
@@ -2576,7 +2697,11 @@
 
       document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
       document.querySelectorAll("[data-view-jump]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.viewJump)));
-      document.querySelectorAll("[data-anim]").forEach((button) => button.addEventListener("click", () => setAnim(button.dataset.anim)));
+      document.querySelectorAll("[data-anim]").forEach((button) => button.addEventListener("click", () => {
+        robotSfx.unlock();
+        if (button.dataset.anim === "punch") robotSfx.play("punch");
+        setAnim(button.dataset.anim);
+      }));
       document.addEventListener("click", (event) => {
         const upgradeButton = event.target.closest("[data-upgrade]");
         if (upgradeButton) upgrade(upgradeButton.dataset.upgrade);
@@ -2604,9 +2729,14 @@
         button.addEventListener("click", () => combatAction(button.dataset.combatAction));
       });
       setupJoystick();
+      window.addEventListener("pointerdown", () => robotSfx.unlock(), { once: true });
+      window.addEventListener("keydown", () => robotSfx.unlock(), { once: true });
       window.addEventListener("keydown", (event) => {
         if (!state.combatMode) return;
-        if (event.key === " ") combatAction("jump");
+        if (event.key === " ") {
+          event.preventDefault();
+          combatAction("jump");
+        }
         if (event.key.toLowerCase() === "j") combatAction("punch");
         if (event.key.toLowerCase() === "k") combatAction("kick");
       });
