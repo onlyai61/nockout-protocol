@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 310" role="img" aria-labelledby="title desc">
+  <title id="title">NOCKOUT Protocol title logo</title>
+  <desc id="desc">White transparent mechanical wordmark for NOCKOUT PROTOCOL.</desc>
+  <defs>
+    <filter id="glow" x="-12%" y="-24%" width="124%" height="148%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.62"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#ffffff" flood-opacity="0.2"/>
+    </filter>
+    <mask id="knockout-cuts">
+      <rect width="920" height="310" fill="#fff"/>
+      <g fill="#000" opacity="0.95">
+        <path d="M94 66h34l-22 24H72z"/>
+        <path d="M209 66h34l-22 24h-34z"/>
+        <path d="M392 66h35l-22 24h-35z"/>
+        <path d="M566 66h34l-22 24h-34z"/>
+        <path d="M727 66h34l-22 24h-34z"/>
+        <path d="M824 66h34l-22 24h-34z"/>
+        <path d="M148 196h50l-22 24h-50z"/>
+        <path d="M438 196h50l-22 24h-50z"/>
+        <path d="M672 196h50l-22 24h-50z"/>
+        <rect x="307" y="54" width="12" height="182" transform="rotate(28 313 145)"/>
+        <rect x="628" y="54" width="12" height="182" transform="rotate(28 634 145)"/>
+      </g>
+    </mask>
+  </defs>
+  <g filter="url(#glow)" mask="url(#knockout-cuts)">
+    <text x="460" y="145"
+      text-anchor="middle"
+      font-family="Impact, Haettenschweiler, 'Arial Black', sans-serif"
+      font-size="118"
+      font-weight="900"
+      letter-spacing="0"
+      fill="#fff">NOCKOUT</text>
+    <text x="460" y="252"
+      text-anchor="middle"
+      font-family="Impact, Haettenschweiler, 'Arial Black', sans-serif"
+      font-size="104"
+      font-weight="900"
+      letter-spacing="0"
+      fill="#fff">PROTOCOL</text>
+  </g>
+  <g fill="#fff" opacity="0.78">
+    <path d="M85 168h750v10H85z"/>
+    <path d="M85 276h750v9H85z"/>
+    <path d="M42 168h26l-10 10H32z"/>
+    <path d="M852 168h26l10 10h-26z"/>
+    <path d="M46 276h26l-10 9H36z"/>
+    <path d="M848 276h26l10 9h-26z"/>
+  </g>
+</svg>
