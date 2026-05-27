@@ -912,102 +912,6 @@
         display: none;
       }
 
-      .combat-avatar {
-        position: absolute;
-        z-index: 3;
-        left: 50%;
-        bottom: clamp(150px, 18vh, 210px);
-        display: none;
-        width: clamp(220px, 18vw, 320px);
-        aspect-ratio: 1 / 1;
-        translate: -50% 0;
-        pointer-events: none;
-        transform-origin: 50% 82%;
-        filter:
-          drop-shadow(0 24px 24px rgba(0, 0, 0, 0.68))
-          drop-shadow(0 0 22px rgba(80, 221, 255, 0.42));
-      }
-
-      .arena-view.battle-live .combat-avatar {
-        display: block;
-      }
-
-      .combat-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-
-      .combat-avatar::after {
-        content: "";
-        position: absolute;
-        left: 22%;
-        right: 22%;
-        bottom: 6%;
-        height: 16%;
-        border-radius: 50%;
-        background: radial-gradient(ellipse, rgba(80, 221, 255, 0.42), transparent 70%);
-        transform: rotateX(72deg);
-        z-index: -1;
-      }
-
-      .combat-avatar[data-anim="idle"],
-      .combat-avatar[data-anim="guard"] {
-        animation: avatarIdle 1.9s ease-in-out infinite;
-      }
-
-      .combat-avatar[data-anim="walk"] {
-        animation: avatarWalk 0.54s ease-in-out infinite;
-      }
-
-      .combat-avatar[data-anim="jump"] {
-        animation: avatarJump 0.72s ease-out;
-      }
-
-      .combat-avatar[data-anim="punch"],
-      .combat-avatar[data-anim="kick"] {
-        animation: avatarStrike 0.34s ease-out;
-      }
-
-      .combat-avatar[data-anim="hit"] {
-        animation: avatarHit 0.36s ease-out;
-      }
-
-      .combat-avatar[data-anim="knockdown"] {
-        animation: avatarDown 0.78s ease-out forwards;
-      }
-
-      @keyframes avatarIdle {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(-5px) scale(1.015); }
-      }
-
-      @keyframes avatarWalk {
-        0%, 100% { transform: translateX(-5px) translateY(0) rotateZ(-1.5deg); }
-        50% { transform: translateX(5px) translateY(-6px) rotateZ(1.5deg); }
-      }
-
-      @keyframes avatarJump {
-        0% { transform: translateY(0) scale(1); }
-        45% { transform: translateY(-74px) scale(1.04); }
-        100% { transform: translateY(0) scale(1); }
-      }
-
-      @keyframes avatarStrike {
-        0%, 100% { transform: translateX(0) rotateZ(0) scale(1); }
-        50% { transform: translateX(28px) rotateZ(4deg) scale(1.06); }
-      }
-
-      @keyframes avatarHit {
-        0%, 100% { transform: translateX(0) rotateZ(0); }
-        45% { transform: translateX(-26px) rotateZ(-5deg); }
-      }
-
-      @keyframes avatarDown {
-        0% { transform: translateY(0) rotateZ(0) scale(1); opacity: 1; }
-        100% { transform: translateY(42px) rotateZ(-74deg) scale(0.9); opacity: 0.86; }
-      }
-
       .combat-controls {
         position: absolute;
         z-index: 5;
@@ -1830,9 +1734,6 @@
           <section class="view arena-view" data-page="arena">
               <div class="arena-stage">
                 <div class="model-space" id="arenaModel"></div>
-                <div class="combat-avatar" id="combatAvatar" data-anim="idle" aria-hidden="true">
-                  <img src="./assets/combat-robot.png" alt="">
-                </div>
                 <div class="enemy" id="enemyTarget" aria-label="상대 기본 더미"></div>
               <div class="sandbag" id="sandbagTarget" aria-label="훈련 샌드백" hidden></div>
               <div class="combat-hint">3인칭 스파링장 / 조이스틱 이동 / 점프, 주먹, 발차기 테스트</div>
@@ -1949,10 +1850,10 @@
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
-        fov: 42,
-        offset: new THREE.Vector3(0, 1.3, -3.15),
-        targetOffset: new THREE.Vector3(0, 0.88, 0.36),
-        followLerp: 0.2
+        fov: 38,
+        offset: new THREE.Vector3(0.18, 1.28, -3.35),
+        targetOffset: new THREE.Vector3(0, 0.82, 0.12),
+        followLerp: 0.22
       };
       let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
@@ -2241,7 +2142,8 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = (this.options.arena ? 4.85 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
+          const fitSize = this.options.arena ? 1.72 : this.options.hero ? 1.08 : 1.12;
+          const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
             model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
@@ -2374,7 +2276,7 @@
               this.renderer.render(this.scene, this.camera);
               return;
             }
-            const baseY = this.options.arena ? -0.38 : -0.18;
+            const baseY = this.options.arena ? Math.PI : -0.18;
             const baseX = this.options.arena ? 0 : 0;
             const idleY = this.options.arena ? 0.02 : 0.16;
             this.group.position.y = this.options.staticIdle ? 0.02 : idleY + Math.sin(t * 2.4) * 0.028;
@@ -2504,7 +2406,6 @@
           stage.setAnim(anim);
         });
         document.getElementById("sandbagTarget")?.classList.toggle("hit", state.trainingMode && anim === "punch");
-        document.getElementById("combatAvatar")?.setAttribute("data-anim", anim);
       }
 
       function combatAction(action) {
