@@ -111,6 +111,10 @@
         padding: 0;
       }
 
+      .app.training-live .arena-view.battle-live .sandbag {
+        display: block;
+      }
+
       .topbar,
       .panel,
       .card,
@@ -1048,6 +1052,10 @@
         text-shadow: 0 0 10px rgba(0, 225, 255, 0.62);
       }
 
+      .app.training-live .combat-hint::after {
+        content: " / 목표: 매달린 샌드백";
+      }
+
       .arena-view.battle-live .combat-hint {
         display: block;
       }
@@ -1078,30 +1086,35 @@
       }
 
       .sandbag {
-        right: 15%;
-        bottom: 16%;
-        width: 92px;
-        height: 210px;
+        right: 12%;
+        bottom: 19%;
+        width: 118px;
+        height: 246px;
         border-color: rgba(255, 200, 90, 0.34);
-        border-radius: 999px 999px 18px 18px;
+        border-radius: 54% 54% 24px 24px;
         background:
-          linear-gradient(90deg, transparent 46%, rgba(0, 0, 0, 0.28) 47%, rgba(0, 0, 0, 0.28) 53%, transparent 54%),
-          linear-gradient(160deg, #9e4935, #3f1511 78%);
+          radial-gradient(ellipse at 34% 18%, rgba(255, 230, 180, 0.28), transparent 24%),
+          linear-gradient(90deg, transparent 45%, rgba(0, 0, 0, 0.32) 47%, rgba(0, 0, 0, 0.32) 53%, transparent 55%),
+          repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.055) 0 2px, transparent 2px 18px),
+          linear-gradient(160deg, #a94e35, #40140f 78%);
         box-shadow:
           inset -18px -18px 28px rgba(0, 0, 0, 0.36),
-          0 0 32px rgba(255, 200, 90, 0.18);
+          0 0 34px rgba(255, 200, 90, 0.2),
+          0 28px 42px rgba(0, 0, 0, 0.46);
         transform-origin: 50% 0;
       }
 
       .sandbag::before {
         content: "";
         position: absolute;
-        left: 42px;
-        top: -92px;
-        width: 8px;
-        height: 94px;
+        left: 53px;
+        top: -116px;
+        width: 10px;
+        height: 118px;
         border-radius: 999px;
-        background: linear-gradient(#d8e8ef, #67717a);
+        background:
+          linear-gradient(90deg, transparent 0 2px, rgba(12, 14, 16, 0.62) 2px 4px, transparent 4px 6px, rgba(12, 14, 16, 0.62) 6px 8px, transparent 8px 10px),
+          linear-gradient(#d8e8ef, #67717a);
       }
 
       .sandbag::after {
@@ -2029,7 +2042,7 @@
                 <div class="model-space" id="arenaModel"></div>
                 <div class="enemy" id="enemyTarget" aria-label="상대 기본 더미"></div>
               <div class="sandbag" id="sandbagTarget" aria-label="훈련 샌드백" hidden></div>
-              <div class="combat-hint">3인칭 스파링장 / 조이스틱 이동 / 점프, 주먹, 발차기 테스트</div>
+              <div class="combat-hint">3인칭 샌드백 훈련장 / 조이스틱 이동 / 점프, 주먹, 발차기 테스트</div>
               <div class="combat-controls" aria-label="전투 조작">
                 <div class="joystick" id="moveJoystick" aria-label="이동 조이스틱">
                   <div class="joystick-knob" id="moveJoystickKnob"></div>
@@ -2133,8 +2146,15 @@
 
       const SUPABASE_URL = "https://swhvcrqfncroxihlbxov.supabase.co";
       const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3aHZjcnFmbmNyb3hpaGxieG92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMjI2NTcsImV4cCI6MjA5NDY5ODY1N30.yx1tb9HqsQk4-dY8sfNuS8XuY-MhmF8NhQi33pWxEn8";
-      const REQUIRE_LOGIN_ON_FRESH_ENTRY = true;
-      const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
+      const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+          flowType: "pkce",
+          storage: window.localStorage
+        }
+      }) || null;
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-walkfix-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
@@ -2147,7 +2167,6 @@
         targetLerp: 0.22,
         rotationLerp: 0.16
       };
-      let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
       const LEGACY_STARTER_STATS = { attack: 42, armor: 46, speed: 40, cooling: 44, sensor: 38, power: 45 };
       const UPGRADE_FIELDS = [
@@ -2413,9 +2432,9 @@
           const floor = new THREE.Mesh(
             new THREE.CircleGeometry(3.85, 96),
             new THREE.MeshStandardMaterial({
-              color: 0x1a2029,
-              metalness: 0.18,
-              roughness: 0.72
+              color: 0x202631,
+              metalness: 0.22,
+              roughness: 0.68
             })
           );
           floor.rotation.x = -Math.PI / 2;
@@ -2436,20 +2455,65 @@
           grid.material.opacity = 0.28;
           this.scene.add(grid);
 
-          const dummy = new THREE.Group();
-          const dummyMaterial = new THREE.MeshStandardMaterial({ color: 0x5a1f1d, roughness: 0.58, metalness: 0.36 });
-          const dummyHead = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.28, 0.22), dummyMaterial);
-          dummyHead.position.y = 1.46;
-          const dummyBody = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.84, 0.28), dummyMaterial);
-          dummyBody.position.y = 0.9;
-          const dummyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.44, 0.16, 24), dummyMaterial);
-          dummyBase.position.y = 0.08;
-          dummy.add(dummyHead, dummyBody, dummyBase);
-          dummy.position.set(1.85, 0, 2.25);
-          dummy.rotation.y = -0.42;
-          dummy.scale.setScalar(0.72);
-          this.scene.add(dummy);
-          this.dummy = dummy;
+          const trussMaterial = new THREE.MeshStandardMaterial({ color: 0x667481, metalness: 0.72, roughness: 0.28 });
+          const truss = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.08, 0.08), trussMaterial);
+          truss.position.set(0.85, 2.95, 1.72);
+          truss.rotation.y = -0.18;
+          this.scene.add(truss);
+
+          const bag = new THREE.Group();
+          const leather = new THREE.MeshStandardMaterial({ color: 0x9a3f2d, roughness: 0.76, metalness: 0.04 });
+          const seam = new THREE.MeshStandardMaterial({ color: 0x2f1410, roughness: 0.9, metalness: 0.02 });
+          const metal = new THREE.MeshStandardMaterial({ color: 0xcbd5dc, roughness: 0.34, metalness: 0.82 });
+          const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 1.05, 14, 32), leather);
+          body.position.y = 1.02;
+          body.scale.set(0.86, 1.0, 0.86);
+          const bandTop = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.018, 8, 42), seam);
+          bandTop.position.y = 1.62;
+          const bandMid = new THREE.Mesh(new THREE.TorusGeometry(0.305, 0.012, 8, 42), seam);
+          bandMid.position.y = 1.08;
+          const bandBottom = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.016, 8, 42), seam);
+          bandBottom.position.y = 0.45;
+          const verticalSeam = new THREE.Mesh(new THREE.BoxGeometry(0.028, 1.28, 0.014), seam);
+          verticalSeam.position.set(0, 1.02, -0.295);
+          const hook = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.018, 8, 28, Math.PI * 1.55), metal);
+          hook.position.y = 2.0;
+          hook.rotation.z = Math.PI * 0.2;
+          const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.78, 12), metal);
+          chain.position.y = 2.38;
+          bag.add(body, bandTop, bandMid, bandBottom, verticalSeam, hook, chain);
+          bag.position.set(1.45, 0, 1.42);
+          bag.rotation.y = -0.22;
+          this.scene.add(bag);
+          this.sandbag = bag;
+
+          const targetLabel = this.makeTextSprite("TRAINING BAG");
+          targetLabel.position.set(1.45, 2.15, 1.42);
+          this.scene.add(targetLabel);
+        }
+
+        makeTextSprite(text) {
+          const canvas = document.createElement("canvas");
+          canvas.width = 512;
+          canvas.height = 128;
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "rgba(6, 10, 16, 0.64)";
+          ctx.fillRect(18, 30, 476, 66);
+          ctx.strokeStyle = "rgba(80, 221, 255, 0.82)";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(18, 30, 476, 66);
+          ctx.fillStyle = "#eaffff";
+          ctx.font = "700 42px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, 256, 64);
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.colorSpace = THREE.SRGBColorSpace;
+          const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+          const sprite = new THREE.Sprite(material);
+          sprite.scale.set(1.45, 0.36, 1);
+          return sprite;
         }
 
         mount(gltf) {
@@ -2681,10 +2745,11 @@
             this.group.position.y += Math.max(0, Math.sin(t * 6.5)) * 0.04;
           }
 
-          if (this.dummy) {
-            const distance = this.group.position.distanceTo(this.dummy.position);
-            const impact = actionActive && (this.anim === "punch" || this.anim === "kick") && distance < 2.1 ? 1 : 0;
-            this.dummy.rotation.z = THREE.MathUtils.lerp(this.dummy.rotation.z, impact ? 0.18 : 0, 0.16);
+          if (this.sandbag) {
+            const distance = this.group.position.distanceTo(this.sandbag.position);
+            const impact = actionActive && (this.anim === "punch" || this.anim === "kick") && distance < 2.6 ? 1 : 0;
+            this.sandbag.rotation.z = THREE.MathUtils.lerp(this.sandbag.rotation.z, impact ? 0.22 : Math.sin(t * 1.7) * 0.025, 0.16);
+            this.sandbag.position.x = THREE.MathUtils.lerp(this.sandbag.position.x, impact ? 1.62 : 1.45, 0.14);
           }
 
           this.updateCombatCamera(false);
@@ -2827,6 +2892,7 @@
         const appShell = document.getElementById("appShell");
         appShell.classList.toggle("hidden", !loggedIn);
         appShell.classList.toggle("combat-live", state.combatMode);
+        appShell.classList.toggle("training-live", state.combatMode && state.trainingMode);
         const authScreen = document.getElementById("authScreen");
         authScreen.classList.toggle("open", !loggedIn);
         authScreen.classList.toggle("login-mode", state.authMode !== "logged_out");
@@ -2858,11 +2924,11 @@
         document.querySelector("[data-page='arena']").classList.toggle("battle-live", state.combatMode);
         const battleNotice = state.combatNotice ? line("기록", state.combatNotice) : "";
         document.getElementById("battleInfo").innerHTML = state.trainingMode
-          ? line("모드", "연습 훈련") + line("목표", "전투 조작 확인") + line("세션", "로컬")
+          ? line("모드", "샌드백 훈련") + line("목표", "타격 거리와 조작 확인") + line("세션", "로컬")
           : state.battle
             ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name) + battleNotice
             : empty("전투 세션 없음");
-        document.getElementById("battleState").textContent = state.trainingMode ? "PRACTICE TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
+        document.getElementById("battleState").textContent = state.trainingMode ? "SANDBAG TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
         document.getElementById("enemyTarget").hidden = state.trainingMode;
         document.getElementById("sandbagTarget").hidden = !state.trainingMode;
         setAnim(state.anim);
@@ -2983,16 +3049,6 @@
           document.getElementById("loginNote").textContent = `로그인 실패: ${authReturn.errorText || "다시 로그인 필요"}`;
           return;
         }
-
-        if (REQUIRE_LOGIN_ON_FRESH_ENTRY && !checkedFreshEntrySession && !authReturn.isCallback) {
-          checkedFreshEntrySession = true;
-          const { data: sessionData } = await client.auth.getSession();
-          if (sessionData.session) await client.auth.signOut();
-          resetSessionState(state.authMode);
-          render();
-          return;
-        }
-        checkedFreshEntrySession = true;
 
         const { data: sessionData } = await client.auth.getSession();
         state.user = sessionData.session?.user || null;
@@ -3252,7 +3308,7 @@
         document.getElementById("modalBody").innerHTML = `
           <button class="primary" data-battle-mode="duel">1:1 배틀</button>
           <button class="secondary" data-battle-mode="ranked">랭킹전</button>
-          <button class="primary" data-battle-mode="practice">연습 훈련</button>
+          <button class="primary" data-battle-mode="practice">샌드백 훈련</button>
         `;
       }
 
@@ -3262,12 +3318,12 @@
           const robot = await createStarterRobot();
           if (!robot) return;
         }
-        state.trainingMode = false;
-        state.combatNotice = "연습 훈련 모드";
+        state.trainingMode = true;
+        state.combatNotice = "샌드백 훈련 모드";
         state.battle = {
           id: `practice-${Date.now()}`,
           status: "practice",
-          arena_name: "Practice Ring"
+          arena_name: "Sandbag Training Bay"
         };
         state.combatMode = true;
         state.controls = { x: 0, y: 0 };
