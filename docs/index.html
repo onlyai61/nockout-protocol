@@ -1259,18 +1259,15 @@
       }
 
       .auth-wordmark {
-        color: var(--text);
-        font-family: Impact, Haettenschweiler, "Arial Black", Menlo, Consolas, monospace;
-        font-size: clamp(58px, 9vw, 128px);
-        font-weight: 950;
-        line-height: 0.78;
-        letter-spacing: 0;
-        text-transform: uppercase;
-        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.24);
-        text-shadow:
-          0 3px 0 rgba(0, 0, 0, 0.9),
-          0 0 34px rgba(80, 221, 255, 0.42),
-          0 0 62px rgba(255, 95, 87, 0.22);
+        display: block;
+        width: min(78vw, 640px);
+        max-height: clamp(112px, 20vw, 214px);
+        object-fit: contain;
+        object-position: left center;
+        filter:
+          drop-shadow(0 5px 0 rgba(0, 0, 0, 0.88))
+          drop-shadow(0 0 24px rgba(80, 221, 255, 0.24))
+          drop-shadow(0 0 42px rgba(255, 255, 255, 0.12));
       }
 
       .auth-tagline {
@@ -1985,7 +1982,8 @@
         }
 
         .auth-wordmark {
-          font-size: clamp(52px, 18vw, 88px);
+          width: min(82vw, 440px);
+          max-height: 156px;
         }
 
         .auth-status-grid {
@@ -2294,7 +2292,7 @@
       <div class="auth-panel">
         <div class="auth-logo">
           <div class="auth-kicker">CORE LINK READY</div>
-          <div class="auth-wordmark">NOCKOUT<br>PROTOCOL</div>
+          <img class="auth-wordmark" src="./assets/title-logo-white.svg" alt="NOCKOUT PROTOCOL">
           <div class="auth-tagline">BUILD. BREAK. KNOCKOUT.</div>
         </div>
         <div class="auth-title">
