@@ -136,6 +136,17 @@
         min-width: 0;
       }
 
+      .account {
+        justify-content: end;
+        flex-wrap: wrap;
+      }
+
+      .account-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
       .mark {
         width: 30px;
         height: 30px;
@@ -160,6 +171,10 @@
         grid-template-columns: 92px 1fr 330px;
         gap: 12px;
         min-height: 0;
+      }
+
+      .app[data-view="upgrade"] .layout {
+        grid-template-columns: 92px minmax(0, 1fr) 280px;
       }
 
       .nav {
@@ -610,17 +625,15 @@
 
       .upgrade-preview {
         position: relative;
-        display: grid;
-        grid-template-columns: minmax(220px, 0.7fr) minmax(0, 1fr);
-        gap: 14px;
-        align-items: stretch;
+        display: block;
         grid-column: 1 / -1;
-        min-height: 260px;
+        min-height: clamp(360px, 42vh, 520px);
         overflow: hidden;
         border: 1px solid var(--line);
         border-radius: 8px;
         background:
-          radial-gradient(circle at 28% 86%, rgba(80, 221, 255, 0.18), transparent 34%),
+          radial-gradient(ellipse at 42% 88%, rgba(80, 221, 255, 0.3), transparent 42%),
+          radial-gradient(circle at 26% 42%, rgba(255, 200, 90, 0.12), transparent 26%),
           linear-gradient(135deg, rgba(255, 255, 255, 0.07), transparent 52%),
           rgba(5, 10, 17, 0.82);
       }
@@ -638,17 +651,25 @@
       }
 
       .upgrade-model {
-        position: relative;
-        min-height: 260px;
+        position: absolute;
+        inset: 0 25% 0 0;
+        min-height: 100%;
+        z-index: 1;
       }
 
       .upgrade-copy {
-        position: relative;
-        z-index: 1;
+        position: absolute;
+        z-index: 3;
+        right: 22px;
+        top: 22px;
+        width: min(420px, 38%);
         display: grid;
-        align-content: center;
         gap: 8px;
-        padding: 22px 22px 22px 0;
+        padding: 16px 18px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 999px 8px 8px 999px;
+        background: rgba(5, 8, 13, 0.66);
+        backdrop-filter: blur(14px);
       }
 
       .upgrade-copy h3 {
@@ -658,6 +679,11 @@
 
       .upgrade-copy .caption {
         max-width: 520px;
+      }
+
+      .upgrade-preview .asset-credit {
+        left: 14px;
+        right: auto;
       }
 
       .upgrade-card {
@@ -805,6 +831,16 @@
       .side {
         grid-template-rows: auto auto 1fr auto;
         padding: 12px;
+      }
+
+      .app[data-view="upgrade"] .side {
+        grid-template-rows: auto auto auto;
+      }
+
+      .app[data-view="upgrade"] .side-friends,
+      .app[data-view="upgrade"] .side-support,
+      .app[data-view="upgrade"] .side-meta {
+        display: none;
       }
 
       .side-actions {
@@ -1580,8 +1616,13 @@
           <span class="pill" id="creditRC">RC -</span>
           <span class="pill" id="creditVC">VC -</span>
           <span class="pill" id="creditWC">WC -</span>
-          <button class="ghost" id="loginButton">로그인</button>
-          <button class="ghost" id="logoutButton" hidden>로그아웃</button>
+          <div class="account-actions">
+            <button class="ghost" id="profileButton" hidden>프로필</button>
+            <button class="ghost" id="nicknameButton" hidden>닉네임</button>
+            <button class="ghost" id="topFriendButton" hidden>친구 추가</button>
+            <button class="ghost" id="loginButton">로그인</button>
+            <button class="ghost" id="logoutButton" hidden>로그아웃</button>
+          </div>
         </div>
       </header>
 
@@ -1737,15 +1778,15 @@
             <div class="card-head"><h3>현재 편성</h3><button class="ghost" id="saveLoadoutButton">저장</button></div>
             <div id="loadoutSummary"></div>
           </article>
-          <article class="card">
+          <article class="card side-friends">
             <div class="card-head"><h3>친구</h3><button class="ghost" data-view-jump="friends">추가</button></div>
             <div id="friendSummary"></div>
           </article>
-          <article class="card">
+          <article class="card side-support">
             <div class="card-head"><h3>서포트봇</h3><button class="ghost" data-view-jump="garage">편집</button></div>
             <div id="supportSummary"></div>
           </article>
-          <article class="card">
+          <article class="card side-meta">
             <div class="line"><span>데이터 소스</span><b id="dataSource">Supabase</b></div>
             <div class="line"><span>프로젝트</span><b>swhvcrqfncroxihlbxov</b></div>
           </article>
@@ -2405,6 +2446,7 @@
         }
         document.querySelectorAll("[data-page]").forEach((el) => el.classList.toggle("active", el.dataset.page === view));
         document.querySelectorAll("[data-view]").forEach((el) => el.classList.toggle("active", el.dataset.view === view));
+        document.getElementById("appShell").dataset.view = view;
         document.getElementById("viewTitle").textContent = meta[view][0];
         document.getElementById("viewCaption").textContent = meta[view][1];
         if (view === "upgrade") setAnim("idle");
@@ -2504,6 +2546,9 @@
         authScreen.classList.toggle("logged-out-mode", state.authMode === "logged_out");
         document.getElementById("loginButton").hidden = loggedIn;
         document.getElementById("logoutButton").hidden = !loggedIn;
+        document.getElementById("profileButton").hidden = !loggedIn;
+        document.getElementById("nicknameButton").hidden = !loggedIn;
+        document.getElementById("topFriendButton").hidden = !loggedIn;
         document.getElementById("authState").textContent = loggedIn ? (state.profile?.display_name || state.user.email || "로그인됨") : "로그인 필요";
         document.getElementById("creditRC").textContent = `RC ${state.profile?.rc ?? "-"}`;
         document.getElementById("creditVC").textContent = `VC ${state.profile?.vc ?? "-"}`;
@@ -2749,6 +2794,29 @@
         render();
       }
 
+      function showProfile() {
+        if (!state.user) return signIn();
+        showModal("프로필", state.profile?.display_name || state.user.email || "NOCKOUT 플레이어");
+        document.getElementById("modalBody").innerHTML =
+          line("계정", state.user.email || state.user.id.slice(0, 8)) +
+          line("닉네임", state.profile?.display_name || "-") +
+          line("친구 코드", state.profile?.friend_code || "-") +
+          line("RC", state.profile?.rc ?? "-") +
+          line("VC", state.profile?.vc ?? "-") +
+          line("WC", state.profile?.wc ?? "-");
+      }
+
+      async function setNickname() {
+        if (!state.user) return signIn();
+        const current = state.profile?.display_name || "";
+        const nickname = window.prompt("사용할 닉네임", current)?.trim();
+        if (!nickname || nickname === current) return;
+        const { error } = await client.from("profiles").update({ display_name: nickname }).eq("id", state.user.id);
+        if (error) return showModal("닉네임 저장 실패", error.message);
+        state.profile = { ...state.profile, display_name: nickname };
+        render();
+      }
+
       async function removeFriend(friendId) {
         if (!state.user || !friendId) return;
         const { error } = await client.from("friendships").delete().eq("user_id", state.user.id).eq("friend_user_id", friendId);
@@ -2894,6 +2962,9 @@
       });
       document.getElementById("returnLoginButton").addEventListener("click", () => showLoginPage());
       document.getElementById("logoutButton").addEventListener("click", logout);
+      document.getElementById("profileButton").addEventListener("click", showProfile);
+      document.getElementById("nicknameButton").addEventListener("click", setNickname);
+      document.getElementById("topFriendButton").addEventListener("click", () => setView("friends"));
       document.getElementById("createRobotButton").addEventListener("click", createStarterRobot);
       document.getElementById("saveLoadoutButton").addEventListener("click", saveLoadout);
       document.getElementById("addFriendButton").addEventListener("click", addFriend);
