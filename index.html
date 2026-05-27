@@ -2225,6 +2225,7 @@
       }) || null;
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-walkfix-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
+      const ARENA_FLOOR_Y = 0;
       const UNITY_COMBAT_CAMERA = {
         fov: 45,
         distance: 4.8,
@@ -2484,6 +2485,8 @@
           this.combatCameraPosition = new THREE.Vector3();
           this.jumpVelocity = 0;
           this.actionUntil = 0;
+          this.modelBounds = new THREE.Box3();
+          this.modelSize = new THREE.Vector3();
           this.lastSize = { width: 0, height: 0 };
           this.resizeObserver = new ResizeObserver(() => this.resize());
           this.resizeObserver.observe(this.container);
@@ -2634,6 +2637,7 @@
           });
           this.model = model;
           this.group.add(model);
+          if (this.options.arena) this.snapArenaRobotToFloor();
           if (this.options.home) this.container.closest(".robot-stage")?.classList.add("has-live-model");
           this.mixer = new THREE.AnimationMixer(model);
           this.actions = {};
@@ -2664,6 +2668,7 @@
             if (anim === "jump" && Math.abs(this.jumpVelocity) < 0.01 && this.playerPosition.y <= 0.02) this.jumpVelocity = 2.65;
           }
           this.applyRigAnimation(anim);
+          if (this.options.arena) this.snapArenaRobotToFloor();
         }
 
         normalizeClipName(name) {
@@ -2715,6 +2720,16 @@
           this.model?.traverse((child) => {
             if (child.isSkinnedMesh) child.skeleton.pose();
           });
+        }
+
+        snapArenaRobotToFloor(targetFloorY = ARENA_FLOOR_Y) {
+          if (!this.options.arena || !this.model || !this.group) return;
+          this.group.updateWorldMatrix(true, true);
+          this.modelBounds.setFromObject(this.model);
+          this.modelBounds.getSize(this.modelSize);
+          if (!Number.isFinite(this.modelBounds.min.y) || this.modelSize.y <= 0.001) return;
+          const correction = targetFloorY - this.modelBounds.min.y;
+          if (Math.abs(correction) > 0.001) this.group.position.y += correction;
         }
 
         resize() {
@@ -2824,6 +2839,8 @@
             this.group.rotation.z = THREE.MathUtils.lerp(this.group.rotation.z, -0.42, 0.12);
             this.group.position.y += Math.max(0, Math.sin(t * 6.5)) * 0.04;
           }
+
+          this.snapArenaRobotToFloor(ARENA_FLOOR_Y + this.playerPosition.y);
 
           if (this.sandbag) {
             const distance = this.group.position.distanceTo(this.sandbag.position);
