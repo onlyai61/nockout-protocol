@@ -1850,10 +1850,10 @@
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
-        fov: 38,
-        offset: new THREE.Vector3(0.18, 1.28, -3.35),
-        targetOffset: new THREE.Vector3(0, 0.82, 0.12),
-        followLerp: 0.22
+        fov: 45,
+        offset: new THREE.Vector3(0.58, 1.42, -5.4),
+        targetOffset: new THREE.Vector3(0, 0.72, 0.1),
+        followLerp: 0.24
       };
       let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
@@ -2130,8 +2130,9 @@
           const dummyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.44, 0.16, 24), dummyMaterial);
           dummyBase.position.y = 0.08;
           dummy.add(dummyHead, dummyBody, dummyBase);
-          dummy.position.set(0.9, 0, 1.55);
+          dummy.position.set(1.85, 0, 2.25);
           dummy.rotation.y = -0.42;
+          dummy.scale.setScalar(0.72);
           this.scene.add(dummy);
           this.dummy = dummy;
         }
@@ -2142,7 +2143,7 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const fitSize = this.options.arena ? 1.72 : this.options.hero ? 1.08 : 1.12;
+          const fitSize = this.options.arena ? 1.08 : this.options.hero ? 1.08 : 1.12;
           const scale = fitSize / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
@@ -2190,7 +2191,7 @@
 
         resetCombatView(force = false) {
           if (!this.options.arena || !this.group) return;
-          this.playerPosition.set(0, 0, -0.45);
+          this.playerPosition.set(0, 0, -0.15);
           this.jumpVelocity = 0;
           this.group.position.set(this.playerPosition.x, this.playerPosition.y, this.playerPosition.z);
           this.group.rotation.set(0, 0, 0);
@@ -2314,8 +2315,9 @@
           if (this.playerPosition.y <= 0) this.jumpVelocity = 0;
 
           const actionActive = performance.now() < this.actionUntil;
-          if (!actionActive && state.anim !== (moving ? "walk" : "idle")) {
-            state.anim = moving ? "walk" : "idle";
+          const defaultCombatAnim = "walk";
+          if (!actionActive && state.anim !== defaultCombatAnim) {
+            state.anim = defaultCombatAnim;
             this.anim = state.anim;
             this.applyRigAnimation(this.anim);
           }
@@ -2323,6 +2325,8 @@
           if (moving) {
             const targetYaw = Math.atan2(input.x, input.y);
             this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, targetYaw, 0.18);
+          } else {
+            this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, 0.28, 0.05);
           }
 
           this.group.position.x = this.playerPosition.x;
@@ -2864,7 +2868,7 @@
         state.controls = { x: 0, y: 0 };
         arenaStage.resetCombatView(true);
         setView("arena");
-        setAnim("guard");
+        setAnim("walk");
         render();
       }
 
@@ -2876,7 +2880,7 @@
         state.controls = { x: 0, y: 0 };
         arenaStage.resetCombatView(true);
         setView("arena");
-        setAnim("punch");
+        setAnim("walk");
         render();
       }
 
