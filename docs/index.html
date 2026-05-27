@@ -1942,6 +1942,22 @@
         }
       }
 
+      @media (max-width: 1180px) and (max-height: 720px) {
+        .home-view {
+          grid-template-rows: minmax(220px, calc(100dvh - 210px)) auto;
+        }
+
+        .home-view .robot-stage {
+          min-height: 220px;
+          height: calc(100dvh - 210px);
+          max-height: 330px;
+        }
+
+        .robot-stage::after {
+          inset: 2% 24% 26%;
+        }
+      }
+
       @media (min-width: 901px) and (max-width: 1180px) and (min-height: 721px) {
         .app {
           padding: 10px;
@@ -2432,7 +2448,11 @@
           try {
             this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
           } catch (error) {
-            this.container.querySelector(".model-loading").textContent = "WEBGL UNAVAILABLE";
+            if (this.options.home) {
+              this.container.querySelector(".model-loading")?.remove();
+            } else {
+              this.container.querySelector(".model-loading").textContent = "WEBGL UNAVAILABLE";
+            }
             return;
           }
           this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
