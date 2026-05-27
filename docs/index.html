@@ -2256,14 +2256,14 @@
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const ARENA_FLOOR_Y = 0;
       const UNITY_COMBAT_CAMERA = {
-        fov: 45,
-        distance: 4.8,
-        height: 1.58,
-        shoulder: 0.46,
-        targetOffset: new THREE.Vector3(0, 0.72, 0.1),
-        followLerp: 0.16,
-        targetLerp: 0.22,
-        rotationLerp: 0.16
+        fov: 42,
+        distance: 5.25,
+        height: 1.66,
+        shoulder: 0.34,
+        targetOffset: new THREE.Vector3(0, 0.68, 0.12),
+        followLerp: 0.2,
+        targetLerp: 0.26,
+        rotationLerp: 0.2
       };
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
       const LEGACY_STARTER_STATS = { attack: 42, armor: 46, speed: 40, cooling: 44, sensor: 38, power: 45 };
@@ -2631,7 +2631,10 @@
           });
           this.model = model;
           this.group.add(model);
-          if (this.options.arena) this.snapArenaRobotToFloor();
+          if (this.options.arena) {
+            this.snapArenaRobotToFloor();
+            this.resetCombatView(true);
+          }
           if (this.options.home) this.container.closest(".robot-stage")?.classList.add("has-live-model");
           this.mixer = new THREE.AnimationMixer(model);
           this.actions = {};
@@ -2646,11 +2649,12 @@
 
         resetCombatView(force = false) {
           if (!this.options.arena || !this.group) return;
-          this.playerPosition.set(0, 0, -0.15);
+          this.playerPosition.set(0, 0, 0.42);
           this.combatYaw = 0;
           this.jumpVelocity = 0;
           this.group.position.set(this.playerPosition.x, this.playerPosition.y, this.playerPosition.z);
           this.group.rotation.set(0, 0, 0);
+          this.snapArenaRobotToFloor(ARENA_FLOOR_Y);
           this.updateCombatCamera(force);
         }
 
@@ -2785,8 +2789,17 @@
           const input = state.controls || { x: 0, y: 0 };
           const moving = Math.hypot(input.x, input.y) > 0.12;
           const speed = 2.05;
-          this.playerPosition.x += input.x * speed * delta;
-          this.playerPosition.z += input.y * speed * delta;
+          const cameraForward = this.combatCameraTarget.clone().sub(this.camera.position);
+          cameraForward.y = 0;
+          if (cameraForward.lengthSq() < 0.001) cameraForward.set(Math.sin(this.combatYaw), 0, Math.cos(this.combatYaw));
+          cameraForward.normalize();
+          const cameraRight = new THREE.Vector3(cameraForward.z, 0, -cameraForward.x).normalize();
+          const moveVector = new THREE.Vector3()
+            .addScaledVector(cameraRight, input.x)
+            .addScaledVector(cameraForward, input.y);
+          if (moveVector.lengthSq() > 1) moveVector.normalize();
+          this.playerPosition.x += moveVector.x * speed * delta;
+          this.playerPosition.z += moveVector.z * speed * delta;
           this.playerPosition.x = THREE.MathUtils.clamp(this.playerPosition.x, -2.15, 2.15);
           this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -1.25, 2.25);
 
@@ -2803,7 +2816,7 @@
           }
 
           if (moving) {
-            const targetYaw = Math.atan2(input.x, input.y);
+            const targetYaw = Math.atan2(moveVector.x, moveVector.z);
             this.combatYaw = THREE.MathUtils.lerp(this.combatYaw, targetYaw, UNITY_COMBAT_CAMERA.rotationLerp);
           }
           this.group.rotation.y = this.combatYaw;
@@ -3413,9 +3426,10 @@
         };
         state.combatMode = true;
         state.controls = { x: 0, y: 0 };
-        arenaStage.resetCombatView(true);
         setView("arena");
+        arenaStage.resetCombatView(true);
         setAnim("idle");
+        requestAnimationFrame(() => arenaStage.resetCombatView(true));
         document.getElementById("modal").classList.remove("open");
         render();
       }
