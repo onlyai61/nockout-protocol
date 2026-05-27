@@ -71,6 +71,31 @@
         display: none;
       }
 
+      .app.combat-live {
+        grid-template-rows: 1fr;
+        gap: 0;
+        min-width: 0;
+        min-height: 0;
+        padding: 0;
+      }
+
+      .app.combat-live .topbar,
+      .app.combat-live .nav,
+      .app.combat-live .stage-head,
+      .app.combat-live .layout > .side {
+        display: none;
+      }
+
+      .app.combat-live .layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .app.combat-live .panel.stage {
+        border: 0;
+        border-radius: 0;
+      }
+
       .topbar,
       .panel,
       .card,
@@ -686,6 +711,15 @@
         gap: 12px;
       }
 
+      .arena-view.battle-live {
+        grid-template-columns: 1fr;
+        padding: 0;
+      }
+
+      .arena-view.battle-live .status-panel {
+        display: none;
+      }
+
       .arena-stage {
         min-height: 0;
         isolation: isolate;
@@ -702,6 +736,143 @@
 
       .arena-stage .robot-model {
         transform: rotateX(-7deg) rotateY(-22deg) scale(0.86) translateX(-70px);
+      }
+
+      .arena-view.battle-live .arena-stage {
+        border: 0;
+        border-radius: 0;
+        min-height: 100%;
+        background:
+          linear-gradient(180deg, rgba(7, 10, 16, 0.2), rgba(7, 10, 16, 0.92)),
+          radial-gradient(ellipse at 50% 74%, rgba(255, 200, 90, 0.24), transparent 48%),
+          #05070b;
+      }
+
+      .arena-view.battle-live .arena-stage::before {
+        opacity: 0.12;
+        background-size: 72px 72px;
+      }
+
+      .arena-view.battle-live .enemy,
+      .arena-view.battle-live .sandbag {
+        display: none;
+      }
+
+      .combat-controls {
+        position: absolute;
+        z-index: 5;
+        inset: auto 18px 18px 18px;
+        display: none;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        pointer-events: none;
+      }
+
+      .arena-view.battle-live .combat-controls {
+        display: flex;
+      }
+
+      .joystick {
+        position: relative;
+        width: 132px;
+        height: 132px;
+        border: 1px solid rgba(80, 221, 255, 0.34);
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(80, 221, 255, 0.18), rgba(5, 8, 13, 0.68) 64%),
+          rgba(5, 8, 13, 0.58);
+        box-shadow: 0 0 34px rgba(80, 221, 255, 0.16);
+        pointer-events: auto;
+        touch-action: none;
+      }
+
+      .joystick::before,
+      .joystick::after {
+        content: "";
+        position: absolute;
+        background: rgba(244, 248, 255, 0.18);
+      }
+
+      .joystick::before {
+        left: 50%;
+        top: 18px;
+        bottom: 18px;
+        width: 1px;
+      }
+
+      .joystick::after {
+        left: 18px;
+        right: 18px;
+        top: 50%;
+        height: 1px;
+      }
+
+      .joystick-knob {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 54px;
+        height: 54px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 50%;
+        background: linear-gradient(145deg, rgba(80, 221, 255, 0.92), rgba(255, 200, 90, 0.84));
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        transform: translate(-50%, -50%);
+      }
+
+      .combat-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 74px);
+        gap: 10px;
+        pointer-events: auto;
+      }
+
+      .combat-action {
+        width: 74px;
+        height: 74px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        background: rgba(8, 13, 21, 0.78);
+        color: var(--text);
+        font-size: 12px;
+        font-weight: 950;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.36);
+        touch-action: manipulation;
+      }
+
+      .combat-action.primary-hit {
+        background: var(--red);
+      }
+
+      .combat-action.secondary-hit {
+        color: #061018;
+        background: var(--gold);
+      }
+
+      .combat-action.jump-hit {
+        color: #031018;
+        background: var(--cyan);
+      }
+
+      .combat-hint {
+        position: absolute;
+        z-index: 4;
+        top: 14px;
+        left: 14px;
+        display: none;
+        max-width: 360px;
+        padding: 9px 11px;
+        border: 1px solid rgba(80, 221, 255, 0.34);
+        border-radius: 8px;
+        background: rgba(5, 8, 13, 0.66);
+        color: rgba(244, 248, 255, 0.82);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .arena-view.battle-live .combat-hint {
+        display: block;
       }
 
       .enemy,
@@ -1295,11 +1466,23 @@
               <div class="model-space" id="arenaModel"></div>
               <div class="enemy" id="enemyTarget" aria-label="상대 기본 더미"></div>
               <div class="sandbag" id="sandbagTarget" aria-label="훈련 샌드백" hidden></div>
+              <div class="combat-hint">3인칭 스파링장 / 조이스틱 이동 / 점프, 주먹, 발차기 테스트</div>
+              <div class="combat-controls" aria-label="전투 조작">
+                <div class="joystick" id="moveJoystick" aria-label="이동 조이스틱">
+                  <div class="joystick-knob" id="moveJoystickKnob"></div>
+                </div>
+                <div class="combat-buttons">
+                  <button class="combat-action jump-hit" data-combat-action="jump">점프</button>
+                  <button class="combat-action primary-hit" data-combat-action="punch">주먹</button>
+                  <button class="combat-action secondary-hit" data-combat-action="kick">발차기</button>
+                </div>
+              </div>
               <div class="arena-hud">
                 <span class="chip" id="battleState">전투 대기</span>
                 <div>
                   <button class="secondary" data-anim="guard">가드</button>
                   <button class="primary" data-anim="punch">펀치</button>
+                  <button class="ghost" id="endBattleHudButton">나가기</button>
                 </div>
               </div>
             </div>
@@ -1412,6 +1595,8 @@
         rankings: [],
         battle: null,
         trainingMode: false,
+        combatMode: false,
+        controls: { x: 0, y: 0 },
         anim: "idle",
         authMode: new URL(window.location.href).searchParams.has("logged_out") ? "logged_out" : "login"
       };
@@ -1443,6 +1628,8 @@
         state.rankings = [];
         state.battle = null;
         state.trainingMode = false;
+        state.combatMode = false;
+        state.controls = { x: 0, y: 0 };
         state.authMode = authMode;
       }
 
@@ -1501,16 +1688,63 @@
           this.group.position.x = options.arena ? -1.06 : 0;
           this.group.position.y = options.arena ? -0.42 : options.hero ? -0.34 : 0;
           this.scene.add(this.group);
+          this.velocity = new THREE.Vector3();
+          this.playerPosition = new THREE.Vector3(options.arena ? -0.35 : 0, 0, options.arena ? 0.72 : 0);
+          this.jumpVelocity = 0;
+          this.actionUntil = 0;
           this.lastSize = { width: 0, height: 0 };
           this.resizeObserver = new ResizeObserver(() => this.resize());
           this.resizeObserver.observe(this.container);
           this.resize();
+          if (options.arena) this.createArenaWorld();
           window.addEventListener("resize", () => this.resize());
           robotAsset.then((gltf) => this.mount(gltf)).catch(() => {
             const loading = this.container.querySelector(".model-loading");
             if (loading) loading.textContent = "MODEL LOAD FAILED";
           });
           this.tick();
+        }
+
+        createArenaWorld() {
+          const floor = new THREE.Mesh(
+            new THREE.CircleGeometry(3.85, 96),
+            new THREE.MeshStandardMaterial({
+              color: 0x1a2029,
+              metalness: 0.18,
+              roughness: 0.72
+            })
+          );
+          floor.rotation.x = -Math.PI / 2;
+          floor.position.y = -0.03;
+          this.scene.add(floor);
+
+          const ring = new THREE.Mesh(
+            new THREE.RingGeometry(3.72, 3.86, 96),
+            new THREE.MeshBasicMaterial({ color: 0xffc85a, transparent: true, opacity: 0.86, side: THREE.DoubleSide })
+          );
+          ring.rotation.x = -Math.PI / 2;
+          ring.position.y = -0.015;
+          this.scene.add(ring);
+
+          const grid = new THREE.GridHelper(7.2, 18, 0x50ddff, 0x2b4354);
+          grid.position.y = -0.005;
+          grid.material.transparent = true;
+          grid.material.opacity = 0.28;
+          this.scene.add(grid);
+
+          const dummy = new THREE.Group();
+          const dummyMaterial = new THREE.MeshStandardMaterial({ color: 0x5a1f1d, roughness: 0.58, metalness: 0.36 });
+          const dummyHead = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.28, 0.22), dummyMaterial);
+          dummyHead.position.y = 1.46;
+          const dummyBody = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.84, 0.28), dummyMaterial);
+          dummyBody.position.y = 0.9;
+          const dummyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.44, 0.16, 24), dummyMaterial);
+          dummyBase.position.y = 0.08;
+          dummy.add(dummyHead, dummyBody, dummyBase);
+          dummy.position.set(1.55, 0, -1.58);
+          dummy.rotation.y = -0.42;
+          this.scene.add(dummy);
+          this.dummy = dummy;
         }
 
         mount(gltf) {
@@ -1562,12 +1796,16 @@
 
         setAnim(anim) {
           this.anim = anim;
+          if (this.options.arena && ["jump", "punch", "kick"].includes(anim)) {
+            this.actionUntil = performance.now() + (anim === "jump" ? 720 : 560);
+            if (anim === "jump" && Math.abs(this.jumpVelocity) < 0.01 && this.playerPosition.y <= 0.02) this.jumpVelocity = 2.65;
+          }
           this.applyRigAnimation(anim);
         }
 
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
-          const nextName = anim === "punch" || anim === "guard" || anim === "idle" ? "boxing_guard_prep_straight_punch" : "walking";
+          const nextName = anim === "punch" || anim === "kick" || anim === "guard" || anim === "idle" || anim === "jump" ? "boxing_guard_prep_straight_punch" : "walking";
           const nextAction = this.actions[nextName];
           Object.values(this.actions).forEach((action) => {
             if (action !== nextAction) action.fadeOut(0.18);
@@ -1578,7 +1816,7 @@
           }
           nextAction.enabled = true;
           nextAction.paused = false;
-          nextAction.timeScale = anim === "punch" ? 1.45 : anim === "idle" ? 0.08 : anim === "guard" ? 0.28 : 1;
+          nextAction.timeScale = anim === "punch" || anim === "kick" ? 1.45 : anim === "jump" ? 0.85 : anim === "idle" ? 0.08 : anim === "guard" ? 0.28 : 1;
           if (this.activeAction !== nextAction) {
             nextAction.reset().fadeIn(0.18).play();
             this.activeAction = nextAction;
@@ -1603,6 +1841,11 @@
           const t = this.clock.elapsedTime;
           if (this.model) {
             this.mixer?.update(delta);
+            if (this.options.arena && state.combatMode) {
+              this.updateCombat(delta, t);
+              this.renderer.render(this.scene, this.camera);
+              return;
+            }
             const baseY = this.options.arena ? -0.38 : -0.18;
             const baseX = this.options.arena ? -1.06 : 0;
             const idleY = this.options.arena ? -0.3 : 0.16;
@@ -1626,6 +1869,66 @@
           }
           this.renderer.render(this.scene, this.camera);
         }
+
+        updateCombat(delta, t) {
+          const input = state.controls || { x: 0, y: 0 };
+          const moving = Math.hypot(input.x, input.y) > 0.12;
+          const speed = 2.05;
+          this.playerPosition.x += input.x * speed * delta;
+          this.playerPosition.z += input.y * speed * delta;
+          this.playerPosition.x = THREE.MathUtils.clamp(this.playerPosition.x, -2.65, 2.65);
+          this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -2.35, 2.55);
+
+          this.jumpVelocity -= 7.4 * delta;
+          this.playerPosition.y = Math.max(0, this.playerPosition.y + this.jumpVelocity * delta);
+          if (this.playerPosition.y <= 0) this.jumpVelocity = 0;
+
+          const actionActive = performance.now() < this.actionUntil;
+          if (!actionActive && state.anim !== (moving ? "walk" : "idle")) {
+            state.anim = moving ? "walk" : "idle";
+            this.anim = state.anim;
+            this.applyRigAnimation(this.anim);
+          }
+
+          if (moving) {
+            const targetYaw = Math.atan2(input.x, input.y);
+            this.group.rotation.y = THREE.MathUtils.lerp(this.group.rotation.y, targetYaw, 0.18);
+          }
+
+          this.group.position.x = this.playerPosition.x;
+          this.group.position.y = this.playerPosition.y + Math.sin(t * 2.4) * (moving ? 0.018 : 0.012);
+          this.group.position.z = this.playerPosition.z;
+          this.model.rotation.y = -0.08;
+          this.group.rotation.z = 0;
+
+          if (this.anim === "punch") {
+            const hit = Math.max(0, Math.sin(t * 14));
+            this.group.position.x += Math.sin(this.group.rotation.y) * hit * 0.2;
+            this.group.position.z += Math.cos(this.group.rotation.y) * hit * 0.2;
+            this.model.rotation.y = -0.42 - hit * 0.36;
+          } else if (this.anim === "kick") {
+            const hit = Math.max(0, Math.sin(t * 13));
+            this.group.rotation.z = -hit * 0.12;
+            this.group.position.y += hit * 0.1;
+            this.model.rotation.y = -0.18 + hit * 0.56;
+          } else if (this.anim === "jump") {
+            this.group.rotation.z = Math.sin(t * 11) * 0.035;
+          }
+
+          if (this.dummy) {
+            const distance = this.group.position.distanceTo(this.dummy.position);
+            const impact = actionActive && (this.anim === "punch" || this.anim === "kick") && distance < 2.1 ? 1 : 0;
+            this.dummy.rotation.z = THREE.MathUtils.lerp(this.dummy.rotation.z, impact ? 0.18 : 0, 0.16);
+          }
+
+          const behind = new THREE.Vector3(
+            this.playerPosition.x - Math.sin(this.group.rotation.y) * 2.25,
+            this.playerPosition.y + 1.32,
+            this.playerPosition.z - Math.cos(this.group.rotation.y) * 2.25
+          );
+          this.camera.position.lerp(behind, 0.09);
+          this.camera.lookAt(this.playerPosition.x, this.playerPosition.y + 0.78, this.playerPosition.z + 0.34);
+        }
       }
 
       const robotStages = [
@@ -1634,10 +1937,18 @@
       ];
 
       function setView(view) {
+        if (view !== "arena") {
+          state.combatMode = false;
+          state.controls = { x: 0, y: 0 };
+          resetJoystick();
+        } else if (!state.battle) {
+          state.combatMode = false;
+        }
         document.querySelectorAll("[data-page]").forEach((el) => el.classList.toggle("active", el.dataset.page === view));
         document.querySelectorAll("[data-view]").forEach((el) => el.classList.toggle("active", el.dataset.view === view));
         document.getElementById("viewTitle").textContent = meta[view][0];
         document.getElementById("viewCaption").textContent = meta[view][1];
+        requestAnimationFrame(() => robotStages.forEach((stage) => stage.resize?.()));
       }
 
       function setAnim(anim) {
@@ -1647,6 +1958,55 @@
           stage.setAnim(anim);
         });
         document.getElementById("sandbagTarget")?.classList.toggle("hit", state.trainingMode && anim === "punch");
+      }
+
+      function combatAction(action) {
+        if (!state.combatMode) return setAnim(action === "kick" ? "punch" : action);
+        setAnim(action);
+      }
+
+      function resetJoystick() {
+        state.controls = { x: 0, y: 0 };
+        const knob = document.getElementById("moveJoystickKnob");
+        if (knob) knob.style.transform = "translate(-50%, -50%)";
+      }
+
+      function setupJoystick() {
+        const joystick = document.getElementById("moveJoystick");
+        const knob = document.getElementById("moveJoystickKnob");
+        if (!joystick || !knob) return;
+
+        const updateFromEvent = (event) => {
+          const pointer = event.touches?.[0] || event;
+          const rect = joystick.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const max = rect.width * 0.34;
+          const rawX = pointer.clientX - centerX;
+          const rawY = pointer.clientY - centerY;
+          const distance = Math.min(max, Math.hypot(rawX, rawY));
+          const angle = Math.atan2(rawY, rawX);
+          const x = Math.cos(angle) * distance;
+          const y = Math.sin(angle) * distance;
+          knob.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+          state.controls = {
+            x: Math.abs(x / max) < 0.08 ? 0 : x / max,
+            y: Math.abs(y / max) < 0.08 ? 0 : y / max
+          };
+          if (state.combatMode && Math.hypot(state.controls.x, state.controls.y) > 0.12 && !["punch", "kick", "jump"].includes(state.anim)) {
+            setAnim("walk");
+          }
+        };
+
+        joystick.addEventListener("pointerdown", (event) => {
+          joystick.setPointerCapture?.(event.pointerId);
+          updateFromEvent(event);
+        });
+        joystick.addEventListener("pointermove", (event) => {
+          if (event.buttons) updateFromEvent(event);
+        });
+        joystick.addEventListener("pointerup", resetJoystick);
+        joystick.addEventListener("pointercancel", resetJoystick);
       }
 
       function line(label, value) {
@@ -1674,7 +2034,9 @@
 
       function render() {
         const loggedIn = Boolean(state.user);
-        document.getElementById("appShell").classList.toggle("hidden", !loggedIn);
+        const appShell = document.getElementById("appShell");
+        appShell.classList.toggle("hidden", !loggedIn);
+        appShell.classList.toggle("combat-live", state.combatMode);
         const authScreen = document.getElementById("authScreen");
         authScreen.classList.toggle("open", !loggedIn);
         authScreen.classList.toggle("login-mode", state.authMode !== "logged_out");
@@ -1697,6 +2059,7 @@
         document.getElementById("supportSummary").innerHTML = state.supports.length ? state.supports.slice(0, 3).map((bot) => line(bot.name, bot.frame_type)).join("") : empty("보유 서포트봇 없음");
         document.getElementById("loadoutSummary").innerHTML = robot ? line("전투봇", robot.name) + line("편성", state.loadout?.name || "미저장") : empty("편성할 전투봇 없음");
         document.getElementById("rankingList").innerHTML = renderRankings();
+        document.querySelector("[data-page='arena']").classList.toggle("battle-live", state.combatMode);
         document.getElementById("battleInfo").innerHTML = state.trainingMode
           ? line("모드", "샌드백 훈련") + line("목표", "펀치 타격감 확인") + line("세션", "로컬")
           : state.battle
@@ -1918,6 +2281,8 @@
         }).select("*").single();
         if (error) return showModal("전투 시작 실패", error.message);
         state.battle = data;
+        state.combatMode = true;
+        state.controls = { x: 0, y: 0 };
         setView("arena");
         setAnim("walk");
         render();
@@ -1926,6 +2291,8 @@
       function startSandbagTraining() {
         state.battle = null;
         state.trainingMode = true;
+        state.combatMode = false;
+        state.controls = { x: 0, y: 0 };
         setView("arena");
         setAnim("punch");
         render();
@@ -1958,7 +2325,26 @@
       document.getElementById("startBattleButton").addEventListener("click", startBattle);
       document.getElementById("startPracticeButton").addEventListener("click", startSandbagTraining);
       document.getElementById("practiceButton").addEventListener("click", startSandbagTraining);
-      document.getElementById("endBattleButton").addEventListener("click", () => { state.battle = null; state.trainingMode = false; setView("home"); render(); });
+      document.querySelectorAll("[data-combat-action]").forEach((button) => {
+        button.addEventListener("click", () => combatAction(button.dataset.combatAction));
+      });
+      setupJoystick();
+      window.addEventListener("keydown", (event) => {
+        if (!state.combatMode) return;
+        if (event.key === " ") combatAction("jump");
+        if (event.key.toLowerCase() === "j") combatAction("punch");
+        if (event.key.toLowerCase() === "k") combatAction("kick");
+      });
+      function endBattle() {
+        state.battle = null;
+        state.trainingMode = false;
+        state.combatMode = false;
+        resetJoystick();
+        setView("home");
+        render();
+      }
+      document.getElementById("endBattleButton").addEventListener("click", endBattle);
+      document.getElementById("endBattleHudButton").addEventListener("click", endBattle);
       document.getElementById("modalClose").addEventListener("click", () => document.getElementById("modal").classList.remove("open"));
       document.getElementById("modal").addEventListener("click", (event) => {
         if (event.target.id === "modal") document.getElementById("modal").classList.remove("open");
