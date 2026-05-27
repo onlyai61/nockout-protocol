@@ -320,6 +320,7 @@
       .arena-stage::before {
         content: "";
         position: absolute;
+        z-index: 0;
         inset: 0;
         opacity: 0.22;
         background-image:
@@ -331,7 +332,7 @@
       .robot-stage::after {
         content: "";
         position: absolute;
-        z-index: 0;
+        z-index: 1;
         inset: 8% 10% 14%;
         background: url("./assets/combat-robot.png") center center / contain no-repeat;
         opacity: 0.9;
@@ -340,12 +341,12 @@
       }
 
       .robot-stage.has-live-model::after {
-        opacity: 0;
+        opacity: 0.58;
       }
 
       .model-space {
         position: absolute;
-        z-index: 1;
+        z-index: 2;
         inset: 0;
         display: grid;
         place-items: center;
