@@ -1632,6 +1632,8 @@
                   <button class="combat-action jump-hit" data-combat-action="jump">점프</button>
                   <button class="combat-action primary-hit" data-combat-action="punch">주먹</button>
                   <button class="combat-action secondary-hit" data-combat-action="kick">발차기</button>
+                  <button class="combat-action" data-combat-action="hit">피격</button>
+                  <button class="combat-action" data-combat-action="knockdown">다운</button>
                 </div>
               </div>
               <div class="arena-hud">
@@ -1639,6 +1641,8 @@
                 <div>
                   <button class="secondary" data-anim="guard">가드</button>
                   <button class="primary" data-anim="punch">펀치</button>
+                  <button class="secondary" data-anim="hit">피격</button>
+                  <button class="secondary" data-anim="knockdown">다운</button>
                   <button class="ghost" id="endBattleHudButton">나가기</button>
                 </div>
               </div>
@@ -1762,6 +1766,7 @@
         loadout: null,
         rankings: [],
         battle: null,
+        combatNotice: "",
         trainingMode: false,
         combatMode: false,
         controls: { x: 0, y: 0 },
@@ -1850,6 +1855,12 @@
             return;
           }
 
+          if (kind === "hit" || kind === "knockdown") {
+            this.tone(kind === "knockdown" ? 120 : 180, 0, 0.07, "sawtooth", 0.16);
+            this.noise(0.01, kind === "knockdown" ? 0.14 : 0.08, kind === "knockdown" ? 0.18 : 0.12);
+            return;
+          }
+
           const base = kind === "kick" ? 230 : 290;
           this.tone(base, 0, 0.045, "square", 0.18);
           this.tone(base * 2.4, 0.032, 0.034, "sawtooth", 0.13);
@@ -1884,6 +1895,7 @@
         state.loadout = null;
         state.rankings = [];
         state.battle = null;
+        state.combatNotice = "";
         state.trainingMode = false;
         state.combatMode = false;
         state.controls = { x: 0, y: 0 };
@@ -2053,7 +2065,7 @@
           this.mixer = new THREE.AnimationMixer(model);
           this.actions = {};
           gltf.animations.forEach((clip) => {
-            this.actions[clip.name.toLowerCase()] = this.mixer.clipAction(clip);
+            this.actions[this.normalizeClipName(clip.name)] = this.mixer.clipAction(clip);
           });
           this.applyRigAnimation(this.anim);
           this.container.querySelector(".model-loading")?.remove();
@@ -2070,39 +2082,47 @@
 
         setAnim(anim) {
           this.anim = anim;
-          if (this.options.arena && ["jump", "punch", "kick"].includes(anim)) {
-            this.actionUntil = performance.now() + (anim === "jump" ? 720 : 560);
+          if (this.options.arena && ["jump", "punch", "kick", "hit", "knockdown"].includes(anim)) {
+            const actionDurations = { jump: 760, punch: 620, kick: 720, hit: 820, knockdown: 1250 };
+            this.actionUntil = performance.now() + (actionDurations[anim] || 620);
             if (anim === "jump" && Math.abs(this.jumpVelocity) < 0.01 && this.playerPosition.y <= 0.02) this.jumpVelocity = 2.65;
           }
           this.applyRigAnimation(anim);
         }
 
+        normalizeClipName(name) {
+          return String(name || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+        }
+
+        findRigAction(names) {
+          return names.map((name) => this.actions[this.normalizeClipName(name)]).find(Boolean) || null;
+        }
+
         applyRigAnimation(anim) {
           if (!this.mixer || !this.actions) return;
-          const nextName = {
-            walk: "walking",
-            punch: "right_jab_from_guard",
-            kick: "left_short_hook_from_guard",
-            guard: "boxing_guard_prep_straight_punch",
-            jump: "running"
-          }[anim] || null;
-          if (!nextName || this.options.staticIdle) {
+          const nextAction = this.findRigAction({
+            walk: ["Walking", "Running"],
+            punch: ["Right_Jab_from_Guard", "Boxing_Guard_Prep_Straight_Punch"],
+            kick: ["Left_Short_Hook_from_Guard", "Right_Upper_Hook_from_Guard"],
+            guard: ["Boxing_Guard_Prep_Straight_Punch"],
+            jump: ["Running"],
+            hit: ["Hit_Reaction_1", "Face_Punch_Reaction_1"],
+            knockdown: ["Knock_Down_1", "falling_down"]
+          }[anim] || []);
+          if (!nextAction || this.options.staticIdle) {
             Object.values(this.actions).forEach((action) => action.stop());
             this.activeAction = null;
             this.resetRigPose();
             return;
           }
-          const nextAction = this.actions[nextName];
           Object.values(this.actions).forEach((action) => {
             if (action !== nextAction) action.fadeOut(0.18);
           });
-          if (!nextAction) {
-            this.activeAction = null;
-            return;
-          }
           nextAction.enabled = true;
           nextAction.paused = false;
-          nextAction.timeScale = anim === "punch" || anim === "kick" ? 1.35 : anim === "jump" ? 1.1 : anim === "guard" ? 0.72 : 1;
+          nextAction.clampWhenFinished = ["punch", "kick", "hit", "knockdown"].includes(anim);
+          nextAction.setLoop(["punch", "kick", "hit", "knockdown"].includes(anim) ? THREE.LoopOnce : THREE.LoopRepeat, ["punch", "kick", "hit", "knockdown"].includes(anim) ? 1 : Infinity);
+          nextAction.timeScale = anim === "punch" ? 1.45 : anim === "kick" ? 1.28 : anim === "jump" ? 1.1 : anim === "guard" ? 0.72 : 1;
           if (this.activeAction !== nextAction) {
             nextAction.reset().fadeIn(0.18).play();
             this.activeAction = nextAction;
@@ -2206,6 +2226,13 @@
             this.model.rotation.y = -0.18 + hit * 0.56;
           } else if (this.anim === "jump") {
             this.group.rotation.z = Math.sin(t * 11) * 0.035;
+          } else if (this.anim === "hit") {
+            const recoil = Math.max(0, Math.sin(t * 12));
+            this.group.position.z -= recoil * 0.16;
+            this.group.rotation.z = recoil * 0.08;
+          } else if (this.anim === "knockdown") {
+            this.group.rotation.z = THREE.MathUtils.lerp(this.group.rotation.z, -0.42, 0.12);
+            this.group.position.y += Math.max(0, Math.sin(t * 6.5)) * 0.04;
           }
 
           if (this.dummy) {
@@ -2297,7 +2324,7 @@
             x: Math.abs(x / max) < 0.08 ? 0 : x / max,
             y: Math.abs(y / max) < 0.08 ? 0 : y / max
           };
-          if (state.combatMode && Math.hypot(state.controls.x, state.controls.y) > 0.12 && !["punch", "kick", "jump"].includes(state.anim)) {
+          if (state.combatMode && Math.hypot(state.controls.x, state.controls.y) > 0.12 && !["punch", "kick", "jump", "hit", "knockdown"].includes(state.anim)) {
             setAnim("walk");
           }
         };
@@ -2367,10 +2394,11 @@
         document.getElementById("loadoutSummary").innerHTML = robot ? line("전투봇", robot.name) + line("편성", state.loadout?.name || "미저장") : empty("편성할 전투봇 없음");
         document.getElementById("rankingList").innerHTML = renderRankings();
         document.querySelector("[data-page='arena']").classList.toggle("battle-live", state.combatMode);
+        const battleNotice = state.combatNotice ? line("기록", state.combatNotice) : "";
         document.getElementById("battleInfo").innerHTML = state.trainingMode
           ? line("모드", "샌드백 훈련") + line("목표", "펀치 타격감 확인") + line("세션", "로컬")
           : state.battle
-            ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name)
+            ? line("세션", state.battle.id.slice(0, 8)) + line("상태", state.battle.status) + line("아레나", state.battle.arena_name) + battleNotice
             : empty("전투 세션 없음");
         document.getElementById("battleState").textContent = state.trainingMode ? "SANDBAG TRAINING" : state.battle ? `BATTLE ${state.battle.status.toUpperCase()}` : "전투 대기";
         document.getElementById("enemyTarget").hidden = state.trainingMode;
@@ -2648,14 +2676,19 @@
       }
 
       async function saveLoadout() {
-        if (!state.user || !state.robot) return;
+        if (!state.user || !state.robot) return false;
         const supportIds = state.supports.slice(0, 3).map((bot) => bot.id);
         const score = ["attack", "armor", "speed", "cooling", "sensor", "power"].reduce((sum, key) => sum + Number(state.robot[key] || 0), 0);
         const payload = { user_id: state.user.id, name: "Primary Loadout", combat_robot_id: state.robot.id, support_bot_ids: supportIds, score };
         const { error } = await client.from("loadouts").upsert(payload, { onConflict: "user_id,name" });
-        if (error) return showModal("편성 저장 실패", error.message);
-        await client.from("ranking_entries").insert({ user_id: state.user.id, display_name: state.profile?.display_name, loadout_name: payload.name, score });
+        if (error) {
+          state.combatNotice = `편성 저장 실패: ${error.message}`;
+          return false;
+        }
+        const { error: rankError } = await client.from("ranking_entries").insert({ user_id: state.user.id, display_name: state.profile?.display_name, loadout_name: payload.name, score });
+        if (rankError) state.combatNotice = `랭킹 기록 실패: ${rankError.message}`;
         await loadData();
+        return true;
       }
 
       async function startBattle() {
@@ -2665,6 +2698,7 @@
           if (!robot) return;
         }
         state.trainingMode = false;
+        state.combatNotice = "";
         await saveLoadout();
         const { data, error } = await client.from("battle_sessions").insert({
           user_id: state.user.id,
@@ -2672,18 +2706,27 @@
           arena_name: "Practice Ring",
           status: "active"
         }).select("*").single();
-        if (error) return showModal("전투 시작 실패", error.message);
-        state.battle = data;
+        if (error) {
+          state.combatNotice = `DB 기록 실패, 로컬 전투로 시작: ${error.message}`;
+          state.battle = {
+            id: `local-${Date.now()}`,
+            status: "local",
+            arena_name: "Practice Ring"
+          };
+        } else {
+          state.battle = data;
+        }
         state.combatMode = true;
         state.controls = { x: 0, y: 0 };
         arenaStage.resetCombatView(true);
         setView("arena");
-        setAnim("walk");
+        setAnim("guard");
         render();
       }
 
       function startSandbagTraining() {
         state.battle = null;
+        state.combatNotice = "";
         state.trainingMode = true;
         state.combatMode = false;
         state.controls = { x: 0, y: 0 };
@@ -2704,7 +2747,7 @@
       document.querySelectorAll("[data-view-jump]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.viewJump)));
       document.querySelectorAll("[data-anim]").forEach((button) => button.addEventListener("click", () => {
         robotSfx.unlock();
-        if (button.dataset.anim === "punch") robotSfx.play("punch");
+        if (["punch", "kick", "hit", "knockdown"].includes(button.dataset.anim)) robotSfx.play(button.dataset.anim);
         setAnim(button.dataset.anim);
       }));
       document.addEventListener("click", (event) => {
@@ -2744,9 +2787,12 @@
         }
         if (event.key.toLowerCase() === "j") combatAction("punch");
         if (event.key.toLowerCase() === "k") combatAction("kick");
+        if (event.key.toLowerCase() === "h") combatAction("hit");
+        if (event.key.toLowerCase() === "l") combatAction("knockdown");
       });
       function endBattle() {
         state.battle = null;
+        state.combatNotice = "";
         state.trainingMode = false;
         state.combatMode = false;
         resetJoystick();
