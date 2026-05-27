@@ -2436,7 +2436,7 @@
           } else {
             model.position.copy(center).multiplyScalar(-scale);
           }
-          model.rotation.y = this.options.arena ? Math.PI : -0.18;
+          model.rotation.y = this.options.arena ? 0 : -0.18;
           model.traverse((child) => {
             if (child.isMesh) {
               child.castShadow = true;
@@ -2571,7 +2571,7 @@
               this.renderer.render(this.scene, this.camera);
               return;
             }
-            const baseY = this.options.arena ? Math.PI : -0.18;
+            const baseY = this.options.arena ? 0 : -0.18;
             const baseX = this.options.arena ? 0 : 0;
             const idleY = this.options.arena ? 0.02 : 0.16;
             this.group.position.y = this.options.staticIdle ? 0.02 : idleY + Math.sin(t * 2.4) * 0.028;
@@ -2609,7 +2609,7 @@
           if (this.playerPosition.y <= 0) this.jumpVelocity = 0;
 
           const actionActive = performance.now() < this.actionUntil;
-          const defaultCombatAnim = "walk";
+          const defaultCombatAnim = moving ? "walk" : "idle";
           if (!actionActive && state.anim !== defaultCombatAnim) {
             state.anim = defaultCombatAnim;
             this.anim = state.anim;
@@ -2625,19 +2625,19 @@
           this.group.position.x = this.playerPosition.x;
           this.group.position.y = this.playerPosition.y + Math.sin(t * 2.4) * (moving ? 0.012 : 0.007);
           this.group.position.z = this.playerPosition.z;
-          this.model.rotation.y = Math.PI;
+          this.model.rotation.y = 0;
           this.group.rotation.z = 0;
 
           if (this.anim === "punch") {
             const hit = Math.max(0, Math.sin(t * 14));
             this.group.position.x += Math.sin(this.group.rotation.y) * hit * 0.2;
             this.group.position.z += Math.cos(this.group.rotation.y) * hit * 0.2;
-            this.model.rotation.y = Math.PI - 0.3 - hit * 0.28;
+            this.model.rotation.y = -0.3 - hit * 0.28;
           } else if (this.anim === "kick") {
             const hit = Math.max(0, Math.sin(t * 13));
             this.group.rotation.z = -hit * 0.12;
             this.group.position.y += hit * 0.1;
-            this.model.rotation.y = Math.PI - 0.18 + hit * 0.42;
+            this.model.rotation.y = -0.18 + hit * 0.42;
           } else if (this.anim === "jump") {
             this.group.rotation.z = Math.sin(t * 11) * 0.035;
           } else if (this.anim === "hit") {
@@ -2724,6 +2724,9 @@
         state.controls = { x: 0, y: 0 };
         const knob = document.getElementById("moveJoystickKnob");
         if (knob) knob.style.transform = "translate(-50%, -50%)";
+        if (state.combatMode && !["punch", "kick", "jump", "hit", "knockdown"].includes(state.anim)) {
+          setAnim("idle");
+        }
       }
 
       function setupJoystick() {
@@ -3167,7 +3170,7 @@
         state.controls = { x: 0, y: 0 };
         arenaStage.resetCombatView(true);
         setView("arena");
-        setAnim("walk");
+        setAnim("idle");
         document.getElementById("modal").classList.remove("open");
         render();
       }
