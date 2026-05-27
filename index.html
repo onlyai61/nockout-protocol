@@ -1390,6 +1390,18 @@
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
+      let checkedFreshEntrySession = false;
+      const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
+      const LEGACY_STARTER_STATS = { attack: 42, armor: 46, speed: 40, cooling: 44, sensor: 38, power: 45 };
+      const UPGRADE_FIELDS = [
+        { key: "attack", label: "공격", icon: "ATK", tone: "rgba(255, 95, 87, 0.44)", desc: "타격 피해량", cost: 120 },
+        { key: "armor", label: "장갑", icon: "ARM", tone: "rgba(135, 153, 173, 0.5)", desc: "내구/방어력", cost: 110 },
+        { key: "speed", label: "기동", icon: "SPD", tone: "rgba(80, 221, 255, 0.44)", desc: "이동/회피 반응", cost: 95 },
+        { key: "cooling", label: "냉각", icon: "CLD", tone: "rgba(112, 243, 154, 0.38)", desc: "연속 전투 안정성", cost: 90 },
+        { key: "sensor", label: "센서", icon: "SNS", tone: "rgba(255, 200, 90, 0.42)", desc: "탐지/락온 정확도", cost: 105 },
+        { key: "power", label: "전원", icon: "PWR", tone: "rgba(178, 128, 255, 0.42)", desc: "출력/배터리 효율", cost: 130 }
+      ];
+      const upgradeByKey = Object.fromEntries(UPGRADE_FIELDS.map((field) => [field.key, field]));
 
       const state = {
         user: null,
@@ -1709,17 +1721,10 @@
             </div>
           `;
         }
-        const fields = [
-          { key: "attack", label: "공격", icon: "ATK", tone: "rgba(255, 95, 87, 0.44)", desc: "타격 피해량", cost: "RC 120" },
-          { key: "armor", label: "장갑", icon: "ARM", tone: "rgba(135, 153, 173, 0.5)", desc: "내구/방어력", cost: "RC 110" },
-          { key: "speed", label: "기동", icon: "SPD", tone: "rgba(80, 221, 255, 0.44)", desc: "이동/회피 반응", cost: "RC 95" },
-          { key: "cooling", label: "냉각", icon: "CLD", tone: "rgba(112, 243, 154, 0.38)", desc: "연속 전투 안정성", cost: "RC 90" },
-          { key: "sensor", label: "센서", icon: "SNS", tone: "rgba(255, 200, 90, 0.42)", desc: "탐지/락온 정확도", cost: "RC 105" },
-          { key: "power", label: "전원", icon: "PWR", tone: "rgba(178, 128, 255, 0.42)", desc: "출력/배터리 효율", cost: "RC 130" }
-        ];
-        return fields.map(({ key, label, icon, tone, desc, cost }) => {
+        return UPGRADE_FIELDS.map(({ key, label, icon, tone, desc, cost }) => {
           const value = Number(robot[key] || 0);
           const capped = value >= 99;
+          const affordable = Number(state.profile?.rc || 0) >= cost;
           return `
             <article class="card upgrade-card" style="--upgrade-glow:${tone}">
               <div class="upgrade-top">
@@ -1736,8 +1741,8 @@
               </div>
               <div class="upgrade-meta"><span>강화 결과</span><b>${capped ? "MAX" : `Lv ${value + 1}`}</b></div>
               <div class="upgrade-cta">
-                <button class="upgrade-button" data-upgrade="${key}" ${capped ? "disabled" : ""}>${capped ? "최대 강화" : `${label} 강화`}</button>
-                <span class="chip">${cost}</span>
+                <button class="upgrade-button" data-upgrade="${key}" ${capped || !affordable ? "disabled" : ""}>${capped ? "최대 강화" : affordable ? `${label} 강화` : "RC 부족"}</button>
+                <span class="chip">RC ${cost}</span>
               </div>
             </article>
           `;
@@ -1800,13 +1805,15 @@
           return;
         }
 
-        if (REQUIRE_LOGIN_ON_FRESH_ENTRY && !authReturn.isCallback) {
+        if (REQUIRE_LOGIN_ON_FRESH_ENTRY && !checkedFreshEntrySession && !authReturn.isCallback) {
+          checkedFreshEntrySession = true;
           const { data: sessionData } = await client.auth.getSession();
           if (sessionData.session) await client.auth.signOut();
           resetSessionState(state.authMode);
           render();
           return;
         }
+        checkedFreshEntrySession = true;
 
         const { data: sessionData } = await client.auth.getSession();
         state.user = sessionData.session?.user || null;
@@ -1830,11 +1837,19 @@
         ]);
 
         state.profile = profile;
-        state.robot = robots?.[0] || null;
+        state.robot = await normalizeLegacyStarterRobot(robots?.[0] || null);
         state.supports = supports || [];
         state.loadout = loadouts?.[0] || null;
         state.rankings = rankings || [];
         render();
+      }
+
+      async function normalizeLegacyStarterRobot(robot) {
+        if (!robot) return null;
+        const legacy = Object.entries(LEGACY_STARTER_STATS).every(([key, value]) => Number(robot[key]) === value);
+        if (!legacy) return robot;
+        const { data, error } = await client.from("robots").update(STARTER_STATS).eq("id", robot.id).select("*").single();
+        return error ? { ...robot, ...STARTER_STATS } : data;
       }
 
       async function createStarterRobot() {
@@ -1847,12 +1862,7 @@
           status: "ready",
           battery_name: "Titan Cell S2",
           battery_capacity: 100,
-          attack: 42,
-          armor: 46,
-          speed: 40,
-          cooling: 44,
-          sensor: 38,
-          power: 45
+          ...STARTER_STATS
         }).select("*").single();
         if (error) return showModal("생성 실패", error.message);
         await client.from("support_bots").insert([
@@ -1867,7 +1877,15 @@
 
       async function upgrade(field) {
         if (!state.robot) return;
+        const upgradeInfo = upgradeByKey[field];
+        if (!upgradeInfo) return;
+        const currentRc = Number(state.profile?.rc || 0);
+        if (currentRc < upgradeInfo.cost) {
+          return showModal("RC 부족", `${upgradeInfo.label} 강화에는 RC ${upgradeInfo.cost}가 필요함. 현재 보유 RC는 ${currentRc}.`);
+        }
         const next = Math.min(99, Number(state.robot[field]) + 1);
+        const { error: creditError } = await client.from("profiles").update({ rc: currentRc - upgradeInfo.cost }).eq("id", state.user.id);
+        if (creditError) return showModal("강화 실패", creditError.message);
         const { error } = await client.from("robots").update({ [field]: next }).eq("id", state.robot.id);
         if (error) return showModal("업그레이드 실패", error.message);
         await loadData();
