@@ -866,6 +866,10 @@
         inset: 0;
       }
 
+      .arena-view.battle-live .asset-credit {
+        display: none;
+      }
+
       .arena-view.battle-live .enemy,
       .arena-view.battle-live .sandbag {
         display: none;
@@ -874,11 +878,11 @@
       .combat-controls {
         position: absolute;
         z-index: 5;
-        inset: auto 18px 18px 18px;
+        inset: auto 22px 18px 22px;
         display: none;
         align-items: end;
         justify-content: space-between;
-        gap: 16px;
+        gap: 18px;
         pointer-events: none;
       }
 
@@ -888,84 +892,82 @@
 
       .joystick {
         position: relative;
-        width: 132px;
-        height: 132px;
-        border: 1px solid rgba(80, 221, 255, 0.34);
+        width: clamp(136px, 16vw, 178px);
+        height: clamp(136px, 16vw, 178px);
+        border: 0;
         border-radius: 50%;
-        background:
-          radial-gradient(circle at 50% 50%, rgba(80, 221, 255, 0.18), rgba(5, 8, 13, 0.68) 64%),
-          rgba(5, 8, 13, 0.58);
-        box-shadow: 0 0 34px rgba(80, 221, 255, 0.16);
+        background: url("./assets/ui/joystick_back.png") center / contain no-repeat;
+        filter: drop-shadow(0 0 18px rgba(0, 225, 255, 0.32)) drop-shadow(0 16px 24px rgba(0, 0, 0, 0.52));
         pointer-events: auto;
         touch-action: none;
       }
 
       .joystick::before,
       .joystick::after {
-        content: "";
-        position: absolute;
-        background: rgba(244, 248, 255, 0.18);
-      }
-
-      .joystick::before {
-        left: 50%;
-        top: 18px;
-        bottom: 18px;
-        width: 1px;
-      }
-
-      .joystick::after {
-        left: 18px;
-        right: 18px;
-        top: 50%;
-        height: 1px;
+        display: none;
       }
 
       .joystick-knob {
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 54px;
-        height: 54px;
-        border: 1px solid rgba(255, 255, 255, 0.24);
+        width: 48%;
+        height: 48%;
+        border: 0;
         border-radius: 50%;
-        background: linear-gradient(145deg, rgba(80, 221, 255, 0.92), rgba(255, 200, 90, 0.84));
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        background: url("./assets/ui/joystick.png") center / contain no-repeat;
+        filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.48));
         transform: translate(-50%, -50%);
       }
 
       .combat-buttons {
         display: grid;
-        grid-template-columns: repeat(3, 74px);
-        gap: 10px;
+        grid-template-columns: repeat(3, clamp(80px, 8vw, 112px));
+        grid-auto-rows: clamp(50px, 5vw, 64px);
+        align-items: end;
+        gap: 8px 10px;
         pointer-events: auto;
       }
 
       .combat-action {
-        width: 74px;
-        height: 74px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 50%;
-        background: rgba(8, 13, 21, 0.78);
-        color: var(--text);
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        background: url("./assets/ui/button1.png") center / 100% 100% no-repeat;
+        color: #eaffff;
         font-size: 12px;
         font-weight: 950;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.36);
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45), 0 0 12px rgba(0, 225, 255, 0.72);
+        box-shadow: none;
+        filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.42));
         touch-action: manipulation;
       }
 
+      .combat-action:active {
+        transform: translateY(2px) scale(0.98);
+        background-image: url("./assets/ui/button_active.png");
+      }
+
       .combat-action.primary-hit {
-        background: var(--red);
+        color: #fff1f1;
+        background-image:
+          linear-gradient(rgba(255, 95, 87, 0.48), rgba(255, 95, 87, 0.48)),
+          url("./assets/ui/button_active.png");
       }
 
       .combat-action.secondary-hit {
-        color: #061018;
-        background: var(--gold);
+        color: #fff8df;
+        background-image:
+          linear-gradient(rgba(255, 200, 90, 0.38), rgba(255, 200, 90, 0.38)),
+          url("./assets/ui/button1.png");
       }
 
       .combat-action.jump-hit {
-        color: #031018;
-        background: var(--cyan);
+        color: #eaffff;
+        background-image:
+          linear-gradient(rgba(80, 221, 255, 0.36), rgba(80, 221, 255, 0.36)),
+          url("./assets/ui/button_active.png");
       }
 
       .combat-hint {
@@ -974,14 +976,17 @@
         top: 14px;
         left: 14px;
         display: none;
-        max-width: 360px;
-        padding: 9px 11px;
-        border: 1px solid rgba(80, 221, 255, 0.34);
-        border-radius: 8px;
-        background: rgba(5, 8, 13, 0.66);
-        color: rgba(244, 248, 255, 0.82);
-        font-size: 11px;
+        min-width: min(420px, calc(100vw - 28px));
+        max-width: 480px;
+        padding: 20px 28px;
+        border: 0;
+        border-radius: 0;
+        background: url("./assets/ui/window_transparent.png") center / 100% 100% no-repeat;
+        color: rgba(234, 255, 255, 0.92);
+        font-size: 12px;
         font-weight: 800;
+        letter-spacing: 0;
+        text-shadow: 0 0 10px rgba(0, 225, 255, 0.62);
       }
 
       .arena-view.battle-live .combat-hint {
@@ -1063,14 +1068,38 @@
 
       .arena-hud {
         position: absolute;
-        z-index: 3;
-        left: 14px;
-        right: 14px;
-        bottom: 14px;
+        z-index: 6;
+        left: auto;
+        right: 18px;
+        top: 14px;
+        bottom: auto;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 10px;
+        justify-content: end;
+        gap: 8px;
+        max-width: calc(100vw - 36px);
+        padding: 14px 18px;
+        background: url("./assets/ui/window_transparent.png") center / 100% 100% no-repeat;
+      }
+
+      .arena-hud .chip {
+        min-width: 120px;
+        justify-content: center;
+        border: 0;
+        background: transparent;
+        color: #eaffff;
+        text-shadow: 0 0 12px rgba(0, 225, 255, 0.7);
+      }
+
+      .arena-hud button {
+        min-width: 78px;
+        min-height: 40px;
+        border: 0;
+        border-radius: 0;
+        background: url("./assets/ui/button1.png") center / 100% 100% no-repeat;
+        box-shadow: none;
+        color: #eaffff;
+        text-shadow: 0 0 10px rgba(0, 225, 255, 0.65);
       }
 
       .empty {
@@ -1494,6 +1523,45 @@
         .auth-status-grid {
           grid-template-columns: 1fr;
         }
+
+        .arena-view.battle-live .combat-hint {
+          display: none;
+        }
+
+        .arena-hud {
+          left: 10px;
+          right: 10px;
+          top: 10px;
+          justify-content: center;
+          flex-wrap: wrap;
+          padding: 12px 14px;
+        }
+
+        .arena-hud .chip {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .arena-hud button {
+          min-width: 58px;
+          min-height: 34px;
+          font-size: 11px;
+        }
+
+        .combat-controls {
+          inset: auto 14px 16px 14px;
+          gap: 10px;
+        }
+
+        .combat-buttons {
+          grid-template-columns: repeat(3, minmax(72px, 1fr));
+          grid-auto-rows: 48px;
+          gap: 8px;
+        }
+
+        .combat-action {
+          font-size: 11px;
+        }
       }
     </style>
   </head>
@@ -1739,10 +1807,10 @@
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
       const UNITY_COMBAT_CAMERA = {
-        fov: 48,
-        position: new THREE.Vector3(0, 4.45, -5.75),
-        lookAt: new THREE.Vector3(0, 1.15, 2.75),
-        followLerp: 0.18
+        fov: 52,
+        position: new THREE.Vector3(0, 2.55, -5.15),
+        lookAt: new THREE.Vector3(0, 0.92, -1.05),
+        followLerp: 0.22
       };
       let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
@@ -1954,12 +2022,17 @@
           const rim = new THREE.DirectionalLight(0x50ddff, 2.1);
           rim.position.set(3.4, 2.6, -2.8);
           this.scene.add(rim);
+          if (options.arena) {
+            const playerLight = new THREE.PointLight(0x7feaff, 5.2, 7);
+            playerLight.position.set(0, 1.6, -1.5);
+            this.scene.add(playerLight);
+          }
           this.group = new THREE.Group();
           this.group.position.x = 0;
           this.group.position.y = options.arena ? 0 : options.hero ? -0.34 : 0;
           this.scene.add(this.group);
           this.velocity = new THREE.Vector3();
-          this.playerPosition = new THREE.Vector3(0, 0, options.arena ? 0.25 : 0);
+          this.playerPosition = new THREE.Vector3(0, 0, options.arena ? -1.05 : 0);
           this.jumpVelocity = 0;
           this.actionUntil = 0;
           this.lastSize = { width: 0, height: 0 };
@@ -2014,10 +2087,67 @@
           const dummyBase = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.44, 0.16, 24), dummyMaterial);
           dummyBase.position.y = 0.08;
           dummy.add(dummyHead, dummyBody, dummyBase);
-          dummy.position.set(2.15, 0, 2.45);
+          dummy.position.set(1.65, 0, 1.5);
           dummy.rotation.y = -0.42;
           this.scene.add(dummy);
           this.dummy = dummy;
+          this.createPlayerProxy();
+        }
+
+        createPlayerProxy() {
+          const proxy = new THREE.Group();
+          const armor = new THREE.MeshStandardMaterial({
+            color: 0xb8d6e8,
+            emissive: 0x0a3042,
+            emissiveIntensity: 0.24,
+            metalness: 0.64,
+            roughness: 0.34
+          });
+          const accent = new THREE.MeshStandardMaterial({
+            color: 0x50ddff,
+            emissive: 0x1ccfff,
+            emissiveIntensity: 0.7,
+            metalness: 0.38,
+            roughness: 0.28
+          });
+          const dark = new THREE.MeshStandardMaterial({
+            color: 0x111820,
+            emissive: 0x071522,
+            emissiveIntensity: 0.18,
+            metalness: 0.5,
+            roughness: 0.42
+          });
+
+          const body = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.72, 0.28), armor);
+          body.position.y = 0.98;
+          const chest = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.18, 0.035), accent);
+          chest.position.set(0, 1.05, -0.155);
+          const head = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.24, 0.24), armor);
+          head.position.y = 1.5;
+          const visor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.035), accent);
+          visor.position.set(0, 1.52, -0.14);
+          const hips = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.22, 0.24), dark);
+          hips.position.y = 0.54;
+
+          const limb = (width, height, depth, x, y, z, material = armor) => {
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+            mesh.position.set(x, y, z);
+            return mesh;
+          };
+          proxy.add(
+            body, chest, head, visor, hips,
+            limb(0.14, 0.54, 0.14, -0.38, 0.98, 0, armor),
+            limb(0.14, 0.54, 0.14, 0.38, 0.98, 0, armor),
+            limb(0.16, 0.58, 0.16, -0.17, 0.16, 0, dark),
+            limb(0.16, 0.58, 0.16, 0.17, 0.16, 0, dark)
+          );
+          proxy.position.set(0, 0, 0);
+          proxy.rotation.y = Math.PI;
+          proxy.traverse((child) => {
+            if (child.isMesh) child.frustumCulled = false;
+          });
+          this.group.add(proxy);
+          this.playerProxy = proxy;
         }
 
         mount(gltf) {
@@ -2026,7 +2156,7 @@
           const bounds = new THREE.Box3().setFromObject(model);
           const center = bounds.getCenter(new THREE.Vector3());
           const size = bounds.getSize(new THREE.Vector3());
-          const scale = (this.options.arena ? 18 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
+          const scale = (this.options.arena ? 3.2 : this.options.hero ? 1.08 : 1.12) / Math.max(size.x, size.y, size.z);
           model.scale.setScalar(scale);
           if (this.options.arena) {
             model.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
@@ -2073,7 +2203,7 @@
 
         resetCombatView(force = false) {
           if (!this.options.arena || !this.group) return;
-          this.playerPosition.set(0, 0, 0.25);
+          this.playerPosition.set(0, 0, -1.05);
           this.jumpVelocity = 0;
           this.group.position.set(this.playerPosition.x, this.playerPosition.y, this.playerPosition.z);
           this.group.rotation.set(0, 0, 0);
@@ -2190,7 +2320,7 @@
           this.playerPosition.x += input.x * speed * delta;
           this.playerPosition.z += input.y * speed * delta;
           this.playerPosition.x = THREE.MathUtils.clamp(this.playerPosition.x, -2.65, 2.65);
-          this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -1.65, 2.75);
+          this.playerPosition.z = THREE.MathUtils.clamp(this.playerPosition.z, -2.25, 2.25);
 
           this.jumpVelocity -= 7.4 * delta;
           this.playerPosition.y = Math.max(0, this.playerPosition.y + this.jumpVelocity * delta);
