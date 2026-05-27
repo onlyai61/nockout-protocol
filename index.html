@@ -1734,6 +1734,12 @@
       const client = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) || null;
       const ROBOT_ASSET_VERSION = "azure-automaton-biped-gen1-fit-20260527";
       const ROBOT_MODEL_URL = `./assets/azure_automaton.glb?v=${ROBOT_ASSET_VERSION}`;
+      const UNITY_COMBAT_CAMERA = {
+        fov: 48,
+        position: new THREE.Vector3(0, 4.45, -5.75),
+        lookAt: new THREE.Vector3(0, 1.15, 2.75),
+        followLerp: 0.18
+      };
       let checkedFreshEntrySession = false;
       const STARTER_STATS = { attack: 1, armor: 1, speed: 1, cooling: 1, sensor: 1, power: 1 };
       const LEGACY_STARTER_STATS = { attack: 42, armor: 46, speed: 40, cooling: 44, sensor: 38, power: 45 };
@@ -1914,7 +1920,7 @@
           this.anim = "idle";
           this.clock = new THREE.Clock();
           this.scene = new THREE.Scene();
-          this.camera = new THREE.PerspectiveCamera(options.arena ? 46 : 34, 1, 0.1, 100);
+          this.camera = new THREE.PerspectiveCamera(options.arena ? UNITY_COMBAT_CAMERA.fov : 34, 1, options.arena ? 0.08 : 0.1, 100);
           this.camera.position.set(options.arena ? 0 : 0, options.hero ? 0.46 : 0.62, options.arena ? 5.2 : options.hero ? 6.45 : 5.7);
           this.camera.lookAt(options.arena ? -0.38 : 0, options.hero ? 0.16 : options.arena ? 0.02 : 0.05, 0);
           this.container.innerHTML = '<div class="model-loading">LOADING GLB</div><div class="asset-credit">Azure Automaton Biped / Meshy AI generated concept</div>';
@@ -2212,17 +2218,16 @@
         }
 
         updateCombatCamera(force = false) {
-          const yaw = this.group.rotation.y || 0;
-          const target = new THREE.Vector3(this.playerPosition.x, this.playerPosition.y + 0.82, this.playerPosition.z + 0.26);
-          const behind = new THREE.Vector3(
-            this.playerPosition.x - Math.sin(yaw) * 2.35,
-            this.playerPosition.y + 1.56,
-            this.playerPosition.z - Math.cos(yaw) * 2.55
-          );
+          const target = UNITY_COMBAT_CAMERA.lookAt.clone();
+          const cameraPosition = UNITY_COMBAT_CAMERA.position.clone();
+          if (this.playerPosition.y > 0.01) {
+            target.y += this.playerPosition.y * 0.25;
+            cameraPosition.y += this.playerPosition.y * 0.15;
+          }
           if (force) {
-            this.camera.position.copy(behind);
+            this.camera.position.copy(cameraPosition);
           } else {
-            this.camera.position.lerp(behind, 0.12);
+            this.camera.position.lerp(cameraPosition, UNITY_COMBAT_CAMERA.followLerp);
           }
           this.camera.lookAt(target);
         }
